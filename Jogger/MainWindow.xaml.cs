@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Jogger.Drivers;
+using Jogger.Models;
+using Jogger.Services;
+using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +24,18 @@ namespace Jogger
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+
+        private readonly ISampleService sampleService;
+        private readonly AppSettings settings;
+        private readonly IDriver driver;
+
+        public MainWindow(ISampleService sampleService,
+                          IOptions<AppSettings> settings, IDriver driver)
         {
             InitializeComponent();
+            this.driver = driver;
+            this.sampleService = sampleService;
+            this.settings = settings.Value;
         }
     }
 }
