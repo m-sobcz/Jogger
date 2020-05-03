@@ -40,6 +40,7 @@ namespace Jogger
             ServiceProvider = serviceCollection.BuildServiceProvider();
 
             MainWindow mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+
             mainWindow.Show();
         }
 
