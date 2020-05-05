@@ -14,7 +14,7 @@ namespace Jogger.ViewModels.Tests
     public class RelayCommandTests
     {
         [TestMethod()]
-        public void SingleActionExecution()
+        public void Execute_Once_CounterEquals1()
         {
             var executionCounter = 0;
             RelayCommand relayCommand = new RelayCommand((o) => executionCounter++, o => true);
@@ -22,7 +22,7 @@ namespace Jogger.ViewModels.Tests
             Assert.AreEqual(1, executionCounter);
         }
         [TestMethod()]
-        public void DoubleActionExecution()
+        public void Execute_Double_CounterEquals2()
         {
             int executionCounter = 0;
 
@@ -32,7 +32,7 @@ namespace Jogger.ViewModels.Tests
             Assert.AreEqual(2, executionCounter);
         }
         [TestMethod()]
-        public void CanNotExecuteWithTypedFalse()
+        public void Execute_CanExecuteSetToFalse_AreEqual()
         {
             int executionCounter = 0;
 
@@ -40,7 +40,7 @@ namespace Jogger.ViewModels.Tests
             Assert.AreEqual(false, relayCommand.CanExecute(new object()));
         }
         [TestMethod()]
-        public void CanExecuteWithDefaultCanExecuteParameter()
+        public void Execute_CanExecuteWithDefaultCanExecuteParameter_CanExecute()
         {
             int executionCounter = 0;
 
