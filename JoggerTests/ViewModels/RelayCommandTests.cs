@@ -3,6 +3,10 @@ using Jogger.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.InteropServices;
+using System.Windows.Input;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Jogger.ViewModels.Tests
 {
@@ -20,7 +24,8 @@ namespace Jogger.ViewModels.Tests
         [TestMethod()]
         public void DoubleActionExecution()
         {
-            var executionCounter = 0;
+            int executionCounter = 0;
+
             RelayCommand relayCommand = new RelayCommand((o) => executionCounter++, o => true);
             relayCommand.Execute(new object());
             relayCommand.Execute(new object());
@@ -29,16 +34,19 @@ namespace Jogger.ViewModels.Tests
         [TestMethod()]
         public void CanNotExecuteWithTypedFalse()
         {
-            var executionCounter = 0;
+            int executionCounter = 0;
+
             RelayCommand relayCommand = new RelayCommand((o) => executionCounter++, o => false);
             Assert.AreEqual(false, relayCommand.CanExecute(new object()));
         }
         [TestMethod()]
-        public void CanExecuteWithDefaultCanExecute()
+        public void CanExecuteWithDefaultCanExecuteParameter()
         {
-            var executionCounter = 0;
+            int executionCounter = 0;
+
             RelayCommand relayCommand = new RelayCommand((o) => executionCounter++);
             Assert.AreEqual(true, relayCommand.CanExecute(new object()));
         }
     }
 }
+
