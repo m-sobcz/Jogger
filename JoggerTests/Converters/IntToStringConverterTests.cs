@@ -9,21 +9,30 @@ namespace Jogger.Converters.Tests
     [TestClass()]
     public class IntToStringConverterTests
     {
-        [TestMethod()]
-        public void Int5ConvertedTo5String()
+        IntToStringConverter intToStringConverter = new IntToStringConverter();
+        [TestInitialize]
+        public void TestInitialize() 
         {
-            IntToStringConverter intToStringConverter = new IntToStringConverter();
-            object x = 5;
-            string converted =(string) intToStringConverter.Convert(x, typeof(string), null, System.Globalization.CultureInfo.InvariantCulture);
-            Assert.AreEqual("5",converted);
+            
         }
-        [TestMethod()]
-        public void String3ConvertedBackToInt()
+
+        [DataTestMethod]
+        [DataRow(0,"0")]
+        [DataRow(74, "74")]
+        [DataRow(-3, "-3")]
+        public void Int5ConvertedTo5String(int number,string properOutput)
         {
-            IntToStringConverter intToStringConverter = new IntToStringConverter();
-            object x = "3";
-            int convertedBack = (int)intToStringConverter.ConvertBack(x, typeof(int), null, System.Globalization.CultureInfo.InvariantCulture);
-            Assert.AreEqual(3, convertedBack);
+            string converted =(string) intToStringConverter.Convert(number, typeof(string), null, System.Globalization.CultureInfo.InvariantCulture);
+            Assert.AreEqual(properOutput,converted);
+        }
+        [DataTestMethod]
+        [DataRow(0, "0")]
+        [DataRow(74, "74")]
+        [DataRow(-3, "-3")]
+        public void String3ConvertedBackToInt(int properOutput, string text)
+        {
+            int convertedBack = (int)intToStringConverter.ConvertBack(text, typeof(int), null, System.Globalization.CultureInfo.InvariantCulture);
+            Assert.AreEqual(properOutput, convertedBack);
         }
     }
 }
