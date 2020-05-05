@@ -7,7 +7,7 @@ using System.Windows.Data;
 namespace Jogger.Converters
 {
 
-    class IntToStringConverter : IValueConverter
+    public class IntToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

@@ -8,19 +8,19 @@ using System.Windows.Controls;
 
 namespace Jogger.Behaviors
 {
-       public class TextBoxAutoScrollAfterTextChange : Behavior<TextBox>
+    public class TextBoxAutoScrollAfterTextChange : Behavior<TextBox>
+    {
+        private TextBox textBox;
+        protected override void OnAttached()
         {
-            private TextBox textBox;
-            protected override void OnAttached()
-            {
-                base.OnAttached();
-                this.textBox = base.AssociatedObject;
-                this.textBox.TextChanged += TextBox_TextChanged;
-            }
-            private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-            {
-                this.textBox.ScrollToEnd();
-            }
+            base.OnAttached();
+            this.textBox = base.AssociatedObject;
+            this.textBox.TextChanged += TextBox_TextChanged;
         }
-    
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            this.textBox.ScrollToEnd();          
+        }
+    }
+
 }
