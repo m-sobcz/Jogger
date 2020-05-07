@@ -16,28 +16,28 @@ namespace Jogger.Services.Tests
         public void Initialize_InitializationSuccess_SetsStateInitialized()
         {     
             TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.OK, "OK", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 }));
-            ActionStatus actionStatus = testerService.Initialize(new ConfigurationSettings(), ()=>Task.CompletedTask);
+            ActionStatus actionStatus = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ProgramState.Initialized, testerService.State);
         }
         [TestMethod()]
         public void Initialize_InitializationSuccess_ReturnsActionStatusOk()
         {
             TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.OK, "OK", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 }));
-            ActionStatus status= testerService.Initialize(new ConfigurationSettings(), () => Task.CompletedTask);
+            ActionStatus status= testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ActionStatus.OK, status);
         }
         [TestMethod()]
         public void Initialize_InitializationFailed_SetsStateError()
         {
             TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.Error, "Error", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 })) {};
-            ActionStatus status=testerService.Initialize(new ConfigurationSettings(), () => Task.CompletedTask);
+            ActionStatus status=testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ProgramState.Error, testerService.State);
         }
         [TestMethod()]
         public void Initialize_InitializationFailed_ReturnsActionStatusError()
         {
             TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.Error, "Error", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 })) { };
-            ActionStatus status = testerService.Initialize(new ConfigurationSettings(), () => Task.CompletedTask);
+            ActionStatus status = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ActionStatus.Error,status);
         }
     }

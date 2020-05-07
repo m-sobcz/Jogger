@@ -51,7 +51,7 @@ namespace Jogger.Services
             this.digitalIO = digitalIO;
         }
 
-        public ActionStatus Initialize(ConfigurationSettings configurationSettings, Func<Task> afterInitializationTask)
+        public ActionStatus Initialize(ConfigurationSettings configurationSettings)
         {
             OnProgramStateChanged(ProgramState.Initializing);
             ActionStatus actionStatus = digitalIO.Initialize();
@@ -75,7 +75,6 @@ namespace Jogger.Services
             //}
             if (actionStatus == ActionStatus.OK) State = (ProgramState.Initialized);
             else State = ProgramState.Error;
-            _ = afterInitializationTask.Invoke();
             return actionStatus;
         }
         public ActionStatus Start(TestSettings testSettings)
