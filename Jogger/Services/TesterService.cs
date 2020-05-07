@@ -96,11 +96,10 @@ namespace Jogger.Services
                 await Task.WhenAny(communication.ReceiveData(), Task.Delay(5000));
             }
         }
-        public ActionStatus Stop()
+        public ActionStatus Stop(Action stopFunc)
         {
-            OnProgramStateChanged(ProgramState.Stopping);
-            communication.StopAll();
-            OnProgramStateChanged(ProgramState.Idle);
+            stopFunc.Invoke();//communication.StopAll();
+            State = ProgramState.Idle;
             return ActionStatus.OK;
         }
         public void Dispose()

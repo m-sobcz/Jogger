@@ -56,5 +56,20 @@ namespace Jogger.Services.Tests
             ActionStatus status = testerService.Start(startFunc, new TestSettings());
             Assert.AreEqual(ProgramState.Error, testerService.State);
         }
+        [TestMethod()]
+        public void Stop_Stopped_StopFuncExecuted()
+        {
+            TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.Error, "Error", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 })) { };
+            bool executionDone = false;
+            testerService.Stop(() => executionDone = true);
+            Assert.AreEqual(true, executionDone);
+        }
+        [TestMethod()]
+        public void Stop_Stopped_SetsStateIdle()
+        {
+            TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.Error, "Error", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 })) { };
+            testerService.Stop(() => { });
+            Assert.AreEqual(ProgramState.Idle, testerService.State);
+        }
     }
 }
