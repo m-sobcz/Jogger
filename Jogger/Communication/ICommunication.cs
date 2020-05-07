@@ -15,7 +15,7 @@ namespace Jogger.Communication
         //Result CheckResult();
         void Dispose();
         //BitArray GetDigitalInputs();
-        void Initialize(int hardwareChannelCount);
+        ActionStatus Initialize(int hardwareChannelCount);
         void InitializeReceivers();
         void OnActiveErrorsChanged(object sender, string errors, int channelNumber);
         void OnCommunicationLogChanged(object sender, string log);

@@ -8,17 +8,19 @@ namespace Jogger.Communication
 {
     public class CommunicationStub : ICommunication
     {
-        public bool IsTestingDone { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool IsTestingDone { get; set; }
+        public ActionStatus InitializeActionStatus { get; set; }
 
         public void Dispose()
         {
-            
+
         }
 
-        public void Initialize(int hardwareChannelCount)
+        public ActionStatus Initialize(int hardwareChannelCount)
         {
-            throw new NotImplementedException();
+            return InitializeActionStatus;
         }
+
 
         public void InitializeReceivers()
         {
@@ -89,5 +91,6 @@ namespace Jogger.Communication
         {
             throw new NotImplementedException();
         }
+
     }
 }

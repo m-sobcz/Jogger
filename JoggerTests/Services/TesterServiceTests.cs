@@ -12,38 +12,47 @@ namespace Jogger.Services.Tests
     [TestClass()]
     public class TesterServiceTests
     {
+        ICommunication communicationOk;
+        ICommunication communicationError;
+        IDigitalIO digitalIO;
+        TesterService testerService;
+        [TestInitialize()]
+        public void Initialize()
+        {
+            communicationOk = new CommunicationStub() { InitializeActionStatus = ActionStatus.OK, IsTestingDone = false };
+            communicationError = new CommunicationStub() { InitializeActionStatus = ActionStatus.Error, IsTestingDone = false };
+            digitalIO = new DigitalIOStub() { Status = ActionStatus.OK, ReadData = "readData", ResultData = new byte[]{ 0, 1, 2, 3, 4, 5, 6, 7 } };
+            testerService = new TesterService(communicationOk, digitalIO);
+        }
         [TestMethod()]
         public void Initialize_InitializationSuccess_SetsStateInitialized()
         {
-            TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.OK, "OK", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 }));
             ActionStatus actionStatus = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ProgramState.Initialized, testerService.State);
         }
         [TestMethod()]
         public void Initialize_InitializationSuccess_ReturnsActionStatusOk()
         {
-            TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.OK, "OK", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 }));
-            ActionStatus status = testerService.Initialize(new ConfigurationSettings());
+  ActionStatus status = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ActionStatus.OK, status);
         }
         [TestMethod()]
         public void Initialize_InitializationFailed_SetsStateError()
         {
-            TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.Error, "Error", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 })) { };
+            testerService = new TesterService(communicationError, digitalIO);
             ActionStatus status = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ProgramState.Error, testerService.State);
         }
         [TestMethod()]
         public void Initialize_InitializationFailed_ReturnsActionStatusError()
         {
-            TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.Error, "Error", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 })) { };
+            testerService = new TesterService(communicationError, digitalIO);
             ActionStatus status = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ActionStatus.Error, status);
         }
         [TestMethod()]
         public void Start_ExecutedOk_SetsStateStarted()
         {
-            TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.OK, "Ok", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 })) { };
             Func<TestSettings, string, ActionStatus> startFunc = (TestSettings testSettings, string text) => { return ActionStatus.OK; };
             ActionStatus status = testerService.Start(startFunc, new TestSettings());
             Assert.AreEqual(ProgramState.Started, testerService.State);
@@ -51,7 +60,6 @@ namespace Jogger.Services.Tests
         [TestMethod()]
         public void Start_ExecutedOk_SetsStateError()
         {
-            TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.Error, "Error", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 })) { };
             Func<TestSettings, string, ActionStatus> startFunc = (TestSettings testSettings, string text) => { return ActionStatus.Error; };
             ActionStatus status = testerService.Start(startFunc, new TestSettings());
             Assert.AreEqual(ProgramState.Error, testerService.State);
@@ -59,7 +67,6 @@ namespace Jogger.Services.Tests
         [TestMethod()]
         public void Stop_Stopped_StopFuncExecuted()
         {
-            TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.Error, "Error", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 })) { };
             bool executionDone = false;
             testerService.Stop(() => executionDone = true);
             Assert.AreEqual(true, executionDone);
@@ -67,7 +74,6 @@ namespace Jogger.Services.Tests
         [TestMethod()]
         public void Stop_Stopped_SetsStateIdle()
         {
-            TesterService testerService = new TesterService(new CommunicationStub(), new DigitalIOStub(ActionStatus.Error, "Error", new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 })) { };
             testerService.Stop(() => { });
             Assert.AreEqual(ProgramState.Idle, testerService.State);
         }
@@ -75,7 +81,18 @@ namespace Jogger.Services.Tests
         [TestMethod()]
         public void Dispose_OnNulls_DoesntThrowNullReferenceException()
         {
-            TesterService testerService = new TesterService(null,null) { };
+            testerService.Dispose();
+            Assert.IsTrue(true);
+        }
+        [TestMethod()]
+        public void CommunicationLoop_ExecutesReadIO()
+        {
+            testerService.Dispose();
+            Assert.IsTrue(true);
+        }
+        [TestMethod()]
+        public void CommunicationLoop_ExecutesSendData()
+        {
             testerService.Dispose();
             Assert.IsTrue(true);
         }

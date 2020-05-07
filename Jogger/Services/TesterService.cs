@@ -49,11 +49,12 @@ namespace Jogger.Services
             this.communication = communication;
             this.digitalIO = digitalIO;
         }
-
         public ActionStatus Initialize(ConfigurationSettings configurationSettings)
         {
             OnProgramStateChanged(ProgramState.Initializing);
-            ActionStatus actionStatus = digitalIO.Initialize();
+            ActionStatus actionStatusDigitalIO = digitalIO.Initialize();
+            ActionStatus actionStatusCommunication = communication.Initialize(configurationSettings.HardwareChannelCount);
+            ActionStatus actionStatus = (ActionStatus)Math.Max((int)actionStatusDigitalIO, (int)actionStatusCommunication);
             //driver = new LinDriver(configurationSettings.HardwareChannelCount);
             //linCommunication = new LinCommunication(digitalIO, driver);
             //communication.OccuredErrorsChanged += OnOccuredErrorsChanged;
@@ -76,7 +77,7 @@ namespace Jogger.Services
             else State = ProgramState.Error;
             return actionStatus;
         }
-        public ActionStatus Start(Func<TestSettings,string, ActionStatus> startFunc, TestSettings testSettings)
+        public ActionStatus Start(Func<TestSettings, string, ActionStatus> startFunc, TestSettings testSettings)
         {
             State = (ProgramState.Starting);
             ActionStatus actionStatus = startFunc(testSettings, ValveType);//communication.Start(testSettings, ValveType);
@@ -86,15 +87,16 @@ namespace Jogger.Services
         }
         public async Task CommunicationLoop()
         {
-            communication.SetSequencerAndReceiver(ValveType);
-            byte[] ioData;
-            while (true)
-            {
-                ioData = await communication.ReadIO();
-                OnDigitalIOChanged(this, ioData);
-                await communication.SendData();
-                await Task.WhenAny(communication.ReceiveData(), Task.Delay(5000));
-            }
+            //communication.SetSequencerAndReceiver(ValveType);
+            //byte[] ioData;
+            //while (true)
+            //{
+            //ioData = 
+            await communication.ReadIO();
+            //OnDigitalIOChanged(this, ioData);
+            await communication.SendData();
+            await Task.WhenAny(communication.ReceiveData(), Task.Delay(5000));
+            //}
         }
         public ActionStatus Stop(Action stopFunc)
         {
