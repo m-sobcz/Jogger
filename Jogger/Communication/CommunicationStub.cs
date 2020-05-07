@@ -12,7 +12,7 @@ namespace Jogger.Communication
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            
         }
 
         public void Initialize(int hardwareChannelCount)

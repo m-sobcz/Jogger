@@ -23,7 +23,6 @@ namespace Jogger.IO
         }
         public void Dispose()
         {
-            Trace.WriteLine(nameof(Dispose));
         }
 
         public Task<(string, byte[])> ReadInputs()

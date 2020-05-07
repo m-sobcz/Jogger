@@ -71,5 +71,13 @@ namespace Jogger.Services.Tests
             testerService.Stop(() => { });
             Assert.AreEqual(ProgramState.Idle, testerService.State);
         }
+
+        [TestMethod()]
+        public void Dispose_OnNulls_DoesntThrowNullReferenceException()
+        {
+            TesterService testerService = new TesterService(null,null) { };
+            testerService.Dispose();
+            Assert.IsTrue(true);
+        }
     }
 }
