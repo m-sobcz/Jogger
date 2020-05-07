@@ -17,7 +17,6 @@ namespace Jogger.Services
         string communicationLog = "";
         ICommunication communication;
         IDigitalIO digitalIO;
-        private TestSettings testSettings = new TestSettings();//TODO
 
         public event ProgramStateEventHandler ProgramStateChanged;
         public delegate void ProgramStateEventHandler(object sender, ProgramState programState);
@@ -77,11 +76,10 @@ namespace Jogger.Services
             else State = ProgramState.Error;
             return actionStatus;
         }
-        public ActionStatus Start(TestSettings testSettings)
+        public ActionStatus Start(Func<TestSettings,string, ActionStatus> startFunc, TestSettings testSettings)
         {
-            this.testSettings = testSettings;
             State = (ProgramState.Starting);
-            ActionStatus actionStatus = communication.Start(testSettings, ValveType);
+            ActionStatus actionStatus = startFunc(testSettings, ValveType);//communication.Start(testSettings, ValveType);
             if (actionStatus == ActionStatus.OK) State = (ProgramState.Started);
             else State = ProgramState.Error;
             return actionStatus;
