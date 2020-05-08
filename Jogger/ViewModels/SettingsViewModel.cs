@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jogger.ViewModels
 {
-    class SettingsViewModel : ObservedObject
+    public class SettingsViewModel : ObservedObject
     {
         ITesterService testerService;
         readonly TestSettings testSettings;

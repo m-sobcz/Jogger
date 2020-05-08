@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace Jogger.ViewModels
 {
-    class JoggingViewModel : ObservedObject
+    public class JoggingViewModel : ObservedObject
     {
         readonly ITesterService testerService;
         readonly JoggingModel model = new JoggingModel();
@@ -36,9 +36,11 @@ namespace Jogger.ViewModels
         private ICommand startCommand;
         private ICommand stopCommand;
         private ICommand selectValveType;
-        public JoggingViewModel(ITesterService testerService)
+        public JoggingViewModel(ITesterService testerService, TestSettings testSettings, ConfigurationSettings configurationSettings)
         {
             this.testerService = testerService;
+            this.testSettings = testSettings;
+            this.configurationSettings = configurationSettings;
             valveTypes.Add(new ValveModel("", "Sprawdzanie obecności"));
             valveTypes.Add(new ValveModel("2Up", "GM MBM 2UP LIN"));
             //valveTypes.Add(new ValveModel("3_5Up", "GM 3,5Up"));
@@ -219,7 +221,7 @@ namespace Jogger.ViewModels
         {
             get
             {
-                if (selectValveType == null)
+                if (selectValveType is null)
                 {
                     selectValveType = new RelayCommand(
                     o =>

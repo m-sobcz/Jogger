@@ -15,6 +15,8 @@ using Jogger.Services;
 using Jogger.ViewModels;
 using Jogger.Communication;
 using Jogger.IO;
+using System.Diagnostics;
+using Jogger.Views;
 
 namespace Jogger
 {
@@ -32,35 +34,50 @@ namespace Jogger
             IConfigurationBuilder builder = new ConfigurationBuilder()
                .SetBasePath(Directory.GetCurrentDirectory())
                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
             Configuration = builder.Build();
-
             // Create a service collection and configure our dependencies
             ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
-
             // Build the our IServiceProvider and set our static reference to it
             ServiceProvider = serviceCollection.BuildServiceProvider();
-            MainWindow mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
-            ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            mainWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            mainWindow.Show();
+            ServiceProvider.GetRequiredService<TestSettings>();
+            ServiceProvider.GetRequiredService<Services.ConfigurationSettings>();
+            StartWindow startWindow = ServiceProvider.GetRequiredService<StartWindow>();
+            ServiceProvider.GetRequiredService<MainWindowViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
+            //ServiceProvider.GetRequiredService<MainWindowViewModel>();
+            //startWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
+            Trace.WriteLine(MainWindow.DataContext);
+            startWindow.Show();
+        }
+
+        private void ShowInfo_ShowInformation(object sender, string text, string caption)
+        {
+            MessageBox.Show(text, caption);
         }
 
         private void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient(typeof(MainWindow));
             services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
-            services.AddScoped<ISampleService, SampleService>();
             services.AddScoped<IDriver, Driver>();
             services.AddSingleton<ITesterService, TesterService>();
-            services.AddScoped<MainWindowViewModel>();
-            services.AddScoped<JoggingViewModel>();
-            services.AddScoped<SettingsViewModel>();
-            services.AddScoped<DiagnosticsViewModel>();
+            services.AddSingleton<TestSettings>();
+            services.AddSingleton<Services.ConfigurationSettings>();
+            //ViewModels
+            services.AddSingleton<MainWindowViewModel>();
+            services.AddSingleton<JoggingViewModel>();
+            services.AddSingleton<SettingsViewModel>();
+            services.AddSingleton<DiagnosticsViewModel>();
+            //Views
+            services.AddTransient<MainWindow>();
+            services.AddTransient<StartWindow>();
             //stubs
             services.AddScoped<ICommunication, CommunicationStub>();
-            services.AddScoped<IDigitalIO, DigitalIOStub>();          
+            services.AddScoped<IDigitalIO, DigitalIOStub>();
+        }
+
+        private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show($"Wystąpił nieobsłużony wyjątek: \n {e.Exception.Message}", "Nieobsłużony wyjątek", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 }

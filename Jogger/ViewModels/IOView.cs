@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Jogger.ViewModels
 {
-    class IOView : ObservedObject
+    public class IOView : ObservedObject
     {
         IDictionary<int, DigitalState> io = new Dictionary<int, DigitalState>();
 

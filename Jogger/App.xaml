@@ -3,12 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Jogger"
              xmlns:vm="clr-namespace:Jogger.ViewModels" 
-             xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             DispatcherUnhandledException="Application_DispatcherUnhandledException">
     <Application.Resources>
         <vm:ViewModelLocator
             xmlns:vm="clr-namespace:Jogger.ViewModels" 
             x:Key="Locator" />
-        <sys:String x:Key="ApplicationTitle">KA Tester</sys:String>
+        <sys:String x:Key="ApplicationTitle">Jogger</sys:String>
         <sys:String x:Key="Author">Michał Sobczak</sys:String>
         <sys:String x:Key="Version">v0.1</sys:String>
         <sys:String x:Key="CopyRight">Kongsberg Automotive</sys:String>

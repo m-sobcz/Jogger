@@ -7,12 +7,16 @@ using System.Text;
 
 namespace Jogger.ViewModels
 {
-    class DiagnosticsViewModel : ObservedObject
+    public class DiagnosticsViewModel : ObservedObject
     {
         ITesterService testerService;
         IOView iOView = new IOView();
         public ShowInfo showInfo = new ShowInfo();
         BitArray bitArray;
+        public DiagnosticsViewModel()
+        {
+
+        }
         public DiagnosticsViewModel(ITesterService testerService)
         {
             this.testerService = testerService;

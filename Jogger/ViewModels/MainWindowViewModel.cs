@@ -2,23 +2,18 @@
 using Jogger.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Windows.Input;
 
 namespace Jogger.ViewModels
 {
-    public class MainWindowViewModel : ObservedObject
+    public class MainWindowViewModel : ViewModelBase
     {
         ITesterService testerService;
-        public event EventHandler CloseWindow;
-        public ShowInfo showInfo;
         private ICommand closingCommand;
         private ICommand aboutCommand;
         private ICommand helpCommand;
-        public MainWindowViewModel()
-        {
-
-        }
         public MainWindowViewModel(ITesterService testerService)
         {
             this.testerService = testerService;
@@ -34,7 +29,7 @@ namespace Jogger.ViewModels
                         {
                             //Logger.SaveLogToFile(Logger.CommunicationLog);
                             testerService?.Dispose();
-                            CloseWindow?.Invoke(this, new EventArgs());
+                            Environment.Exit(0);
                         },
                         o => true
                         );
