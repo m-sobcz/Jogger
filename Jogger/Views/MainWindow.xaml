@@ -6,11 +6,418 @@
         xmlns:vm="clr-namespace:Jogger.ViewModels"
         xmlns:conv="clr-namespace:Jogger.Converters"
         xmlns:behaviors="clr-namespace:Jogger.Behaviors"
-        xmlns:local="clr-namespace:Jogger"
+        xmlns:local="clr-namespace:Jogger" 
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime" 
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="{StaticResource ApplicationTitle}"
+        Height="800" Width="1024"  WindowStartupLocation="CenterScreen" >
 
-    <Grid>
-        <Label Content="{Binding Strings.LabelTest}"></Label>
-    </Grid>
+    <Window.DataContext>
+        <vm:MainWindowViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!--Opcje menu/przyciski-->
+        <!--<vm:MainWindowViewModel x:Key="MainViewModel"/>-->
+
+        <vm:MainWindowViewModel x:Key="MainViewModel"/>
+        <conv:IntToStringConverter x:Key="IntToStringConverter" />
+        <conv:ResultToStringConverter x:Key="ResultToStringConverter" />
+        <conv:ResultToImageSourceConverter x:Key="ResultToImageSource" />
+        <conv:DigitalStateToFillConverter x:Key="DigitalStateToFillConverter" />
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <sys:String x:Key="File">_Plik</sys:String>
+        <sys:String x:Key="Tools">_Narzędzia</sys:String>
+        <sys:String x:Key="Help">P_omoc</sys:String>
+        <sys:String x:Key="Exit">_Zamknij</sys:String>
+        <sys:String x:Key="Initialize">_Inicjalizuj</sys:String>
+        <sys:String x:Key="Start">_Start</sys:String>
+        <sys:String x:Key="Stop">S_top</sys:String>
+        <sys:String x:Key="ViewHelp">W_yświetl Pomoc</sys:String>
+        <sys:String x:Key="About">Informacje o _aplikacji</sys:String>
+        <sys:String x:Key="Send">_Wyślij</sys:String>
+        <!--Zakladki-->
+        <sys:String x:Key="Jogging">_Jogging</sys:String>
+        <sys:String x:Key="Settings">_Ustawienia</sys:String>
+        <sys:String x:Key="Diagnostics">_Diagnostyka</sys:String>
+        <sys:String x:Key="Manual">S_terowanie ręczne</sys:String>
+        <!--Pozycje radiobutton-->
+        <sys:String x:Key="codeHeader">Kod</sys:String>
+        <sys:String x:Key="nameHeader">Nazwa</sys:String>
+
+        <sys:String x:Key="2UP">Zawór _2 UP</sys:String>
+        <sys:String x:Key="3_5UP">Zawór _3,5 UP</sys:String>
+        <sys:String x:Key="6UP">Zawór _6 UP</sys:String>
+        <sys:String x:Key="11UP">Zawór _11 UP</sys:String>
+        <sys:String x:Key="typeCheckAll">Sprawdzanie o_becności</sys:String>
+        <!--Parametry`-->
+        <sys:String x:Key="DataLengthCode">DataLengthCode</sys:String>
+        <sys:String x:Key="Baudrate">Baudrate</sys:String>
+        <sys:String x:Key="SendData0">SendData0</sys:String>
+        <sys:String x:Key="SendData1">SendData1</sys:String>
+        <sys:String x:Key="SendData2">SendData2</sys:String>
+        <sys:String x:Key="SendData3">SendData3</sys:String>
+        <sys:String x:Key="SlaveId">SlaveId</sys:String>
+        <sys:String x:Key="LogInData">Logowanie danych wejściowych</sys:String>
+        <sys:String x:Key="LogOutData">Logowanie danych wyjściowych</sys:String>
+        <sys:String x:Key="LogTimeout">Logowanie Timeout</sys:String>
+        <sys:String x:Key="Channel1">Kanał 1</sys:String>
+        <sys:String x:Key="Channel2">Kanał 2</sys:String>
+        <sys:String x:Key="Channel3">Kanał 3</sys:String>
+        <sys:String x:Key="Channel4">Kanał 4</sys:String>
+        <!--Ustawienia-->
+        <sys:String x:Key="TestSettings">Ustawienia testu</sys:String>
+        <sys:String x:Key="ConfigurationSettings">Ustawienia konfiguracyjne</sys:String>
+        <sys:String x:Key="Repetitions">Powtórzenia testu</sys:String>
+        <sys:String x:Key="valveActivationTime">Czas aktywacji zaworu</sys:String>
+        <sys:String x:Key="valveMinInflateTime">Minimalny czas aktywacji dla zaworu napełniającego</sys:String>
+        <sys:String x:Key="valveMinDeflateTime">Minimalny czas aktywacji dla zaworu spuszczającego</sys:String>
+        <sys:String x:Key="valveMaxInflateTime">Czas do wykrycia błędu napełniania zaworu</sys:String>
+        <sys:String x:Key="valveMaxDeflateTime">Czas do wykrycia błędu spuszczania zaworu</sys:String>
+        <sys:String x:Key="hardwareChannelCount">Liczba obsługiwanych kanałów</sys:String>
+        <!--Diagnostyka-->
+        <sys:String x:Key="NotInitializedWarnig">Uwaga: Wejścia nie są odczytywane przed dokonaniem inicjalizacji!</sys:String>
+
+        <sys:String x:Key="DigitalInputs">Wejścia cyfrowe</sys:String>
+        <sys:String x:Key="DI0">Kanał 1 - czujnik górny</sys:String>
+        <sys:String x:Key="DI1">Kanał 1 - czujnik dolny</sys:String>
+        <sys:String x:Key="DI2">Kanał 2 - czujnik górny</sys:String>
+        <sys:String x:Key="DI3">Kanał 2 - czujnik dolny</sys:String>
+        <sys:String x:Key="DI4">Kanał 3 - czujnik górny</sys:String>
+        <sys:String x:Key="DI5">Kanał 3 - czujnik dolny</sys:String>
+        <sys:String x:Key="DI6">Kanał 4 - czujnik górny</sys:String>
+        <sys:String x:Key="DI7">Kanał 4 - czujnik dolny</sys:String>
+        <!--Bledy-->
+        <sys:String x:Key="activeErrors1">Błędy aktywne kanał 1</sys:String>
+        <sys:String x:Key="occuredErrors1">Błędy zanotowane kanał 1</sys:String>
+        <sys:String x:Key="activeErrors2">Błędy aktywne kanał 2</sys:String>
+        <sys:String x:Key="occuredErrors2">Błędy zanotowane kanał 2</sys:String>
+        <sys:String x:Key="activeErrors3">Błędy aktywne kanał 3</sys:String>
+        <sys:String x:Key="occuredErrors3">Błędy zanotowane kanał 3</sys:String>
+        <sys:String x:Key="activeErrors4">Błędy aktywne kanał 4</sys:String>
+        <sys:String x:Key="occuredErrors4">Błędy zanotowane kanał 4</sys:String>
+        <!--Statusy-->
+        <sys:String x:Key="ResultDoneErrorCriticalCode">Błąd zaworu</sys:String>
+        <sys:String x:Key="ResultDoneErrorTimeout">Przekroczono czas testu</sys:String>
+        <sys:String x:Key="ResultDoneErrorConnection">Błąd komunikacji</sys:String>
+        <sys:String x:Key="ResultDoneOk">OK!</sys:String>
+        <sys:String x:Key="ResultTesting">Testowanie</sys:String>
+        <sys:String x:Key="ResultDefault">Niekatywny</sys:String>
+    </Window.Resources>
+    <!-- Expression.Blend.Sdk from nuget-->
+    <!-- Event to command -->
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Closing">
+            <b:InvokeCommandAction Command="{Binding ClosingCommand}"/>
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
+
+    <DockPanel Name="MainWindowPanel" >
+        <DockPanel Name="TopMenu" DockPanel.Dock="Top">
+            <Menu Width="Auto" Height="Auto" DockPanel.Dock="Top">
+                <MenuItem Header="{StaticResource File}">
+                    <MenuItem x:Name="Exit" Header="{StaticResource Exit}" Command="{Binding ClosingCommand}"/>
+                </MenuItem>
+                <MenuItem Header="{StaticResource Jogging}">
+                    <MenuItem.DataContext>
+                        <vm:JoggingViewModel/>
+                    </MenuItem.DataContext>
+                    <MenuItem x:Name="Initialize" Header="{StaticResource Initialize}" Command="{Binding InitializeCommand}"/>
+                    <MenuItem x:Name="Start" Header="{StaticResource Start}" Command="{Binding StartCommand}"/>
+                    <MenuItem x:Name="Stop" Header="{StaticResource Stop}" Command="{Binding StopCommand}"  />
+                </MenuItem>
+                <MenuItem Header="{StaticResource Help}">
+                    <MenuItem x:Name="ViewHelp" Header="{StaticResource ViewHelp}" Command="{Binding HelpCommand}"/>
+                    <MenuItem x:Name="About" Header="{StaticResource About}" Command="{Binding AboutCommand}"/>
+                </MenuItem>
+                <Button Content="{StaticResource Initialize}"  Width="100" Command="{Binding InitializeCommand}">
+                    <Button.DataContext>
+                        <vm:JoggingViewModel/>
+                    </Button.DataContext>
+                </Button>
+            </Menu>
+        </DockPanel>
+        <DockPanel Name="MiddleSection" DockPanel.Dock="Bottom" Margin="5">
+            <DockPanel.DataContext>
+                <vm:JoggingViewModel/>
+            </DockPanel.DataContext>
+            <TextBox Name="CommunicationLog" Text="{Binding CommunicationLog}"  Background="{DynamicResource {x:Static SystemColors.InfoColor}}" Height="200" VerticalScrollBarVisibility="Auto" >
+                <b:Interaction.Behaviors>
+                    <behaviors:TextBoxAutoScroll/>
+                </b:Interaction.Behaviors>
+            </TextBox>
+        </DockPanel>
+        <DockPanel Name="as" DockPanel.Dock="Bottom" Margin="5">
+            <DockPanel.DataContext>
+                <vm:JoggingViewModel/>
+            </DockPanel.DataContext>
+            <WrapPanel >
+                <CheckBox Name="LogInData" Content="{StaticResource LogInData}" IsChecked="{Binding IsLogInDataSelected}" Margin="5" />
+                <CheckBox Name="LogOutData" Content="{StaticResource LogOutData}" IsChecked="{Binding IsLogOutDataSelected}" Margin="5"/>
+                <CheckBox Name="LogTimeout" Content="{StaticResource LogTimeout}" IsChecked="{Binding IsLogTimeoutSelected}" Margin="5"/>
+            </WrapPanel>
+        </DockPanel>
+        <TabControl DockPanel.Dock="Bottom" Background="Azure" Margin="5">
+            <TabItem Name="joggingTab" >
+                <TabItem.DataContext>
+                    <vm:JoggingViewModel/>
+                </TabItem.DataContext>
+                <TabItem.Header>
+                    <WrapPanel Orientation="Horizontal">
+                        <Image Source="/Images/clipboard.png"  Width="24" Height="24"/>
+                        <Label Content="{StaticResource Jogging}"/>
+                    </WrapPanel>
+                </TabItem.Header>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <Grid VerticalAlignment="Center" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+                        <WrapPanel HorizontalAlignment="Center">
+
+                        </WrapPanel>
+                        <WrapPanel Orientation="Vertical" Grid.Row="1" Margin="5" HorizontalAlignment="Center">
+
+                            <ListView ItemsSource="{Binding ValveTypes}" SelectedItem="{Binding SelectedType}" IsEnabled="{Binding SelectValveType}" >
+                                <b:Interaction.Triggers>
+                                    <b:EventTrigger EventName="SelectionChanged">
+                                        <b:InvokeCommandAction Command="{Binding SelectValveType}"/>
+                                    </b:EventTrigger>
+                                </b:Interaction.Triggers>
+                                <ListView.View>
+                                    <GridView >
+                                        <GridViewColumn Header="{StaticResource nameHeader}" DisplayMemberBinding="{Binding Name}" />
+                                        <GridViewColumn Header="{StaticResource codeHeader}" DisplayMemberBinding="{Binding Code}" />
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+
+                        </WrapPanel>
+                        <WrapPanel Grid.Row="2" HorizontalAlignment="Center">
+                            <Button Content="{StaticResource Start}" Height="50" Width="100" Command="{Binding StartCommand}"  Margin="5"/>
+                            <Button Content="{StaticResource Stop}" Height="50" Width="100" Command="{Binding StopCommand}" Margin="5"/>
+                        </WrapPanel>
+                        <Label Grid.Row="3" Content="Status" HorizontalAlignment="Center" FontWeight="Bold"/>
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <WrapPanel Orientation="Vertical" Grid.Column="0" Margin="5" HorizontalAlignment="Center" >
+                                <Label Content="{StaticResource Channel1}" HorizontalAlignment="Center"/>
+                                <Image Name="result1Img" Source="{Binding Result1, Converter={StaticResource ResultToImageSource} }" Height="48"/>
+                                <Label Name="result1Txt" Content="{Binding Result1,  Converter={StaticResource ResultToStringConverter}}" HorizontalContentAlignment="Center" FontStyle="Italic"   />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Vertical" Grid.Column="1" Margin="5" HorizontalAlignment="Center">
+                                <Label Content="{StaticResource Channel2}" HorizontalAlignment="Center"/>
+                                <Image Name="result2Img" Source="{Binding Result2, Converter={StaticResource ResultToImageSource} }" Height="48"/>
+                                <Label Name="result2Txt" Content="{Binding Result2,  Converter={StaticResource ResultToStringConverter}}"  HorizontalContentAlignment="Center" FontStyle="Italic"   />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Vertical" Grid.Column="2" Margin="5" HorizontalAlignment="Center">
+                                <Label Content="{StaticResource Channel3}" HorizontalAlignment="Center"/>
+                                <Image Name="result3Img" Source="{Binding Result3, Converter={StaticResource ResultToImageSource} }" Height="48"/>
+                                <Label Name="result3Txt" Content="{Binding Result3,  Converter={StaticResource ResultToStringConverter}}"  HorizontalContentAlignment="Center" FontStyle="Italic"   />
+                            </WrapPanel>
+                            <WrapPanel Orientation="Vertical" Grid.Column="3" Margin="5" HorizontalAlignment="Center">
+                                <Label Content="{StaticResource Channel4}" HorizontalAlignment="Center"/>
+                                <Image Name="result4Img" Source="{Binding Result4, Converter={StaticResource ResultToImageSource} }" Height="48"/>
+                                <Label Name="result4Txt" Content="{Binding Result4,  Converter={StaticResource ResultToStringConverter}}"   FontStyle="Italic"  HorizontalContentAlignment="Center"   />
+                            </WrapPanel>
+                        </Grid>
+
+                    </Grid>
+                    <Grid  Grid.Column="1" Margin="5.4,5,5,5.2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Content="{StaticResource activeErrors1}" HorizontalAlignment="Center" />
+                        <TextBox Name="activeErrors1" Text="{Binding ActiveErrors1}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" />
+                        <Label Content="{StaticResource activeErrors2}" HorizontalAlignment="Center" Grid.Row="2"/>
+                        <TextBox Name="activeErrors2" Text="{Binding ActiveErrors2}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Grid.Row="3"/>
+                        <Label Content="{StaticResource activeErrors3}" HorizontalAlignment="Center" Grid.Row="4"/>
+                        <TextBox Name="activeErrors3" Text="{Binding ActiveErrors3}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Grid.Row="5"/>
+                        <Label Content="{StaticResource activeErrors4}" HorizontalAlignment="Center" Grid.Row="6"/>
+                        <TextBox Name="activeErrors4" Text="{Binding ActiveErrors4}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="7" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" />
+                    </Grid>
+                    <Grid  Grid.Column="3" Margin="5,5,5.4,5.2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Content="{StaticResource occuredErrors1}" HorizontalAlignment="Center" />
+                        <TextBox Name="occuredErrors1" Text="{Binding OccuredErrors1}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" />
+                        <Label Content="{StaticResource occuredErrors2}" HorizontalAlignment="Center" Grid.Row="2"/>
+                        <TextBox Name="occuredErrors2" Text="{Binding OccuredErrors2}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Grid.Row="3"/>
+                        <Label Content="{StaticResource occuredErrors3}" HorizontalAlignment="Center" Grid.Row="4"/>
+                        <TextBox Name="occuredErrors3" Text="{Binding OccuredErrors3}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Grid.Row="5"/>
+                        <Label Content="{StaticResource occuredErrors4}" HorizontalAlignment="Center" Grid.Row="6"/>
+                        <TextBox Name="occuredErrors4" Text="{Binding OccuredErrors4}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="7" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" />
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Name="settingsTab">
+                <TabItem.Header>
+                    <WrapPanel Orientation="Horizontal">
+                        <Image Source="/Images/settings.png"  Width="24" Height="24"/>
+                        <Label Content="{StaticResource Settings}"/>
+                    </WrapPanel>
+                </TabItem.Header>
+                <TabItem.DataContext>
+                    <vm:SettingsViewModel/>
+                </TabItem.DataContext>
+                <WrapPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Label Content="{StaticResource TestSettings}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="5*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions >
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+
+                        </Grid.RowDefinitions>
+                        <Label Grid.Column="0" Grid.Row="0" Content="{DynamicResource Repetitions}"/>
+                        <TextBox Grid.Column="1" Grid.Row="0" Name="Repetitions"  Text="{Binding Repetitions, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}"  Width="50" VerticalAlignment="Center"/>
+                        <Label Grid.Column="2" Grid.Row="0" Content=""/>
+                        <Label Grid.Column="0" Grid.Row="1" Content="{DynamicResource valveMinInflateTime}"/>
+                        <Label Grid.Column="0" Grid.Row="2" Content="{DynamicResource valveMinDeflateTime}"/>
+                        <Label Grid.Column="0" Grid.Row="3" Content="{DynamicResource valveMaxInflateTime}"/>
+                        <Label Grid.Column="0" Grid.Row="4" Content="{DynamicResource valveMaxDeflateTime}"/>
+
+                        <TextBox Name="valveMinInflateTimeText"  Grid.Column="1" Grid.Row="1" Text="{Binding ValveMinInflateTime, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}" Width="50" VerticalAlignment="Center"/>
+                        <TextBox Name="valveMinDeflateTimeText"  Grid.Column="1" Grid.Row="2" Text="{Binding ValveMinDeflateTime, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}" Width="50" VerticalAlignment="Center"/>
+                        <TextBox Name="valveMaxInflateTimeText"  Grid.Column="1" Grid.Row="3" Text="{Binding ValveMaxInflateTime, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}" Width="50" VerticalAlignment="Center"/>
+                        <TextBox Name="valveMaxDeflateTimeText"  Grid.Column="1" Grid.Row="4" Text="{Binding ValveMaxDeflateTime, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}" Width="50" VerticalAlignment="Center"/>
+                        <Label Grid.Column="2" Grid.Row="1" Content="ms"/>
+                        <Label Grid.Column="2" Grid.Row="2" Content="ms"/>
+                        <Label Grid.Column="2" Grid.Row="3" Content="ms"/>
+                        <Label Grid.Column="2" Grid.Row="4" Content="ms"/>
+                    </Grid>
+                    <Label Content="{StaticResource ConfigurationSettings}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="5*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions >
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+
+                        </Grid.RowDefinitions>
+                        <Label  Grid.Column="0" Grid.Row="0" Content="{DynamicResource hardwareChannelCount}"/>
+                        <TextBox Name="hardwareChannelCountText"  Grid.Column="1" Grid.Row="0" Text="{Binding HardwareChannelCount, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}" Width="50" VerticalAlignment="Center" IsEnabled="{Binding IsPreInitialization}"/>
+                        <Label Grid.Column="2" Grid.Row="0" Content=""/>
+                    </Grid>
+                </WrapPanel>
+            </TabItem>
+            <TabItem Name="diagnosticTab">
+                <TabItem.Header>
+                    <WrapPanel Orientation="Horizontal">
+                        <Image Source="/Images/monitor.png"  Width="24" Height="24"/>
+                        <Label Content="{StaticResource Diagnostics}"/>
+                    </WrapPanel>
+                </TabItem.Header>
+                <TabItem.DataContext>
+                    <vm:DiagnosticsViewModel/>
+                </TabItem.DataContext>
+                <WrapPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                    <Label Content="{StaticResource DigitalInputs}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <Grid HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions >
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Column="1" Grid.Row="0" Content="DI0" HorizontalAlignment="Center" />
+                        <Label Grid.Column="0" Grid.Row="0" Content="{StaticResource DI0}" HorizontalAlignment="Center" />
+                        <Ellipse Grid.Column="2" Grid.Row="0" Width="16" Height="16" Fill="{Binding DigitalIO[0], Converter={StaticResource DigitalStateToFillConverter}}" Stroke="Gray"/>
+                        <Label Grid.Column="1" Grid.Row="1" Content="DI1" HorizontalAlignment="Center" />
+                        <Label Grid.Column="0" Grid.Row="1" Content="{StaticResource DI1}" HorizontalAlignment="Center" />
+                        <Ellipse Grid.Column="2" Grid.Row="1" Width="16" Height="16" Fill="{Binding DigitalIO[1], Converter={StaticResource DigitalStateToFillConverter}}" Stroke="Gray"/>
+                        <Label Grid.Column="1" Grid.Row="2" Content="DI2" HorizontalAlignment="Center" />
+                        <Label Grid.Column="0" Grid.Row="2" Content="{StaticResource DI2}" HorizontalAlignment="Center" />
+                        <Ellipse Grid.Column="2" Grid.Row="2" Width="16" Height="16" Fill="{Binding DigitalIO[2], Converter={StaticResource DigitalStateToFillConverter}}" Stroke="Gray"/>
+
+                        <Label Grid.Column="1" Grid.Row="3" Content="DI3" HorizontalAlignment="Center" />
+                        <Label Grid.Column="0" Grid.Row="3" Content="{StaticResource DI3}" HorizontalAlignment="Center" />
+                        <Ellipse Grid.Column="2" Grid.Row="3" Width="16" Height="16" Fill="{Binding DigitalIO[3], Converter={StaticResource DigitalStateToFillConverter}}" Stroke="Gray"/>
+
+                        <Label Grid.Column="1" Grid.Row="4" Content="DI4" HorizontalAlignment="Center" />
+                        <Label Grid.Column="0" Grid.Row="4" Content="{StaticResource DI4}" HorizontalAlignment="Center" />
+                        <Ellipse Grid.Column="2" Grid.Row="4" Width="16" Height="16" Fill="{Binding DigitalIO[4], Converter={StaticResource DigitalStateToFillConverter}}" Stroke="Gray"/>
+
+                        <Label Grid.Column="1" Grid.Row="5" Content="DI5" HorizontalAlignment="Center" />
+                        <Label Grid.Column="0" Grid.Row="5" Content="{StaticResource DI5}" HorizontalAlignment="Center" />
+                        <Ellipse Grid.Column="2" Grid.Row="5" Width="16" Height="16" Fill="{Binding DigitalIO[5], Converter={StaticResource DigitalStateToFillConverter}}" Stroke="Gray"/>
+
+                        <Label Grid.Column="1" Grid.Row="6" Content="DI6" HorizontalAlignment="Center" />
+                        <Label Grid.Column="0" Grid.Row="6" Content="{StaticResource DI6}" HorizontalAlignment="Center" />
+                        <Ellipse Grid.Column="2" Grid.Row="6" Width="16" Height="16" Fill="{Binding DigitalIO[6], Converter={StaticResource DigitalStateToFillConverter}}" Stroke="Gray"/>
+
+                        <Label Grid.Column="1" Grid.Row="7" Content="DI7" HorizontalAlignment="Center" />
+                        <Label Grid.Column="0" Grid.Row="7" Content="{StaticResource DI7}" HorizontalAlignment="Center" />
+                        <Ellipse Grid.Column="2" Grid.Row="7" Width="16" Height="16" Fill="{Binding DigitalIO[7], Converter={StaticResource DigitalStateToFillConverter}}" Stroke="Gray"/>
+                    </Grid>
+                    <Label Content="{StaticResource NotInitializedWarnig}" Visibility="{Binding IsPreInitialization, Converter={StaticResource BoolToVis}}" FontStyle="Italic" Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}" >
+
+                    </Label>
+                </WrapPanel>
+            </TabItem>
+
+        </TabControl>
+
+    </DockPanel>
 </Window>

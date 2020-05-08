@@ -8,7 +8,7 @@ using System.Windows.Controls;
 
 namespace Jogger.Behaviors
 {
-    public class TextBoxAutoScrollAfterTextChange : Behavior<TextBox>
+    public class TextBoxAutoScroll : Behavior<TextBox>
     {
         private TextBox textBox;
         protected override void OnAttached()
