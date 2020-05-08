@@ -65,16 +65,6 @@
         <sys:String x:Key="Channel2">Kanał 2</sys:String>
         <sys:String x:Key="Channel3">Kanał 3</sys:String>
         <sys:String x:Key="Channel4">Kanał 4</sys:String>
-        <!--Ustawienia-->
-        <sys:String x:Key="TestSettings">Ustawienia testu</sys:String>
-        <sys:String x:Key="ConfigurationSettings">Ustawienia konfiguracyjne</sys:String>
-        <sys:String x:Key="Repetitions">Powtórzenia testu</sys:String>
-        <sys:String x:Key="valveActivationTime">Czas aktywacji zaworu</sys:String>
-        <sys:String x:Key="valveMinInflateTime">Minimalny czas aktywacji dla zaworu napełniającego</sys:String>
-        <sys:String x:Key="valveMinDeflateTime">Minimalny czas aktywacji dla zaworu spuszczającego</sys:String>
-        <sys:String x:Key="valveMaxInflateTime">Czas do wykrycia błędu napełniania zaworu</sys:String>
-        <sys:String x:Key="valveMaxDeflateTime">Czas do wykrycia błędu spuszczania zaworu</sys:String>
-        <sys:String x:Key="hardwareChannelCount">Liczba obsługiwanych kanałów</sys:String>
         <!--Diagnostyka-->
         <sys:String x:Key="NotInitializedWarnig">Uwaga: Wejścia nie są odczytywane przed dokonaniem inicjalizacji!</sys:String>
 
@@ -118,11 +108,17 @@
                 <MenuItem Header="{StaticResource File}">
                     <MenuItem x:Name="Exit" Header="{StaticResource Exit}" Command="{Binding ClosingCommand}"/>
                 </MenuItem>
+                <MenuItem Header="{StaticResource Jogging}" DataContext="{Binding Source={StaticResource Locator}, Path=JogingViewModel}">
+                    <MenuItem x:Name="Initialize" Header="{StaticResource Initialize}" Command="{Binding InitializeCommand}"/>
+                    <MenuItem x:Name="Start" Header="{StaticResource Start}" Command="{Binding StartCommand}"/>
+                    <MenuItem x:Name="Stop" Header="{StaticResource Stop}" Command="{Binding StopCommand}"  />
+                </MenuItem>
                 <MenuItem Header="{StaticResource Help}">
                     <MenuItem x:Name="ViewHelp" Header="{StaticResource ViewHelp}" Command="{Binding HelpCommand}"/>
                     <MenuItem x:Name="About" Header="{StaticResource About}" Command="{Binding AboutCommand}"/>
                 </MenuItem>
-
+                <Button Content="{StaticResource Initialize}"  Width="100" Command="{Binding InitializeCommand}" DataContext="{Binding Source={StaticResource Locator}, Path=JogingViewModel}">
+                </Button>
             </Menu>
         </DockPanel>
 
