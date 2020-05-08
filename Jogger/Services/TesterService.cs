@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Jogger.Services
 {
-    public class TesterService : IDisposable
+    public class TesterService : IDisposable, ITesterService
     {
         #region fields
         ProgramState state = ProgramState.NotInitialized;
