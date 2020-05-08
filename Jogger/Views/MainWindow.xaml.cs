@@ -25,17 +25,5 @@ namespace Jogger
     public partial class MainWindow : Window
     {
 
-        private readonly ISampleService sampleService;
-        private readonly AppSettings settings;
-        private readonly IDriver driver;
-
-        public MainWindow(ISampleService sampleService,
-                          IOptions<AppSettings> settings, IDriver driver)
-        {
-            InitializeComponent();
-            this.driver = driver;
-            this.sampleService = sampleService;
-            this.settings = settings.Value;
-        }
     }
 }

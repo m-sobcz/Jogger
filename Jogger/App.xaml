@@ -2,8 +2,10 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Jogger"
-             >
+             xmlns:vm="clr-namespace:Jogger.ViewModels" >
     <Application.Resources>
-         
+        <vm:ViewModelLocator
+            xmlns:vm="clr-namespace:Jogger.ViewModels" 
+            x:Key="Locator" />
     </Application.Resources>
 </Application>

@@ -7,15 +7,22 @@ using System.Windows.Input;
 
 namespace Jogger.ViewModels
 {
-public class MainWindowViewModel : ObservedObject
+    public class MainWindowViewModel : ObservedObject
     {
-        TesterService testerService;
+        ITesterService testerService;
         public event EventHandler CloseWindow;
         public ShowInfo showInfo;
         private ICommand closingCommand;
         private ICommand aboutCommand;
         private ICommand helpCommand;
+        public MainWindowViewModel()
+        {
 
+        }
+        public MainWindowViewModel(ITesterService testerService)
+        {
+            this.testerService = testerService;
+        }
         public ICommand ClosingCommand
         {
             get
@@ -44,7 +51,7 @@ public class MainWindowViewModel : ObservedObject
                     aboutCommand = new RelayCommand(
                         o =>
                         {
-                            string currentVersion="?";
+                            string currentVersion = "?";
                             //if (System.Deployment.Application.ApplicationDeployment.IsNetworkDeployed)
                             //{
                             //    currentVersion = System.Deployment.Application.ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString();
@@ -54,7 +61,7 @@ public class MainWindowViewModel : ObservedObject
                             //    currentVersion = "???";
                             //}
                             string applicationInfo = $"-----\nKATester v.{currentVersion}\n-----\n\nProgram do automatycznego joggingu zaworów SMA.\n\nMichał Sobczak\n2020 Kongsberg Automotive";
-                            showInfo.Show(applicationInfo,"Informacje o aplikacji");
+                            showInfo.Show(applicationInfo, "Informacje o aplikacji");
                         },
                         o => true
                         );
@@ -71,7 +78,7 @@ public class MainWindowViewModel : ObservedObject
                     helpCommand = new RelayCommand(
                         o =>
                         {
-                            showInfo.Show("Brak pomocy dla aktualnej wersji aplikacji.","Pomoc");
+                            showInfo.Show("Brak pomocy dla aktualnej wersji aplikacji.", "Pomoc");
                         },
                         o => true
                         );

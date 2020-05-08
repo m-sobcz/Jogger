@@ -14,7 +14,7 @@ namespace Jogger.IO
         public string ReadData { get; set; }
         public byte[] ResultData { get; set; }
 
-
+      
 
         public void Dispose()
         {

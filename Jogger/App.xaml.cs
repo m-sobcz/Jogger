@@ -12,6 +12,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Jogger.Models;
 using Jogger.Services;
+using Jogger.ViewModels;
+using Jogger.Communication;
+using Jogger.IO;
 
 namespace Jogger
 {
@@ -20,7 +23,7 @@ namespace Jogger
     /// </summary>
     public partial class App : Application
     {
-        public IServiceProvider ServiceProvider { get; private set; }
+        public static IServiceProvider ServiceProvider { get; private set; }
 
         public IConfiguration Configuration { get; private set; }
 
@@ -38,21 +41,26 @@ namespace Jogger
 
             // Build the our IServiceProvider and set our static reference to it
             ServiceProvider = serviceCollection.BuildServiceProvider();
-
             MainWindow mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
-
+            ServiceProvider.GetRequiredService<MainWindowViewModel>();
+            mainWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
             mainWindow.Show();
         }
 
         private void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient(typeof(MainWindow));
             services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
             services.AddScoped<ISampleService, SampleService>();
             services.AddScoped<IDriver, Driver>();
-            //services.AddScoped<ITesterService, TesterService>();
-//            services.AddScoped<ITesterService, TesterService>();
-
-            services.AddTransient(typeof(MainWindow));
+            services.AddSingleton<ITesterService, TesterService>();
+            services.AddScoped<MainWindowViewModel>();
+            services.AddScoped<JoggingViewModel>();
+            services.AddScoped<SettingsViewModel>();
+            services.AddScoped<DiagnosticsViewModel>();
+            //stubs
+            services.AddScoped<ICommunication, CommunicationStub>();
+            services.AddScoped<IDigitalIO, DigitalIOStub>();          
         }
     }
 }
