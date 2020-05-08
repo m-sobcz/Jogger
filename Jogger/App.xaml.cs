@@ -68,7 +68,6 @@ namespace Jogger
             services.AddSingleton<SettingsViewModel>();
             services.AddSingleton<DiagnosticsViewModel>();
             //Views
-            services.AddTransient<MainWindow>();
             services.AddTransient<StartWindow>();
             //stubs
             services.AddScoped<ICommunication, CommunicationStub>();

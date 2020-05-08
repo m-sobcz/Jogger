@@ -4,12 +4,20 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Resources\kaico13.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="appsettings.json" />
     <None Remove="Images\activity.png" />
+    <None Remove="Images\alert.png" />
+    <None Remove="Images\check.png" />
     <None Remove="Images\clipboard.png" />
+    <None Remove="Images\clock.png" />
+    <None Remove="Images\cloud.png" />
+    <None Remove="Images\monitor.png" />
+    <None Remove="Images\settings.png" />
+    <None Remove="Images\slash.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,9 +44,20 @@
     <Resource Include="Images\activity.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\alert.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\check.png" />
     <Resource Include="Images\clipboard.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\clock.png" />
+    <Resource Include="Images\cloud.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\monitor.png" />
+    <Resource Include="Images\settings.png" />
+    <Resource Include="Images\slash.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,12 +73,9 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Images\alert.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

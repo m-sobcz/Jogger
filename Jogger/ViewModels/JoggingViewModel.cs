@@ -236,7 +236,7 @@ namespace Jogger.ViewModels
         }
         public Result Result1
         {
-            get { return model.results[0]; }
+            get {return model.results[0]; }
             set { model.results[0] = value; OnPropertyChanged("Result1"); }
         }
         public Result Result2

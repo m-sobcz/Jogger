@@ -153,7 +153,24 @@
                 </TabItem.Header>
                 <views:JoggingTab/>
             </TabItem>
-
+            <TabItem Name="settingsTab">
+                <TabItem.Header>
+                    <WrapPanel Orientation="Horizontal">
+                        <Image Source="/Images/settings.png"  Width="24" Height="24"/>
+                        <Label Content="{StaticResource Settings}"/>
+                    </WrapPanel>
+                </TabItem.Header>
+                <views:SettingsTab/>
+            </TabItem>
+            <TabItem Name="diagnosticTab">
+                <TabItem.Header>
+                    <WrapPanel Orientation="Horizontal">
+                        <Image Source="/Images/monitor.png"  Width="24" Height="24"/>
+                        <Label Content="{StaticResource Diagnostics}"/>
+                    </WrapPanel>
+                </TabItem.Header>
+                <views:DiagnosticsTab/>
+            </TabItem>
         </TabControl>
 
     </DockPanel>
