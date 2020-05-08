@@ -49,7 +49,8 @@ namespace Jogger
             services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
             services.AddScoped<ISampleService, SampleService>();
             services.AddScoped<IDriver, Driver>();
-            services.AddScoped<ITesterService, TesterService>();
+            //services.AddScoped<ITesterService, TesterService>();
+//            services.AddScoped<ITesterService, TesterService>();
 
             services.AddTransient(typeof(MainWindow));
         }
