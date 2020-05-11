@@ -4,14 +4,27 @@ using System.Text;
 
 namespace Jogger.Drivers
 {
-    public class Driver : IDriver
+    public class DriverStub : IDriver
     {
+        public ulong[] MasterMask { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public byte[] ReceivedData { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public ulong SlaveMask => throw new NotImplementedException();
+
+        public event LinDriver.CommunicationLogEventHandler CommunicationLogChanged;
+        public event EventHandler InitializationFailed;
+
         public void Close()
         {
             throw new NotImplementedException();
         }
 
         public bool Initialize()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnInitializationFailed()
         {
             throw new NotImplementedException();
         }

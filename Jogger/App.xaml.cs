@@ -58,7 +58,7 @@ namespace Jogger
         private void ConfigureServices(IServiceCollection services)
         {
             services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
-            services.AddScoped<IDriver, Driver>();
+            services.AddScoped<IDriver, DriverStub>();
             services.AddSingleton<ITesterService, TesterService>();
             services.AddSingleton<TestSettings>();
             services.AddSingleton<Services.ConfigurationSettings>();

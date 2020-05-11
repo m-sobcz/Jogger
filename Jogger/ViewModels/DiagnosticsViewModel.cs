@@ -20,7 +20,6 @@ namespace Jogger.ViewModels
         public DiagnosticsViewModel(ITesterService testerService)
         {
             this.testerService = testerService;
-
             testerService.DigitalIOChanged += TesterService_DigitalIOChanged;
             for (int i = 0; i < 8; i++)
             {
