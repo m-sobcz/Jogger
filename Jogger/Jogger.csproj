@@ -38,6 +38,9 @@
     <Reference Include="Automation.BDaq4">
       <HintPath>..\..\..\DLL\Advantech\4.0.0.0\Automation.BDaq4.dll</HintPath>
     </Reference>
+    <Reference Include="vxlapi_NET">
+      <HintPath>..\..\..\..\Users\MISO\source\repos\Vector XL Driver Library\exec\NET\vxlapi_NET.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

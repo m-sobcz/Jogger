@@ -69,7 +69,7 @@ namespace Jogger
             services.AddSingleton<DiagnosticsViewModel>();
             //Views
             services.AddTransient<StartWindow>();
-            //stubs
+            //Stubs
             services.AddScoped<ICommunication, CommunicationStub>();
             services.AddScoped<IDigitalIO, DigitalIOStub>();
         }
