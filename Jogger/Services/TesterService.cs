@@ -138,8 +138,4 @@ namespace Jogger.Services
             CommunicationLogChanged?.Invoke(this, communicationLog);
         }
     }
-
-
-
-
 }

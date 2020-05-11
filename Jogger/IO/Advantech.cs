@@ -31,6 +31,10 @@ namespace Jogger.IO
                 Trace.WriteLine($"Advantech init exception {e.Message} {e.StackTrace}!");
             }
             Trace.WriteLine($"Advantech Init: {errorCode}");
+            return ErrorCodeToActionStatus(errorCode);
+        }
+        ActionStatus ErrorCodeToActionStatus(ErrorCode errorCode) 
+        {
             ActionStatus actionStatus;
             if (errorCode.ToString().Contains("Error")) actionStatus = ActionStatus.Error;
             else if (errorCode.ToString().Contains("Warning")) actionStatus = ActionStatus.WarnigInExecution;

@@ -41,58 +41,6 @@
         <sys:String x:Key="Settings">_Ustawienia</sys:String>
         <sys:String x:Key="Diagnostics">_Diagnostyka</sys:String>
         <sys:String x:Key="Manual">S_terowanie ręczne</sys:String>
-        <!--Pozycje radiobutton-->
-        <sys:String x:Key="codeHeader">Kod</sys:String>
-        <sys:String x:Key="nameHeader">Nazwa</sys:String>
-
-        <sys:String x:Key="2UP">Zawór _2 UP</sys:String>
-        <sys:String x:Key="3_5UP">Zawór _3,5 UP</sys:String>
-        <sys:String x:Key="6UP">Zawór _6 UP</sys:String>
-        <sys:String x:Key="11UP">Zawór _11 UP</sys:String>
-        <sys:String x:Key="typeCheckAll">Sprawdzanie o_becności</sys:String>
-        <!--Parametry`-->
-        <sys:String x:Key="DataLengthCode">DataLengthCode</sys:String>
-        <sys:String x:Key="Baudrate">Baudrate</sys:String>
-        <sys:String x:Key="SendData0">SendData0</sys:String>
-        <sys:String x:Key="SendData1">SendData1</sys:String>
-        <sys:String x:Key="SendData2">SendData2</sys:String>
-        <sys:String x:Key="SendData3">SendData3</sys:String>
-        <sys:String x:Key="SlaveId">SlaveId</sys:String>
-        <sys:String x:Key="LogInData">Logowanie danych wejściowych</sys:String>
-        <sys:String x:Key="LogOutData">Logowanie danych wyjściowych</sys:String>
-        <sys:String x:Key="LogTimeout">Logowanie Timeout</sys:String>
-        <sys:String x:Key="Channel1">Kanał 1</sys:String>
-        <sys:String x:Key="Channel2">Kanał 2</sys:String>
-        <sys:String x:Key="Channel3">Kanał 3</sys:String>
-        <sys:String x:Key="Channel4">Kanał 4</sys:String>
-        <!--Diagnostyka-->
-        <sys:String x:Key="NotInitializedWarnig">Uwaga: Wejścia nie są odczytywane przed dokonaniem inicjalizacji!</sys:String>
-
-        <sys:String x:Key="DigitalInputs">Wejścia cyfrowe</sys:String>
-        <sys:String x:Key="DI0">Kanał 1 - czujnik górny</sys:String>
-        <sys:String x:Key="DI1">Kanał 1 - czujnik dolny</sys:String>
-        <sys:String x:Key="DI2">Kanał 2 - czujnik górny</sys:String>
-        <sys:String x:Key="DI3">Kanał 2 - czujnik dolny</sys:String>
-        <sys:String x:Key="DI4">Kanał 3 - czujnik górny</sys:String>
-        <sys:String x:Key="DI5">Kanał 3 - czujnik dolny</sys:String>
-        <sys:String x:Key="DI6">Kanał 4 - czujnik górny</sys:String>
-        <sys:String x:Key="DI7">Kanał 4 - czujnik dolny</sys:String>
-        <!--Bledy-->
-        <sys:String x:Key="activeErrors1">Błędy aktywne kanał 1</sys:String>
-        <sys:String x:Key="occuredErrors1">Błędy zanotowane kanał 1</sys:String>
-        <sys:String x:Key="activeErrors2">Błędy aktywne kanał 2</sys:String>
-        <sys:String x:Key="occuredErrors2">Błędy zanotowane kanał 2</sys:String>
-        <sys:String x:Key="activeErrors3">Błędy aktywne kanał 3</sys:String>
-        <sys:String x:Key="occuredErrors3">Błędy zanotowane kanał 3</sys:String>
-        <sys:String x:Key="activeErrors4">Błędy aktywne kanał 4</sys:String>
-        <sys:String x:Key="occuredErrors4">Błędy zanotowane kanał 4</sys:String>
-        <!--Statusy-->
-        <sys:String x:Key="ResultDoneErrorCriticalCode">Błąd zaworu</sys:String>
-        <sys:String x:Key="ResultDoneErrorTimeout">Przekroczono czas testu</sys:String>
-        <sys:String x:Key="ResultDoneErrorConnection">Błąd komunikacji</sys:String>
-        <sys:String x:Key="ResultDoneOk">OK!</sys:String>
-        <sys:String x:Key="ResultTesting">Testowanie</sys:String>
-        <sys:String x:Key="ResultDefault">Niekatywny</sys:String>
     </Window.Resources>
     <!-- Expression.Blend.Sdk from nuget-->
     <!-- Event to command -->

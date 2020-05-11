@@ -13,9 +13,6 @@ namespace Jogger.IO
         public ActionStatus Status { get; set; }
         public string ReadData { get; set; }
         public byte[] ResultData { get; set; }
-
-      
-
         public void Dispose()
         {
         }
@@ -28,7 +25,6 @@ namespace Jogger.IO
 
         public ActionStatus Initialize()
         {
-            Trace.WriteLine(nameof(Initialize));
             return Status;
         }
     }
