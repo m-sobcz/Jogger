@@ -18,7 +18,7 @@ namespace Jogger.Services
         Task CommunicationLoop();
         void Dispose();
         ActionStatus Initialize(ConfigurationSettings configurationSettings);
-        ActionStatus Start(Func<TestSettings, string, ActionStatus> startFunc, TestSettings testSettings);
+        ActionStatus Start(TestSettings testSettings);
         ActionStatus Stop(Action stopFunc);
     }
 }

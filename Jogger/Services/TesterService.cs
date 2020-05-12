@@ -13,13 +13,13 @@ namespace Jogger.Services
     public class TesterService : IDisposable, ITesterService
     {
         #region fields
+        ICommunication communication;
+        IDigitalIO digitalIO;
+        IDriver driver;
+        ActionStatus actionStatus;
         ProgramState state = ProgramState.NotInitialized;
         public Result[] results = new Result[4];
         string communicationLog = "";
-        ICommunication communication;
-        IDigitalIO digitalIO;
-        private IDriver driver;
-
         public event ProgramStateEventHandler ProgramStateChanged;
         public delegate void ProgramStateEventHandler(object sender, ProgramState programState);
         public event ResultEventHandler ResultChanged;
@@ -55,57 +55,23 @@ namespace Jogger.Services
         public ActionStatus Initialize(ConfigurationSettings configurationSettings)
         {
             OnProgramStateChanged(ProgramState.Initializing);
-            
-            ActionStatus actionStatusDigitalIO = digitalIO.Initialize();
-            ActionStatus actionStatusCommunication = communication.Initialize(configurationSettings.HardwareChannelCount);
-            ActionStatus actionStatusDriver = driver.Initialize();
-            List<ActionStatus> actionList = new List<ActionStatus>() { actionStatusCommunication, actionStatusDigitalIO, actionStatusDriver };
-            ActionStatus actionStatus = ActionListStatusToActionStatus(actionList);
-            state = (actionStatus == ActionStatus.Error) ? ProgramState.Error : ProgramState.Initialized; 
+            List<ActionStatus> actionList = new List<ActionStatus>();
+            actionList.Add(digitalIO.Initialize());
+            actionList.Add(communication.Initialize(configurationSettings.HardwareChannelCount));
+            actionList.Add(driver.Initialize());
+            actionStatus = ActionListStatusToActionStatus(actionList);
+            state = (actionStatus == ActionStatus.Error) ? ProgramState.Error : ProgramState.Initialized;
             //communication.OccuredErrorsChanged += OnOccuredErrorsChanged;
             //communication.ActiveErrorsChanged += OnActiveErrorsChanged;
             //communication.ResultChanged += OnResultChanged;
             //communication.CommunicationLogChanged += OnCommunicationLogChanged;
             //driver.CommunicationLogChanged += OnCommunicationLogChanged;
-            //bool isInitializationSuccessful = driver.Initialize();
-            //if (isInitializationSuccessful)
-            //{
-            //    communication.Initialize(configurationSettings.HardwareChannelCount);
-            //    OnProgramStateChanged(ProgramState.Initialized);
-            //}
-            //else
-            //{
-            //    errorCode = ErrorCode.Error;
-            //    OnProgramStateChanged(ProgramState.Error);
-            //}
-
             return actionStatus;
         }
-        ActionStatus ActionListStatusToActionStatus(List<ActionStatus> actionList)
-        {
-            ActionStatus actionStatus;
-            if (actionList.Contains(ActionStatus.Error))
-            {
-                actionStatus = ActionStatus.Error;
-            }
-            else if (actionList.Contains(ActionStatus.WarnigInExecution))
-            {
-                actionStatus = ActionStatus.WarnigInExecution;
-            }
-            else if (actionList.Contains(ActionStatus.WarningWrongParameter))
-            {
-                actionStatus = ActionStatus.WarningWrongParameter;
-            }
-            else
-            {
-                actionStatus = ActionStatus.OK;
-            }
-            return actionStatus;
-        }
-        public ActionStatus Start(Func<TestSettings, string, ActionStatus> startFunc, TestSettings testSettings)
+        public ActionStatus Start(TestSettings testSettings)//Func<TestSettings, string, ActionStatus> startFunc, 
         {
             State = (ProgramState.Starting);
-            ActionStatus actionStatus = startFunc(testSettings, ValveType);//communication.Start(testSettings, ValveType);
+            actionStatus = communication.Start(testSettings, ValveType);//startFunc(testSettings, ValveType);
             if (actionStatus == ActionStatus.OK) State = (ProgramState.Started);
             else State = ProgramState.Error;
             return actionStatus;
@@ -133,6 +99,27 @@ namespace Jogger.Services
         {
             communication?.Dispose();
             digitalIO?.Dispose();
+        }
+        ActionStatus ActionListStatusToActionStatus(List<ActionStatus> actionList)
+        {
+            ActionStatus actionStatus;
+            if (actionList.Contains(ActionStatus.Error))
+            {
+                actionStatus = ActionStatus.Error;
+            }
+            else if (actionList.Contains(ActionStatus.WarnigInExecution))
+            {
+                actionStatus = ActionStatus.WarnigInExecution;
+            }
+            else if (actionList.Contains(ActionStatus.WarningWrongParameter))
+            {
+                actionStatus = ActionStatus.WarningWrongParameter;
+            }
+            else
+            {
+                actionStatus = ActionStatus.OK;
+            }
+            return actionStatus;
         }
         void OnProgramStateChanged(ProgramState programState)
         {

@@ -13,19 +13,16 @@ namespace Jogger.Services.Tests
     [TestClass()]
     public class TesterServiceTests
     {
-        ICommunication communicationOk;
-        ICommunication communicationError;
-        IDriver driver;
-        IDigitalIO digitalIO;
+        ICommunication communication = new CommunicationStub() { IsTestingDone = false };
+        ICommunication communicationInitError = new CommunicationStub() { initializeStatus = ActionStatus.Error, IsTestingDone = false };
+        ICommunication communicationStartError = new CommunicationStub() { startStatus = ActionStatus.Error, IsTestingDone = false };
+        IDigitalIO digitalIO = new DigitalIOStub() { Status = ActionStatus.OK, ReadData = "readData", ResultData = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 } };
+        IDriver driver = new DriverStub();
         TesterService testerService;
         [TestInitialize()]
         public void Initialize()
         {
-            communicationOk = new CommunicationStub() { InitializeActionStatus = ActionStatus.OK, IsTestingDone = false };
-            communicationError = new CommunicationStub() { InitializeActionStatus = ActionStatus.Error, IsTestingDone = false };
-            digitalIO = new DigitalIOStub() { Status = ActionStatus.OK, ReadData = "readData", ResultData = new byte[]{ 0, 1, 2, 3, 4, 5, 6, 7 } };
-            driver = new DriverStub();
-            testerService = new TesterService(communicationOk, digitalIO, driver);
+            testerService = new TesterService(communication, digitalIO, driver);
         }
         [TestMethod()]
         public void Initialize_InitializationSuccess_SetsStateInitialized()
@@ -36,35 +33,36 @@ namespace Jogger.Services.Tests
         [TestMethod()]
         public void Initialize_InitializationSuccess_ReturnsActionStatusOk()
         {
-  ActionStatus status = testerService.Initialize(new ConfigurationSettings());
+            ActionStatus status = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ActionStatus.OK, status);
         }
         [TestMethod()]
         public void Initialize_InitializationFailed_SetsStateError()
         {
-            testerService = new TesterService(communicationError, digitalIO,driver);
+            testerService = new TesterService(communicationInitError, digitalIO, driver);
             ActionStatus status = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ProgramState.Error, testerService.State);
         }
         [TestMethod()]
         public void Initialize_InitializationFailed_ReturnsActionStatusError()
         {
-            testerService = new TesterService(communicationError, digitalIO,driver);
+            testerService = new TesterService(communicationInitError, digitalIO, driver);
             ActionStatus status = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ActionStatus.Error, status);
         }
         [TestMethod()]
-        public void Start_ExecutedOk_SetsStateStarted()
+        public void Start_ExecuteOk_SetsStateStarted()
         {
-            Func<TestSettings, string, ActionStatus> startFunc = (TestSettings testSettings, string text) => { return ActionStatus.OK; };
-            ActionStatus status = testerService.Start(startFunc, new TestSettings());
+            //Func<TestSettings, string, ActionStatus> startFunc = (TestSettings testSettings, string text) => { return ActionStatus.OK; };
+            ActionStatus status = testerService.Start(new TestSettings());
             Assert.AreEqual(ProgramState.Started, testerService.State);
         }
         [TestMethod()]
-        public void Start_ExecutedOk_SetsStateError()
+        public void Start_ExecuteFail_SetsStateError()
         {
-            Func<TestSettings, string, ActionStatus> startFunc = (TestSettings testSettings, string text) => { return ActionStatus.Error; };
-            ActionStatus status = testerService.Start(startFunc, new TestSettings());
+            //Func<TestSettings, string, ActionStatus> startFunc = (TestSettings testSettings, string text) => { return ActionStatus.Error; };
+            testerService = new TesterService(communicationStartError, digitalIO, driver);
+            ActionStatus status = testerService.Start(new TestSettings());
             Assert.AreEqual(ProgramState.Error, testerService.State);
         }
         [TestMethod()]

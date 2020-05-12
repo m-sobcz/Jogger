@@ -9,7 +9,8 @@ namespace Jogger.Communication
     public class CommunicationStub : ICommunication
     {
         public bool IsTestingDone { get; set; }
-        public ActionStatus InitializeActionStatus { get; set; }
+        public ActionStatus initializeStatus { get; set; } = ActionStatus.OK;
+        public ActionStatus startStatus { get; set; } = ActionStatus.OK;
 
         public void Dispose()
         {
@@ -18,7 +19,7 @@ namespace Jogger.Communication
 
         public ActionStatus Initialize(int hardwareChannelCount)
         {
-            return InitializeActionStatus;
+            return initializeStatus;
         }
 
 
@@ -79,7 +80,7 @@ namespace Jogger.Communication
 
         public ActionStatus Start(TestSettings testSettings, string valveType)
         {
-            throw new NotImplementedException();
+            return startStatus;
         }
 
         public void StartSequencers()
