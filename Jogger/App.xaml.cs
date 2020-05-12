@@ -17,6 +17,7 @@ using Jogger.Communication;
 using Jogger.IO;
 using System.Diagnostics;
 using Jogger.Views;
+using Jogger.Valves;
 
 namespace Jogger
 {
@@ -59,6 +60,7 @@ namespace Jogger
         {
             services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
             services.AddScoped<IDriver, DriverStub>();
+            services.AddScoped<Valve>();
             services.AddSingleton<ITesterService, TesterService>();
             services.AddSingleton<TestSettings>();
             services.AddSingleton<Services.ConfigurationSettings>();

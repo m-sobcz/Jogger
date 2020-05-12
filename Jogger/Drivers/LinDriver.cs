@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jogger.Services;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -52,7 +53,6 @@ namespace Jogger.Drivers
             { DLC[i] = otherSize; }
             DLC[60] = zeroSize;
         }
-
         public void SetSendData(byte[] data, byte id, byte dataLengthCode, UInt64 accessMask)
         {
             linSlaveId = id;
@@ -74,7 +74,6 @@ namespace Jogger.Drivers
             currentAccessMask = accessMask;
 
         }
-
         public string Send()
         {
             XLDefine.XL_Status status;
@@ -172,7 +171,7 @@ namespace Jogger.Drivers
             DriverAction("Close port", (driver.XL_ClosePort(portHandle)));
             DriverAction("Close driver", driver.XL_CloseDriver());
         }
-        public bool Initialize()
+        public ActionStatus Initialize()
         {
             initializationWithoutErrors = true;
             OpenDriver();
@@ -190,7 +189,7 @@ namespace Jogger.Drivers
             ActivateChannel();
             SetNotificationAndReadHandle();
             OnCommunicationLogChanged(InitializeInfo);
-            return initializationWithoutErrors;
+            return initializationWithoutErrors ? ActionStatus.OK : ActionStatus.Error;
         }
         bool OpenDriver()
         {

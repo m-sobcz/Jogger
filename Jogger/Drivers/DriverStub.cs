@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jogger.Services;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,15 +14,16 @@ namespace Jogger.Drivers
 
         public event LinDriver.CommunicationLogEventHandler CommunicationLogChanged;
         public event EventHandler InitializationFailed;
+        public ActionStatus initializeStatus { get; set; } = ActionStatus.OK;
 
         public void Close()
         {
             throw new NotImplementedException();
         }
 
-        public bool Initialize()
+        public ActionStatus Initialize()
         {
-            throw new NotImplementedException();
+            return initializeStatus;
         }
 
         public void OnInitializationFailed()

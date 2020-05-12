@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jogger.Services;
+using System;
 
 namespace Jogger.Drivers
 {
@@ -12,7 +13,7 @@ namespace Jogger.Drivers
         event EventHandler InitializationFailed;
 
         void Close();
-        bool Initialize();
+        ActionStatus Initialize();
         void OnInitializationFailed();
         string Receive();
         string Send();

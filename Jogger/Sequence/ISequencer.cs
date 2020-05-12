@@ -1,7 +1,7 @@
 ﻿using Jogger.Drivers;
 using System.Threading.Tasks;
 
-namespace Jogger.Valve
+namespace Jogger.Sequence
 {
     public interface ISequencer
     {
@@ -18,9 +18,7 @@ namespace Jogger.Valve
         int valveMinInflateTime { get; set; }
 
         void AddAllTestQueries();
-        Task<string> ExecuteStep();
-        void SetAccessMask(int channelNumber);
-        void SetDriver(IDriver driver);
+        Task<string> ExecuteStep(ulong accessMask);
         void Start();
         void WakeUp();
     }

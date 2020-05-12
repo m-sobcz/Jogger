@@ -5,6 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\kaico13.ico</ApplicationIcon>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>StrongKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>

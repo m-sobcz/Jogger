@@ -6,6 +6,7 @@ using System.Text;
 using Jogger.IO;
 using Jogger.Communication;
 using System.Threading.Tasks;
+using Jogger.Drivers;
 
 namespace Jogger.Services.Tests
 {
@@ -14,6 +15,7 @@ namespace Jogger.Services.Tests
     {
         ICommunication communicationOk;
         ICommunication communicationError;
+        IDriver driver;
         IDigitalIO digitalIO;
         TesterService testerService;
         [TestInitialize()]
@@ -22,7 +24,8 @@ namespace Jogger.Services.Tests
             communicationOk = new CommunicationStub() { InitializeActionStatus = ActionStatus.OK, IsTestingDone = false };
             communicationError = new CommunicationStub() { InitializeActionStatus = ActionStatus.Error, IsTestingDone = false };
             digitalIO = new DigitalIOStub() { Status = ActionStatus.OK, ReadData = "readData", ResultData = new byte[]{ 0, 1, 2, 3, 4, 5, 6, 7 } };
-            testerService = new TesterService(communicationOk, digitalIO);
+            driver = new DriverStub();
+            testerService = new TesterService(communicationOk, digitalIO, driver);
         }
         [TestMethod()]
         public void Initialize_InitializationSuccess_SetsStateInitialized()
@@ -39,14 +42,14 @@ namespace Jogger.Services.Tests
         [TestMethod()]
         public void Initialize_InitializationFailed_SetsStateError()
         {
-            testerService = new TesterService(communicationError, digitalIO);
+            testerService = new TesterService(communicationError, digitalIO,driver);
             ActionStatus status = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ProgramState.Error, testerService.State);
         }
         [TestMethod()]
         public void Initialize_InitializationFailed_ReturnsActionStatusError()
         {
-            testerService = new TesterService(communicationError, digitalIO);
+            testerService = new TesterService(communicationError, digitalIO,driver);
             ActionStatus status = testerService.Initialize(new ConfigurationSettings());
             Assert.AreEqual(ActionStatus.Error, status);
         }

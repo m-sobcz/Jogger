@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jogger.Valve
+namespace Jogger.Valves
 {
     public class Query
     {
@@ -20,15 +20,16 @@ namespace Jogger.Valve
         {
             Commands.Add(command);
         }
-        public async Task<string> ExecuteStep(IDriver driver)
+        public async Task<string> ExecuteStep(IDriver driver, ulong accessMask)
         {
-            string s = await Commands[step].SendDriverRequest(driver);
+            driver.SetSendData(Commands[step].sendData, Commands[step].id, Command.dataLengthCode, accessMask);
+            string message = await Task<string>.Run(() => driver.Send());
             step++;
             if (step >= Commands.Count)
             {
                 isDone = true;
             }
-            return s;
+            return message;
         }
         public void Restart()
         {

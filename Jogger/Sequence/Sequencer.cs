@@ -1,4 +1,5 @@
 ﻿using Jogger.Drivers;
+using Jogger.Valves;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,7 +7,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Jogger.Valve
+namespace Jogger.Sequence
+
 {
     public class Sequencer : ISequencer
     {
@@ -33,19 +35,16 @@ namespace Jogger.Valve
         public int valveMaxInflateTime { get; set; } = 0;
         public int valveMaxDeflateTime { get; set; } = 0;
 
-        public Sequencer()
+        public Sequencer(IDriver driver)
         {
+            this.driver = driver;
             minStepTimer = new Timer(new TimerCallback((o) => IsMinStepTimerDone = true), null, 0, Timeout.Infinite);
             maxStepTimer = new Timer(new TimerCallback((o) => IsMaxStepTimerDone = true), null, 0, Timeout.Infinite);
         }
-        public void SetDriver(IDriver driver)
-        {
-            this.driver = driver;
-        }
 
-        public async Task<string> ExecuteStep()
+        public async Task<string> ExecuteStep(ulong accessMask)
         {
-            string message = await Queries[Step].ExecuteStep(driver);
+            string message = await Queries[Step].ExecuteStep(driver,accessMask);
             if (IsStopRequested)
             {
                 UntimelyFinish();
@@ -118,8 +117,8 @@ namespace Jogger.Valve
         protected Query GetTesterPresentQuery()
         {
             Query query = new Query();
-            query.AddCommand(new Command(accessMask, 0x3c, new byte[] { 0x90, 0x0, 0x3E, 0x0 }));
-            query.AddCommand(new Command(accessMask, 0x3d));
+            query.AddCommand(new Command(0x3c, new byte[] { 0x90, 0x0, 0x3E, 0x0 }));
+            query.AddCommand(new Command(0x3d));
             return query;
         }
         protected void UntimelyFinish()
@@ -150,18 +149,6 @@ namespace Jogger.Valve
             IsStopRequested = false;
             isUntimelyDone = false;
             IsStarted = true;
-        }
-
-        public void SetAccessMask(int channelNumber)
-        {
-            try
-            {
-                accessMask = driver.MasterMask[channelNumber];
-            }
-            catch
-            {
-                Trace.WriteLine("Unable to set master mask");
-            }
         }
     }
 }

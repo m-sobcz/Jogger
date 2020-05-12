@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Jogger.Valve
+namespace Jogger.Receive
 {
     public interface IReceiver
     {

@@ -1,5 +1,6 @@
 ﻿
 using Jogger.Communication;
+using Jogger.Drivers;
 using Jogger.IO;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace Jogger.Services
         string communicationLog = "";
         ICommunication communication;
         IDigitalIO digitalIO;
+        private IDriver driver;
 
         public event ProgramStateEventHandler ProgramStateChanged;
         public delegate void ProgramStateEventHandler(object sender, ProgramState programState);
@@ -44,19 +46,22 @@ namespace Jogger.Services
             }
         }
         #endregion
-        public TesterService(ICommunication communication, IDigitalIO digitalIO)
+        public TesterService(ICommunication communication, IDigitalIO digitalIO, IDriver driver)
         {
             this.communication = communication;
             this.digitalIO = digitalIO;
+            this.driver = driver;
         }
         public ActionStatus Initialize(ConfigurationSettings configurationSettings)
         {
             OnProgramStateChanged(ProgramState.Initializing);
+            
             ActionStatus actionStatusDigitalIO = digitalIO.Initialize();
             ActionStatus actionStatusCommunication = communication.Initialize(configurationSettings.HardwareChannelCount);
-            ActionStatus actionStatus = (ActionStatus)Math.Max((int)actionStatusDigitalIO, (int)actionStatusCommunication);
-            //driver = new LinDriver(configurationSettings.HardwareChannelCount);
-            //linCommunication = new LinCommunication(digitalIO, driver);
+            ActionStatus actionStatusDriver = driver.Initialize();
+            List<ActionStatus> actionList = new List<ActionStatus>() { actionStatusCommunication, actionStatusDigitalIO, actionStatusDriver };
+            ActionStatus actionStatus = ActionListStatusToActionStatus(actionList);
+            state = (actionStatus == ActionStatus.Error) ? ProgramState.Error : ProgramState.Initialized; 
             //communication.OccuredErrorsChanged += OnOccuredErrorsChanged;
             //communication.ActiveErrorsChanged += OnActiveErrorsChanged;
             //communication.ResultChanged += OnResultChanged;
@@ -73,8 +78,28 @@ namespace Jogger.Services
             //    errorCode = ErrorCode.Error;
             //    OnProgramStateChanged(ProgramState.Error);
             //}
-            if (actionStatus == ActionStatus.OK) State = (ProgramState.Initialized);
-            else State = ProgramState.Error;
+
+            return actionStatus;
+        }
+        ActionStatus ActionListStatusToActionStatus(List<ActionStatus> actionList)
+        {
+            ActionStatus actionStatus;
+            if (actionList.Contains(ActionStatus.Error))
+            {
+                actionStatus = ActionStatus.Error;
+            }
+            else if (actionList.Contains(ActionStatus.WarnigInExecution))
+            {
+                actionStatus = ActionStatus.WarnigInExecution;
+            }
+            else if (actionList.Contains(ActionStatus.WarningWrongParameter))
+            {
+                actionStatus = ActionStatus.WarningWrongParameter;
+            }
+            else
+            {
+                actionStatus = ActionStatus.OK;
+            }
             return actionStatus;
         }
         public ActionStatus Start(Func<TestSettings, string, ActionStatus> startFunc, TestSettings testSettings)
