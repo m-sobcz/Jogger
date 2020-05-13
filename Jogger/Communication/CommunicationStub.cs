@@ -1,4 +1,5 @@
 ﻿using Jogger.Services;
+using Jogger.Valves;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,7 @@ namespace Jogger.Communication
         public bool IsTestingDone { get; set; }
         public ActionStatus initializeStatus { get; set; } = ActionStatus.OK;
         public ActionStatus startStatus { get; set; } = ActionStatus.OK;
+        public bool StopAllExecuted { get; private set; }
 
         public void Dispose()
         {
@@ -90,7 +92,7 @@ namespace Jogger.Communication
 
         public void StopAll()
         {
-            throw new NotImplementedException();
+            StopAllExecuted = true;
         }
 
     }

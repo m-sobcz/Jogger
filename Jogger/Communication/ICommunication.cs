@@ -15,12 +15,12 @@ namespace Jogger.Communication
         //Result CheckResult();
         void Dispose();
         //BitArray GetDigitalInputs();
-        ActionStatus Initialize(int hardwareChannelCount);
+        //ActionStatus Initialize(int hardwareChannelCount);
         void InitializeReceivers();
         void OnActiveErrorsChanged(object sender, string errors, int channelNumber);
         void OnCommunicationLogChanged(object sender, string log);
         void OnOccuredErrorsChanged(object sender, string errors, int channelNumber);
-        void OnResultChanged(object sender, Result result, int channelNumber);
+
         Task<byte[]> ReadIO();
         Task ReceiveData();
         Task SendData();

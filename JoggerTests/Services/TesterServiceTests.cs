@@ -65,17 +65,11 @@ namespace Jogger.Services.Tests
             ActionStatus status = testerService.Start(new TestSettings());
             Assert.AreEqual(ProgramState.Error, testerService.State);
         }
-        [TestMethod()]
-        public void Stop_Stopped_StopFuncExecuted()
-        {
-            bool executionDone = false;
-            testerService.Stop(() => executionDone = true);
-            Assert.AreEqual(true, executionDone);
-        }
+
         [TestMethod()]
         public void Stop_Stopped_SetsStateIdle()
         {
-            testerService.Stop(() => { });
+            testerService.Stop();
             Assert.AreEqual(ProgramState.Idle, testerService.State);
         }
 

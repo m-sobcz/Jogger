@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using static Jogger.IO.IDigitalIO;
 
 namespace Jogger.IO
 {
@@ -13,6 +14,9 @@ namespace Jogger.IO
         public ActionStatus Status { get; set; }
         public string ReadData { get; set; }
         public byte[] ResultData { get; set; }
+
+        public event InputsReadEventHandler InputsRead;
+
         public void Dispose()
         {
         }
@@ -20,6 +24,7 @@ namespace Jogger.IO
         public Task<(string, byte[])> ReadInputs()
         {
             (string readInputs, byte[] result) tuple = (ReadData, ResultData);
+            InputsRead?.Invoke(this, ReadData, ResultData);
             return Task.FromResult(tuple);
         }
 

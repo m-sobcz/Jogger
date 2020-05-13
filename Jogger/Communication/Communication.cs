@@ -36,35 +36,8 @@ namespace Jogger.Communication
             this.driver = driver;
             this.digitalIO = digitalIO;
         }
-        public async Task<byte[]> ReadIO()
+        public void Initialize()
         {
-            string ioError;
-            byte[] ioResult;
-            (ioError, ioResult) = await digitalIO.ReadInputs();
-            valveManager.SetSensorsState(ioResult);
-            return ioResult;
-        }
-        public BitArray GetDigitalInputs()
-        {
-            BitArray bitArray = new BitArray(valveManager.valves.Count * 2);
-            //for (int i = 0; i < valves.Count; i++)
-            //{
-            //    bitArray[i * 2] = valves[i].IsInflateSensorOn;
-            //    bitArray[i * 2 + 1] = valves[i].IsDeflateSensorOn;
-            //}
-            return bitArray;
-        }
-
-        public void Initialize(int hardwareChannelCount)
-        {
-            for (int i = 0; i < hardwareChannelCount; i++)
-            {
-                Valve valve = App.ServiceProvider.GetRequiredService<Valve>();           
-                valve.result = Result.Idle;
-                valveManager.Add(valve);
-                OnResultChanged(this, Result.Idle, i);
-            }
-            Trace.WriteLine($"Valves added, valves count {valveManager.valves.Count}");
         }
         public ActionStatus Start(TestSettings testSettings, string valveType)
         {
@@ -178,7 +151,7 @@ namespace Jogger.Communication
             foreach (Valve valve in valveManager.valves)
             {
                 valve.Sequencer.Start();
-                valve.result = Result.Testing;
+                valve.Result = Result.Testing;
                 OnResultChanged(this, Result.Testing, valve.ChannelNumber);
                 OnActiveErrorsChanged(this, "...", valve.ChannelNumber);
                 OnOccuredErrorsChanged(this, "...", valve.ChannelNumber); ;
@@ -215,11 +188,11 @@ namespace Jogger.Communication
         }
         public void OnResultChanged(object sender, Result result, int channelNumber)
         {
-            valveManager.valves[channelNumber].result = result;
+            valveManager.valves[channelNumber].Result = result;
             bool testDoneCheck = true;
             for (int i = 0; i < valveManager.valves.Count; i++)
             {
-                if (valveManager.valves[i].result == Result.Idle | valveManager.valves[i].result == Result.Testing) testDoneCheck = false;
+                if (valveManager.valves[i].Result == Result.Idle | valveManager.valves[i].Result == Result.Testing) testDoneCheck = false;
             }
             IsTestingDone = testDoneCheck;
             ResultChanged?.Invoke(this, result, channelNumber);

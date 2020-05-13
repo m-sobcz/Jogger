@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Automation.BDaq;
 using Jogger.Services;
+using Jogger.Valves;
+using static Jogger.IO.IDigitalIO;
 
 namespace Jogger.IO
 {
@@ -15,16 +17,18 @@ namespace Jogger.IO
         readonly int startPort = 0;
         readonly int portCount = 1;
         readonly byte[] buffer = new byte[64];
-        InstantDiCtrl instantDiCtrl = new InstantDiCtrl();
+        InstantDiCtrl advantechDIControl = new InstantDiCtrl();
         ErrorCode errorCode = ErrorCode.ErrorUndefined;
         DioPort[] dioPort;
+
+        public event InputsReadEventHandler InputsRead;
         public ActionStatus Initialize()
         {
             try
             {
-                instantDiCtrl.SelectedDevice = new DeviceInformation(deviceDescription);
-                errorCode = instantDiCtrl.LoadProfile(profilePath);
-                dioPort = instantDiCtrl.Ports;
+                advantechDIControl.SelectedDevice = new DeviceInformation(deviceDescription);
+                errorCode = advantechDIControl.LoadProfile(profilePath);
+                dioPort = advantechDIControl.Ports;
             }
             catch (Exception e)
             {
@@ -45,7 +49,8 @@ namespace Jogger.IO
         {
             try
             {
-                errorCode = await Task<string>.Run(() => instantDiCtrl.Read(startPort, portCount, buffer));
+                errorCode = await Task<string>.Run(() => advantechDIControl.Read(startPort, portCount, buffer));
+                OnInputsRead(this, errorCode.ToString(), buffer);
             }
             catch (Exception e)
             {
@@ -55,7 +60,11 @@ namespace Jogger.IO
         }
         public void Dispose()
         {
-            instantDiCtrl.Dispose();
+            advantechDIControl.Dispose();
+        }
+        void OnInputsRead(object sender, string errorCode, byte[] buffer) 
+        {
+            InputsRead.Invoke(sender, errorCode, buffer);
         }
     }
 }

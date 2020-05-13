@@ -15,7 +15,9 @@ namespace Jogger.Valves
         static int count = 0;
         public ISequencer Sequencer { get; set; }
         public IReceiver Receiver { get; set; }
-        private object driver;
+        private IDriver driver;
+        public event ResultEventHandler ResultChanged;
+        public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
         public int ChannelNumber { get; set; }
         public bool IsDeflateSensorOn
         {
@@ -27,7 +29,16 @@ namespace Jogger.Valves
             get { return Sequencer.IsInflated; }
             set { Sequencer.IsInflated = value; }
         }
-        public Result result = Result.Idle;       
+        private Result result = Result.Idle;
+        public Result Result
+        {
+            get => result;
+            set
+            {
+                result = value;
+                ResultChanged?.Invoke(this, result, ChannelNumber);
+            }
+        }
         public Valve(IDriver driver)
         {
             this.driver = driver;

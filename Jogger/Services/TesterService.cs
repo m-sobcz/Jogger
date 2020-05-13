@@ -2,6 +2,7 @@
 using Jogger.Communication;
 using Jogger.Drivers;
 using Jogger.IO;
+using Jogger.Valves;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,7 +13,7 @@ namespace Jogger.Services
 {
     public class TesterService : IDisposable, ITesterService
     {
-        #region fields
+        private IValveManager valveManager;
         ICommunication communication;
         IDigitalIO digitalIO;
         IDriver driver;
@@ -31,10 +32,7 @@ namespace Jogger.Services
         public delegate void CommunicationLogEventHandler(object sender, string log);
         public event DigitalIOEventHandler DigitalIOChanged;
         public delegate void DigitalIOEventHandler(object sender, byte[] data);
-        #endregion
-        #region properties
         public string ValveType { get; set; } = "";
-
         public ProgramState State
         {
             get { return state; }
@@ -45,19 +43,19 @@ namespace Jogger.Services
                 OnProgramStateChanged(state);
             }
         }
-        #endregion
-        public TesterService(ICommunication communication, IDigitalIO digitalIO, IDriver driver)
+        public TesterService(ICommunication communication, IDigitalIO digitalIO, IDriver driver, IValveManager valveManager)
         {
+            this.valveManager = valveManager;
             this.communication = communication;
             this.digitalIO = digitalIO;
             this.driver = driver;
         }
         public ActionStatus Initialize(ConfigurationSettings configurationSettings)
         {
-            OnProgramStateChanged(ProgramState.Initializing);
+            state = ProgramState.Initializing;
             List<ActionStatus> actionList = new List<ActionStatus>();
             actionList.Add(digitalIO.Initialize());
-            actionList.Add(communication.Initialize(configurationSettings.HardwareChannelCount));
+            actionList.Add(valveManager.Initialize(configurationSettings.HardwareChannelCount));
             actionList.Add(driver.Initialize());
             actionStatus = ActionListStatusToActionStatus(actionList);
             state = (actionStatus == ActionStatus.Error) ? ProgramState.Error : ProgramState.Initialized;
@@ -83,15 +81,14 @@ namespace Jogger.Services
             //while (true)
             //{
             //ioData = 
-            await communication.ReadIO();
-            //OnDigitalIOChanged(this, ioData);
+            await digitalIO.ReadInputs();
             await communication.SendData();
             await Task.WhenAny(communication.ReceiveData(), Task.Delay(5000));
             //}
         }
-        public ActionStatus Stop(Action stopFunc)
+        public ActionStatus Stop()
         {
-            stopFunc.Invoke();//communication.StopAll();
+            communication.StopAll();
             State = ProgramState.Idle;
             return ActionStatus.OK;
         }
@@ -130,7 +127,7 @@ namespace Jogger.Services
             ResultChanged?.Invoke(this, result, channelNumber);
             if (communication.IsTestingDone)
             {
-                OnProgramStateChanged(ProgramState.Done);
+                state = ProgramState.Done;
             }
         }
         void OnActiveErrorsChanged(object sender, string errors, int channelNumber)
@@ -147,7 +144,7 @@ namespace Jogger.Services
         }
         void OnCommunicationLogChanged(object sender, string data)
         {
-            CommunicationLogChanged?.Invoke(this, communicationLog);
+            CommunicationLogChanged?.Invoke(sender, communicationLog);
         }
     }
 }

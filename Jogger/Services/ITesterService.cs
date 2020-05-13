@@ -15,10 +15,11 @@ namespace Jogger.Services
         event TesterService.ProgramStateEventHandler ProgramStateChanged;
         event TesterService.ResultEventHandler ResultChanged;
 
+
         Task CommunicationLoop();
         void Dispose();
         ActionStatus Initialize(ConfigurationSettings configurationSettings);
         ActionStatus Start(TestSettings testSettings);
-        ActionStatus Stop(Action stopFunc);
+        ActionStatus Stop();
     }
 }
