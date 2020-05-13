@@ -7,7 +7,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Jogger.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+              DataContext="{Binding Source={StaticResource Locator}, Path=SettingsViewModel}"
+             d:DesignHeight="450" d:DesignWidth="800"
+             >
     <UserControl.Resources>
         <conv:IntToStringConverter x:Key="IntToStringConverter" />
         <conv:ResultToStringConverter x:Key="ResultToStringConverter" />

@@ -12,9 +12,10 @@ namespace Jogger.Drivers
 
         public ulong SlaveMask => throw new NotImplementedException();
 
-        public event LinDriver.CommunicationLogEventHandler CommunicationLogChanged;
-        public event EventHandler InitializationFailed;
         public ActionStatus initializeStatus { get; set; } = ActionStatus.OK;
+
+        public event Driver.CommunicationLogEventHandler CommunicationLogChanged;
+        public event EventHandler InitializationFailed;
 
         public void Close()
         {
@@ -47,6 +48,11 @@ namespace Jogger.Drivers
         }
 
         public bool WakeUp()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ActionStatus Initialize(int numberOfChannels)
         {
             throw new NotImplementedException();
         }

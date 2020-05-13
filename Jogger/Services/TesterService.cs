@@ -22,15 +22,6 @@ namespace Jogger.Services
         string communicationLog = "";
         public event ProgramStateEventHandler ProgramStateChanged;
         public delegate void ProgramStateEventHandler(object sender, ProgramState programState);
-        public event ResultEventHandler ResultChanged;
-        public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
-        public event ErrorsEventHandler ActiveErrorsChanged;
-        public event ErrorsEventHandler OccuredErrorsChanged;
-        public delegate void ErrorsEventHandler(object sender, string errors, int channelNumber);
-        public event CommunicationLogEventHandler CommunicationLogChanged;
-        public delegate void CommunicationLogEventHandler(object sender, string log);
-        public event DigitalIOEventHandler DigitalIOChanged;
-        public delegate void DigitalIOEventHandler(object sender, byte[] data);
         public string ValveType { get; set; } = "";
         public ProgramState State
         {
@@ -39,7 +30,7 @@ namespace Jogger.Services
             {
                 state = value;
                 Trace.WriteLine($"New program state: {state}");
-                OnProgramStateChanged(state);
+                ProgramStateChanged?.Invoke(this, state);
             }
         }
         public TesterService(IDigitalIO digitalIO, IDriver driver, IValveManager valveManager)
@@ -50,21 +41,16 @@ namespace Jogger.Services
         }
         public ActionStatus Initialize(ConfigurationSettings configurationSettings)
         {
-            state = ProgramState.Initializing;
+            State = ProgramState.Initializing;
             List<ActionStatus> actionList = new List<ActionStatus>();
             actionList.Add(digitalIO.Initialize());
-            actionList.Add(valveManager.Initialize(configurationSettings.HardwareChannelCount));
-            actionList.Add(driver.Initialize());
+            actionList.Add(driver.Initialize(configurationSettings.HardwareChannelCount));
+            actionList.Add(valveManager.Initialize(configurationSettings.HardwareChannelCount)); 
             actionStatus = ActionListStatusToActionStatus(actionList);
-            state = (actionStatus == ActionStatus.Error) ? ProgramState.Error : ProgramState.Initialized;
-            //communication.OccuredErrorsChanged += OnOccuredErrorsChanged;
-            //communication.ActiveErrorsChanged += OnActiveErrorsChanged;
-            //communication.ResultChanged += OnResultChanged;
-            //communication.CommunicationLogChanged += OnCommunicationLogChanged;
-            driver.CommunicationLogChanged += OnCommunicationLogChanged;
+            State = (actionStatus == ActionStatus.Error) ? ProgramState.Error : ProgramState.Initialized;
             return actionStatus;
         }
-        public ActionStatus Start(TestSettings testSettings)//Func<TestSettings, string, ActionStatus> startFunc, 
+        public ActionStatus Start(TestSettings testSettings)
         {
             State = (ProgramState.Starting);
             actionStatus = valveManager.Start(testSettings, ValveType);//startFunc(testSettings, ValveType);
@@ -112,34 +98,6 @@ namespace Jogger.Services
                 actionStatus = ActionStatus.OK;
             }
             return actionStatus;
-        }
-        void OnProgramStateChanged(ProgramState programState)
-        {
-            ProgramStateChanged?.Invoke(this, state);
-        }
-        void OnResultChanged(object sender, Result result, int channelNumber)
-        {
-            ResultChanged?.Invoke(this, result, channelNumber);
-            if (valveManager.IsTestingDone)
-            {
-                state = ProgramState.Done;
-            }
-        }
-        void OnActiveErrorsChanged(object sender, string errors, int channelNumber)
-        {
-            ActiveErrorsChanged?.Invoke(sender, errors, channelNumber);
-        }
-        void OnOccuredErrorsChanged(object sender, string errors, int channelNumber)
-        {
-            OccuredErrorsChanged?.Invoke(sender, errors, channelNumber);
-        }
-        void OnDigitalIOChanged(object sender, byte[] data)
-        {
-            DigitalIOChanged?.Invoke(sender, data);
-        }
-        void OnCommunicationLogChanged(object sender, string data)
-        {
-            CommunicationLogChanged?.Invoke(sender, communicationLog);
         }
     }
 }

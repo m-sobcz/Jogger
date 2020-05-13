@@ -1,4 +1,5 @@
-﻿using Jogger.Services;
+﻿using Jogger.Models;
+using Jogger.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,13 +10,14 @@ using vxlapi_NET;
 
 namespace Jogger.Drivers
 {
-    public class LinDriver : IDriver
+    public class Driver : IDriver
     {
         readonly XLDefine.XL_LIN_CalcChecksum calcChecksumType;
+        private  ConfigurationSettings configurationSettings;
         readonly XLDefine.XL_LIN_Mode linMode;
         readonly XLDefine.XL_LIN_Version linVersion;
         public event EventHandler InitializationFailed;
-        readonly VectorHardware vectorHardware;
+        VectorHardware vectorHardware;
         string InitializeInfo { get; set; } = "";
         public event CommunicationLogEventHandler CommunicationLogChanged;
         public delegate void CommunicationLogEventHandler(object sender, string log);
@@ -29,7 +31,6 @@ namespace Jogger.Drivers
         UInt64 currentAccessMask = 0;
         public ulong[] MasterMask { get; set; }
         byte dataLengthCode = 2;
-        readonly int numberOfChannels;
         readonly XLDriver driver = new XLDriver();
         readonly String applicationName = "KA Tester";
         XLClass.xl_driver_config driverConfig = new XLClass.xl_driver_config();
@@ -40,14 +41,12 @@ namespace Jogger.Drivers
         XLDefine.XL_Status status;
         private bool initializationWithoutErrors;
 
-        public LinDriver(int numberOfChannels, XLDefine.XL_LIN_Version linVersion = XLDefine.XL_LIN_Version.XL_LIN_VERSION_2_0, XLDefine.XL_LIN_Mode linMode = XLDefine.XL_LIN_Mode.XL_LIN_MASTER, XLDefine.XL_LIN_CalcChecksum calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM, byte zeroSize = 8, byte otherSize = 8)
+        public Driver(ConfigurationSettings configurationSettings, XLDefine.XL_LIN_Version linVersion = XLDefine.XL_LIN_Version.XL_LIN_VERSION_2_0, XLDefine.XL_LIN_Mode linMode = XLDefine.XL_LIN_Mode.XL_LIN_MASTER, XLDefine.XL_LIN_CalcChecksum calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM, byte zeroSize = 8, byte otherSize = 8)
         {
-            this.numberOfChannels = numberOfChannels;
             this.linVersion = linVersion;
             this.linMode = linMode;
             this.calcChecksumType = calcChecksumType;
-            this.MasterMask = new ulong[numberOfChannels];
-            vectorHardware = new VectorHardware(driver, driverConfig, applicationName, numberOfChannels);
+            this.configurationSettings = configurationSettings;
             DLC[0] = zeroSize;
             for (int i = 1; i < 63; i++)
             { DLC[i] = otherSize; }
@@ -171,9 +170,11 @@ namespace Jogger.Drivers
             DriverAction("Close port", (driver.XL_ClosePort(portHandle)));
             DriverAction("Close driver", driver.XL_CloseDriver());
         }
-        public ActionStatus Initialize()
+        public ActionStatus Initialize(int numberOfChannels)
         {
             initializationWithoutErrors = true;
+            this.MasterMask = new ulong[numberOfChannels];
+            vectorHardware = new VectorHardware(driver, driverConfig, applicationName, numberOfChannels);
             OpenDriver();
             GetDriverConfiguration();
             InitializeVectorHardware();
@@ -214,8 +215,8 @@ namespace Jogger.Drivers
                 LINMode = linMode,
                 LINVersion = linVersion
             };
-            XLDefine.XL_Status[] status = new XLDefine.XL_Status[numberOfChannels];
-            for (int i = 0; i < numberOfChannels; i++)
+            XLDefine.XL_Status[] status = new XLDefine.XL_Status[configurationSettings.HardwareChannelCount];
+            for (int i = 0; i < configurationSettings.HardwareChannelCount; i++)
             {
                 status[i] = driver.XL_LinSetChannelParams(portHandle, MasterMask[i], linChannelParameters);
             }
@@ -224,8 +225,8 @@ namespace Jogger.Drivers
         }
         bool SetDataLengthControl()
         {
-            XLDefine.XL_Status[] status = new XLDefine.XL_Status[numberOfChannels];
-            for (int i = 0; i < numberOfChannels; i++)
+            XLDefine.XL_Status[] status = new XLDefine.XL_Status[configurationSettings.HardwareChannelCount];
+            for (int i = 0; i < configurationSettings.HardwareChannelCount; i++)
             {
                 status[i] = driver.XL_LinSetDLC(portHandle, MasterMask[i], DLC);
             }
@@ -239,8 +240,8 @@ namespace Jogger.Drivers
         }
         bool ActivateChannel()
         {
-            XLDefine.XL_Status[] status = new XLDefine.XL_Status[numberOfChannels];
-            for (int i = 0; i < numberOfChannels; i++)
+            XLDefine.XL_Status[] status = new XLDefine.XL_Status[configurationSettings.HardwareChannelCount];
+            for (int i = 0; i < configurationSettings.HardwareChannelCount; i++)
             {
                 status[i] = driver.XL_ActivateChannel(portHandle, MasterMask[i], XLDefine.XL_BusTypes.XL_BUS_TYPE_LIN, XLDefine.XL_AC_Flags.XL_ACTIVATE_NONE);
             }

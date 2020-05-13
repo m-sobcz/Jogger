@@ -9,11 +9,11 @@ namespace Jogger.Drivers
         byte[] ReceivedData { get; set; }
         ulong SlaveMask { get; }
 
-        event LinDriver.CommunicationLogEventHandler CommunicationLogChanged;
+        event Driver.CommunicationLogEventHandler CommunicationLogChanged;
         event EventHandler InitializationFailed;
 
         void Close();
-        ActionStatus Initialize();
+        ActionStatus Initialize(int numberOfChannels);
         void OnInitializationFailed();
         string Receive();
         string Send();

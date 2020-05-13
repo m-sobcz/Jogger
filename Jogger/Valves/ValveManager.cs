@@ -25,12 +25,13 @@ namespace Jogger.Valves
         private IDriver driver;
         IDigitalIO digitalIO;
         private TestSettings testSettings;
-
         public bool IsTestingDone { get; set; } = false;
         public event CommunicationLogEventHandler CommunicationLogChanged;
         public delegate void CommunicationLogEventHandler(object sender, string log);
         public event ErrorsEventHandler ActiveErrorsChanged;
         public event ErrorsEventHandler OccuredErrorsChanged;
+        public event ResultEventHandler ResultChanged;
+        public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
         static ValveManager()
         {
             namespacePrefix = System.Reflection.Assembly.GetExecutingAssembly().EntryPoint.DeclaringType.Namespace;
@@ -47,23 +48,11 @@ namespace Jogger.Valves
             for (int i = 0; i < channelsCount; i++)
             {
                 valves.Add(App.ServiceProvider.GetRequiredService<Valve>());
-                valves[i].Result = Result.Idle;
                 valves[i].OccuredErrorsChanged += Receiver_OccuredErrorsChanged;
                 valves[i].ActiveErrorsChanged += Receiver_ActiveErrorsChanged;
             }
             return ActionStatus.OK;
         }
-
-        private void Receiver_ActiveErrorsChanged(object sender, string errors, int channelNumber)
-        {
-            ActiveErrorsChanged?.Invoke(sender, errors, channelNumber);
-        }
-
-        private void Receiver_OccuredErrorsChanged(object sender, string errors, int channelNumber)
-        {
-            OccuredErrorsChanged?.Invoke(sender, errors, channelNumber);
-        }
-
         public ActionStatus Start(TestSettings testSettings, string valveType)
         {
             ActionStatus actionStatus = ActionStatus.OK;
@@ -72,7 +61,7 @@ namespace Jogger.Valves
             foreach (Valve valve in valves)
             {
                 valve.Start();
-            }      
+            }
             IsTestingDone = false;
             return actionStatus;
         }
@@ -118,6 +107,14 @@ namespace Jogger.Valves
                     break;
                 }
             }
+        }
+        private void Receiver_ActiveErrorsChanged(object sender, string errors, int channelNumber)
+        {
+            ActiveErrorsChanged?.Invoke(sender, errors, channelNumber);
+        }
+        private void Receiver_OccuredErrorsChanged(object sender, string errors, int channelNumber)
+        {
+            OccuredErrorsChanged?.Invoke(sender, errors, channelNumber);
         }
         private void DigitalIO_InputsRead(object sender, string errorCode, byte[] buffer)
         {

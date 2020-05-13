@@ -1,4 +1,5 @@
-﻿using Jogger.Models;
+﻿using Jogger.Drivers;
+using Jogger.Models;
 using Jogger.Services;
 using Jogger.Valves;
 using System;
@@ -11,6 +12,7 @@ namespace Jogger.ViewModels
 {
     public class JoggingViewModel : ObservedObject
     {
+        private readonly IDriver driver;
         readonly ITesterService testerService;
         readonly JoggingModel model = new JoggingModel();
         readonly TestSettings testSettings;
@@ -38,8 +40,9 @@ namespace Jogger.ViewModels
         private ICommand startCommand;
         private ICommand stopCommand;
         private ICommand selectValveType;
-        public JoggingViewModel(ITesterService testerService, IValveManager valveManager, TestSettings testSettings, ConfigurationSettings configurationSettings)
+        public JoggingViewModel(ITesterService testerService, IValveManager valveManager, IDriver driver, TestSettings testSettings, ConfigurationSettings configurationSettings)
         {
+            this.driver = driver;
             this.testerService = testerService;
             this.testSettings = testSettings;
             this.configurationSettings = configurationSettings;
@@ -50,18 +53,13 @@ namespace Jogger.ViewModels
             valveTypes.Add(new ValveModel("6Up", "GM MBM 6UP LIN"));
             //valveTypes.Add(new ValveModel("11Up", "GM 11Up"));
             SelectedType = valveTypes[0];
-            testSettings = TestSettings.GetActual();
-            configurationSettings = ConfigurationSettings.GetActual();
             IsLogInDataSelected = true;
-
-            testerService.ResultChanged += TesterService_ResultEventHandler_Change;
-            testerService.ActiveErrorsChanged += TesterService_ActiveErrorsEventHandler_Change;
-            testerService.OccuredErrorsChanged += TesterService_OccuredErrorsEventHandler_Change;
-
-            testerService.CommunicationLogChanged += TesterService_CommunicationLogEventHandler_Change;
+            valveManager.ActiveErrorsChanged += ValveManager_ActiveErrorsChanged;
+            valveManager.OccuredErrorsChanged += ValveManager_OccuredErrorsChanged;
+            valveManager.ResultChanged += ValveManager_ResultChanged;
             testerService.ProgramStateChanged += TesterService_ProgramStateEventHandler_Change;
+            driver.CommunicationLogChanged += Driver_CommunicationLogChanged;
         }
-
         public bool IsLogInDataSelected
         {
             get { return testSettings.IsLogInDataSelected; }
@@ -77,80 +75,6 @@ namespace Jogger.ViewModels
             get { return testSettings.IsLogTimeoutSelected; }
             set { testSettings.IsLogTimeoutSelected = value; }
         }
-
-        private void TesterService_ProgramStateEventHandler_Change(object sender, ProgramState programState)
-        {
-            CommandManager.InvalidateRequerySuggested();
-        }
-
-        private void TesterService_CommunicationLogEventHandler_Change(object sender, string log)
-        {
-            CommunicationLog = log;
-        }
-
-        private void TesterService_OccuredErrorsEventHandler_Change(object sender, string errors, int channelNumber)
-        {
-            switch (channelNumber)
-            {
-                case 0:
-                    OccuredErrors1 = errors;
-                    break;
-                case 1:
-                    OccuredErrors2 = errors;
-                    break;
-                case 2:
-                    OccuredErrors3 = errors;
-                    break;
-                case 3:
-                    OccuredErrors4 = errors;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void TesterService_ActiveErrorsEventHandler_Change(object sender, string errors, int channelNumber)
-        {
-            switch (channelNumber)
-            {
-                case 0:
-                    ActiveErrors1 = errors;
-                    break;
-                case 1:
-                    ActiveErrors2 = errors;
-                    break;
-                case 2:
-                    ActiveErrors3 = errors;
-                    break;
-                case 3:
-                    ActiveErrors4 = errors;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private void TesterService_ResultEventHandler_Change(object sender, Result result, int channelNumber)
-        {
-            switch (channelNumber)
-            {
-                case 0:
-                    Result1 = result;
-                    break;
-                case 1:
-                    Result2 = result;
-                    break;
-                case 2:
-                    Result3 = result;
-                    break;
-                case 3:
-                    Result4 = result;
-                    break;
-                default:
-                    break;
-            }
-        }
-
         public ICommand InitializeCommand
         {
             get
@@ -188,8 +112,7 @@ namespace Jogger.ViewModels
                     startCommand = new RelayCommand(
                     o =>
                     {
-                        ActionStatus actionStatus = ActionStatus.OK;
-                        //ActionStatus actionStatus = testerService.Start(testSettings);
+                        ActionStatus actionStatus = testerService.Start(testSettings);
                         switch (actionStatus)
                         {
                             case ActionStatus.Error:
@@ -214,7 +137,7 @@ namespace Jogger.ViewModels
                     stopCommand = new RelayCommand(
                     o =>
                     {
-                        //testerService.Stop();
+                        testerService.Stop();
                     },
                     o => testerService.State == ProgramState.Started
                     );
@@ -241,7 +164,7 @@ namespace Jogger.ViewModels
         }
         public Result Result1
         {
-            get {return model.results[0]; }
+            get { return model.results[0]; }
             set { model.results[0] = value; OnPropertyChanged("Result1"); }
         }
         public Result Result2
@@ -303,6 +226,79 @@ namespace Jogger.ViewModels
         {
             get { return model.communicationLog ?? "?"; }
             set { model.communicationLog = value; OnPropertyChanged("CommunicationLog"); }
+        }
+
+        private void ValveManager_ResultChanged(object sender, Result result, int channelNumber)
+        {
+            switch (channelNumber)
+            {
+                case 0:
+                    Result1 = result;
+                    break;
+                case 1:
+                    Result2 = result;
+                    break;
+                case 2:
+                    Result3 = result;
+                    break;
+                case 3:
+                    Result4 = result;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void ValveManager_OccuredErrorsChanged(object sender, string errors, int channelNumber)
+        {
+            switch (channelNumber)
+            {
+                case 0:
+                    OccuredErrors1 = errors;
+                    break;
+                case 1:
+                    OccuredErrors2 = errors;
+                    break;
+                case 2:
+                    OccuredErrors3 = errors;
+                    break;
+                case 3:
+                    OccuredErrors4 = errors;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void ValveManager_ActiveErrorsChanged(object sender, string errors, int channelNumber)
+        {
+            switch (channelNumber)
+            {
+                case 0:
+                    ActiveErrors1 = errors;
+                    break;
+                case 1:
+                    ActiveErrors2 = errors;
+                    break;
+                case 2:
+                    ActiveErrors3 = errors;
+                    break;
+                case 3:
+                    ActiveErrors4 = errors;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void Driver_CommunicationLogChanged(object sender, string log)
+        {
+            CommunicationLog = log;
+        }
+
+        private void TesterService_ProgramStateEventHandler_Change(object sender, ProgramState programState)
+        {
+            CommandManager.InvalidateRequerySuggested();
         }
     }
 }

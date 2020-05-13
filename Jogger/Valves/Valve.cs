@@ -70,7 +70,6 @@ namespace Jogger.Valves
         public bool HasCriticalError { get; private set; }
         public bool HasAnyErrorCodeRead { get; private set; }
         public bool HasReceivedAnyMessage { get; private set; }
-
         protected Dictionary<Int16, string> errorCodes = new Dictionary<Int16, string>();
         static int count = 0;
         public string ActiveErrors { get; set; } = "---";
@@ -106,9 +105,94 @@ namespace Jogger.Valves
             HasReceivedAnyMessage = HasReceivedAnyMessage | dataFromDriver.Contains("RX"); ;
             CheckErrorInData(ref isReadingActiveError, ActiveErrorList, 0x14);
             CheckErrorInData(ref isReadingOccuredError, OccuredErrorList, 0x15);
+            if (IsDone) CheckResult();
             return dataFromDriver;
         }
+        public void CheckResult()
+        {
+            Result result;
+            if (IsStopRequested)
+            {
+                result = Result.Stopped;
+            }
+            else if (!HasReceivedAnyMessage)
+            {
+                result = Result.DoneErrorConnection;
+            }
+            else if (isUntimelyDone)
+            {
+                result = Result.DoneErrorTimeout;
+            }
+            else if (HasCriticalError)
+            {
+                result = Result.DoneErrorCriticalCode;
+            }
+            else
+            {
+                result = Result.DoneOk;
+            }
+            IsDone = false;
 
+        }
+        public async Task<string> ExecuteStep(ulong accessMask)
+        {
+            string message = await Queries[Step].ExecuteStep(driver, accessMask);
+            if (IsStopRequested)
+            {
+                UntimelyFinish();
+            }
+            if (Queries[Step].isDone)
+            {
+                {
+                    bool isStandardProcessingFinished = (Queries[Step].queryType == QueryType.singleExecution) ||
+                        (IsInflated && !IsDeflated && Queries[Step].queryType == QueryType.inflate) ||
+                        (IsDeflated && !IsInflated && Queries[Step].queryType == QueryType.deflate);
+                    Trace.WriteLine($"QueryType {Queries[Step].queryType },Repetition {actualRepetition},Step {Step}, IsInflated {IsInflated}, IsDeflated {IsDeflated}");
+                    if (IsMaxStepTimerDone | (IsMinStepTimerDone & (isStandardProcessingFinished)))
+                    {
+                        Step++;
+                        if (!isStandardProcessingFinished)
+                        {
+                            UntimelyFinish();
+                        }
+                        if (Step >= Queries.Count)
+                        {
+                            RepetitionDone();
+                        }
+                        else
+                        {
+                            switch (Queries[Step].queryType)
+                            {
+                                case QueryType.inflate:
+                                    minStepTimer.Change(Valve.testSettings.ValveMinInflateTime, Timeout.Infinite);
+                                    maxStepTimer.Change(Valve.testSettings.ValveMaxInflateTime, Timeout.Infinite);
+                                    break;
+                                case QueryType.deflate:
+                                    minStepTimer.Change(Valve.testSettings.ValveMinDeflateTime, Timeout.Infinite);
+                                    maxStepTimer.Change(Valve.testSettings.ValveMaxDeflateTime, Timeout.Infinite);
+                                    break;
+                                default:
+                                    minStepTimer.Change(0, Timeout.Infinite);
+                                    maxStepTimer.Change(0, Timeout.Infinite);
+                                    break;
+                            }
+                            IsMinStepTimerDone = false;
+                            IsMaxStepTimerDone = false;
+                        }
+                    }
+                    else
+                    {
+                        Queries[Step].Restart();
+                    }
+                }
+            }
+            queryFinished = Queries[Step].isDone;
+            return (message);
+        }
+        public void WakeUp()
+        {
+            driver.WakeUp();
+        }
         protected bool CheckErrorInData(ref bool isReadingActive, List<string> list, byte errorType)
         {
             bool newErrorListAvailable = false;
@@ -144,7 +228,6 @@ namespace Jogger.Valves
             }
             return newErrorListAvailable;
         }
-
         protected void AddError(List<string> list, byte data0, byte data1)
         {
             HasAnyErrorCodeRead = true;
@@ -160,68 +243,6 @@ namespace Jogger.Valves
                 HasCriticalError = true;
             }
             list.Add(s);
-        }
-
-
-        public async Task<string> ExecuteStep(ulong accessMask)
-        {
-            string message = await Queries[Step].ExecuteStep(driver, accessMask);
-            if (IsStopRequested)
-            {
-                UntimelyFinish();
-            }
-            if (Queries[Step].isDone)
-            {
-                {
-                    bool isStandardProcessingFinished = (Queries[Step].queryType == QueryType.singleExecution) ||
-                        (IsInflated && !IsDeflated && Queries[Step].queryType == QueryType.inflate) ||
-                        (IsDeflated && !IsInflated && Queries[Step].queryType == QueryType.deflate);
-                    Trace.WriteLine($"QueryType {Queries[Step].queryType },Repetition {actualRepetition},Step {Step}, IsInflated {IsInflated}, IsDeflated {IsDeflated}");
-                    if (IsMaxStepTimerDone | (IsMinStepTimerDone & (isStandardProcessingFinished)))
-                    {
-                        Step++;
-                        if (!isStandardProcessingFinished)
-                        {
-                            UntimelyFinish();
-                        }
-                        if (Step >= Queries.Count)
-                        {
-                            RepetitionDone();
-                        }
-                        else
-                        {
-                            switch (Queries[Step].queryType)
-                            {
-                                case QueryType.inflate:
-                                    minStepTimer.Change(valveMinInflateTime, Timeout.Infinite);
-                                    maxStepTimer.Change(valveMaxInflateTime, Timeout.Infinite);
-                                    break;
-                                case QueryType.deflate:
-                                    minStepTimer.Change(valveMinDeflateTime, Timeout.Infinite);
-                                    maxStepTimer.Change(valveMaxDeflateTime, Timeout.Infinite);
-                                    break;
-                                default:
-                                    minStepTimer.Change(0, Timeout.Infinite);
-                                    maxStepTimer.Change(0, Timeout.Infinite);
-                                    break;
-                            }
-                            IsMinStepTimerDone = false;
-                            IsMaxStepTimerDone = false;
-                        }
-                    }
-                    else
-                    {
-                        Queries[Step].Restart();
-                    }
-                }
-            }
-            queryFinished = Queries[Step].isDone;
-            return (message);
-        }
-
-        public void WakeUp()
-        {
-            driver.WakeUp();
         }
         protected void UntimelyFinish()
         {

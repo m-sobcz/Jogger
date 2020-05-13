@@ -6,7 +6,7 @@ namespace Jogger.Models
 {
     public class TestSettings
     {
-        static TestSettings actualSettings;
+
         public bool IsLogInDataSelected { get; set; } = false;
         public bool IsLogOutDataSelected { get; set; } = false;
         public bool IsLogTimeoutSelected { get; set; } = false;
@@ -18,13 +18,6 @@ namespace Jogger.Models
         public int ValveMaxInflateTime { get; set; } = 3000;
         
 
-        public static TestSettings GetActual()
-        {
-            if (actualSettings is null)
-            {
-                actualSettings = new TestSettings();
-            }
-            return actualSettings;
-        }
+
     }
 }

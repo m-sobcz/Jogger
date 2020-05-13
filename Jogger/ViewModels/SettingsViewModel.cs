@@ -12,11 +12,11 @@ namespace Jogger.ViewModels
         readonly TestSettings testSettings;
         readonly ConfigurationSettings configurationSettings;
         public ShowInfo showInfo = new ShowInfo();
-        public SettingsViewModel(ITesterService testerService)
+        public SettingsViewModel(ITesterService testerService,TestSettings testSettings, ConfigurationSettings configurationSettings)
         {
-            testerService = this.testerService;
-            testSettings = TestSettings.GetActual();
-            configurationSettings = ConfigurationSettings.GetActual();
+            this.testerService = testerService;
+            this.testSettings = testSettings;
+            this.configurationSettings = configurationSettings;
             HardwareChannelCount = 3;
             Repetitions = 3;
             ValveMinInflateTime = 200;

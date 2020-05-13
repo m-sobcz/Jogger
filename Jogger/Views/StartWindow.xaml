@@ -56,7 +56,7 @@
                 <MenuItem Header="{StaticResource File}">
                     <MenuItem x:Name="Exit" Header="{StaticResource Exit}" Command="{Binding ClosingCommand}"/>
                 </MenuItem>
-                <MenuItem Header="{StaticResource Jogging}" DataContext="{Binding Source={StaticResource Locator}, Path=JogingViewModel}">
+                <MenuItem Header="{StaticResource Jogging}" DataContext="{Binding Source={StaticResource Locator}, Path=JoggingViewModel}">
                     <MenuItem x:Name="Initialize" Header="{StaticResource Initialize}" Command="{Binding InitializeCommand}"/>
                     <MenuItem x:Name="Start" Header="{StaticResource Start}" Command="{Binding StartCommand}"/>
                     <MenuItem x:Name="Stop" Header="{StaticResource Stop}" Command="{Binding StopCommand}"  />
@@ -65,8 +65,8 @@
                     <MenuItem x:Name="ViewHelp" Header="{StaticResource ViewHelp}" Command="{Binding HelpCommand}"/>
                     <MenuItem x:Name="About" Header="{StaticResource About}" Command="{Binding AboutCommand}"/>
                 </MenuItem>
-                <Button Content="{StaticResource Initialize}"  Width="100" Command="{Binding InitializeCommand}" DataContext="{Binding Source={StaticResource Locator}, Path=JogingViewModel}">
-                </Button>
+                
+
             </Menu>
         </DockPanel>
 

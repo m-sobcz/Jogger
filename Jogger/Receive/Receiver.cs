@@ -41,6 +41,7 @@ namespace Jogger.Receive
                 {
                     errors += s + "\n";
                 }
+                OccuredErrorsChanged?.Invoke(this, errors, parentValve.ChannelNumber);
                 parentValve.OccuredErrors = errors;
             }
         }
