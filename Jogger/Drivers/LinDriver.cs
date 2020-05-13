@@ -188,7 +188,7 @@ namespace Jogger.Drivers
             SetDataLengthControl();
             ActivateChannel();
             SetNotificationAndReadHandle();
-            OnCommunicationLogChanged(InitializeInfo);
+            CommunicationLogChanged?.Invoke(this, InitializeInfo);
             return initializationWithoutErrors ? ActionStatus.OK : ActionStatus.Error;
         }
         bool OpenDriver()
@@ -292,9 +292,6 @@ namespace Jogger.Drivers
         {
             InitializationFailed?.Invoke(this, EventArgs.Empty);
         }
-        void OnCommunicationLogChanged(string data)
-        {
-            CommunicationLogChanged?.Invoke(this, data);
-        }
+
     }
 }

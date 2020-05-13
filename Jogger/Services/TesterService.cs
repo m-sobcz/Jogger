@@ -1,7 +1,7 @@
 ﻿
-using Jogger.Communication;
 using Jogger.Drivers;
 using Jogger.IO;
+using Jogger.Models;
 using Jogger.Valves;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,6 @@ namespace Jogger.Services
     public class TesterService : IDisposable, ITesterService
     {
         private IValveManager valveManager;
-        ICommunication communication;
         IDigitalIO digitalIO;
         IDriver driver;
         ActionStatus actionStatus;
@@ -43,10 +42,9 @@ namespace Jogger.Services
                 OnProgramStateChanged(state);
             }
         }
-        public TesterService(ICommunication communication, IDigitalIO digitalIO, IDriver driver, IValveManager valveManager)
+        public TesterService(IDigitalIO digitalIO, IDriver driver, IValveManager valveManager)
         {
             this.valveManager = valveManager;
-            this.communication = communication;
             this.digitalIO = digitalIO;
             this.driver = driver;
         }
@@ -63,38 +61,35 @@ namespace Jogger.Services
             //communication.ActiveErrorsChanged += OnActiveErrorsChanged;
             //communication.ResultChanged += OnResultChanged;
             //communication.CommunicationLogChanged += OnCommunicationLogChanged;
-            //driver.CommunicationLogChanged += OnCommunicationLogChanged;
+            driver.CommunicationLogChanged += OnCommunicationLogChanged;
             return actionStatus;
         }
         public ActionStatus Start(TestSettings testSettings)//Func<TestSettings, string, ActionStatus> startFunc, 
         {
             State = (ProgramState.Starting);
-            actionStatus = communication.Start(testSettings, ValveType);//startFunc(testSettings, ValveType);
+            actionStatus = valveManager.Start(testSettings, ValveType);//startFunc(testSettings, ValveType);
             if (actionStatus == ActionStatus.OK) State = (ProgramState.Started);
             else State = ProgramState.Error;
             return actionStatus;
         }
         public async Task CommunicationLoop()
         {
-            //communication.SetSequencerAndReceiver(ValveType);
-            //byte[] ioData;
-            //while (true)
-            //{
-            //ioData = 
-            await digitalIO.ReadInputs();
-            await communication.SendData();
-            await Task.WhenAny(communication.ReceiveData(), Task.Delay(5000));
-            //}
+            while (true)
+            {
+                await digitalIO.ReadInputs();
+                await valveManager.SendData();
+                await Task.WhenAny(valveManager.ReceiveData(), Task.Delay(5000));
+                valveManager.SetNextProcessedChannel();
+            }
         }
         public ActionStatus Stop()
         {
-            communication.StopAll();
+            valveManager.Stop();
             State = ProgramState.Idle;
             return ActionStatus.OK;
         }
         public void Dispose()
         {
-            communication?.Dispose();
             digitalIO?.Dispose();
         }
         ActionStatus ActionListStatusToActionStatus(List<ActionStatus> actionList)
@@ -125,7 +120,7 @@ namespace Jogger.Services
         void OnResultChanged(object sender, Result result, int channelNumber)
         {
             ResultChanged?.Invoke(this, result, channelNumber);
-            if (communication.IsTestingDone)
+            if (valveManager.IsTestingDone)
             {
                 state = ProgramState.Done;
             }

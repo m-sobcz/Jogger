@@ -1,4 +1,6 @@
-﻿using Jogger.IO;
+﻿using Jogger.Drivers;
+using Jogger.IO;
+using Jogger.Models;
 using Jogger.Receive;
 using Jogger.Sequence;
 using Jogger.Services;
@@ -9,82 +11,120 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Text;
+using System.Threading.Tasks;
+using static Jogger.Receive.Receiver;
 
 namespace Jogger.Valves
 {
     public class ValveManager : IValveManager
     {
+        int actualProcessedChannel = 0;
+        int previousProcessedChannel = 0;
         public List<Valve> valves = new List<Valve>();
         readonly static string namespacePrefix;
+        private IDriver driver;
         IDigitalIO digitalIO;
+        private TestSettings testSettings;
+
+        public bool IsTestingDone { get; set; } = false;
+        public event CommunicationLogEventHandler CommunicationLogChanged;
+        public delegate void CommunicationLogEventHandler(object sender, string log);
+        public event ErrorsEventHandler ActiveErrorsChanged;
+        public event ErrorsEventHandler OccuredErrorsChanged;
         static ValveManager()
         {
             namespacePrefix = System.Reflection.Assembly.GetExecutingAssembly().EntryPoint.DeclaringType.Namespace;
             namespacePrefix += ".";
         }
-        public ValveManager(IDigitalIO digitalIO)
+        public ValveManager(IDigitalIO digitalIO, IDriver driver)
         {
+            this.driver = driver;
             this.digitalIO = digitalIO;
             digitalIO.InputsRead += DigitalIO_InputsRead;
         }
-        public ActionStatus Initialize(int channelsCount) 
+        public ActionStatus Initialize(int channelsCount)
         {
             for (int i = 0; i < channelsCount; i++)
             {
                 valves.Add(App.ServiceProvider.GetRequiredService<Valve>());
-                valves[i].Result= Result.Idle;
+                valves[i].Result = Result.Idle;
+                valves[i].OccuredErrorsChanged += Receiver_OccuredErrorsChanged;
+                valves[i].ActiveErrorsChanged += Receiver_ActiveErrorsChanged;
             }
             return ActionStatus.OK;
         }
-        void Add(Valve valve)
+
+        private void Receiver_ActiveErrorsChanged(object sender, string errors, int channelNumber)
         {
-            valves.Add(valve);
+            ActiveErrorsChanged?.Invoke(sender, errors, channelNumber);
         }
-        public void SetSequencerType(string valveType)
+
+        private void Receiver_OccuredErrorsChanged(object sender, string errors, int channelNumber)
         {
-            try
-            {
-                Type sequencerType = Type.GetType(namespacePrefix + "Sequence." + nameof(Jogger.Sequence.Sequencer) + valveType, true);
-                foreach (Valve valve in valves)
-                {
-                    valve.Sequencer = Activator.CreateInstance(sequencerType) as ISequencer;
-                    valve.Sequencer.AddAllTestQueries();
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine("SetSequencerType: " + e.Message);
-            }
+            OccuredErrorsChanged?.Invoke(sender, errors, channelNumber);
         }
-        public void SetReceiverType(string valveType)
+
+        public ActionStatus Start(TestSettings testSettings, string valveType)
         {
-            try
+            ActionStatus actionStatus = ActionStatus.OK;
+            this.testSettings = testSettings;
+            Valve.testSettings = testSettings;
+            foreach (Valve valve in valves)
             {
-                Type receiverType = Type.GetType(namespacePrefix + "Receive." + nameof(Jogger.Receive.Receiver) + valveType, true);
-                foreach (Valve valve in valves)
-                {
-                    valve.Receiver = Activator.CreateInstance(receiverType) as IReceiver;
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine("SetReceiverType: " + e.Message);
-            }
+                valve.Start();
+            }      
+            IsTestingDone = false;
+            return actionStatus;
         }
-        public void SetSensorsState(byte[] ioResult)
+        public void Stop()
         {
             foreach (Valve valve in valves)
             {
-                valve.IsInflateSensorOn = (ioResult[0] & (1 << valve.ChannelNumber * 2)) != 0;
-                valve.IsDeflateSensorOn = (ioResult[0] & (1 << valve.ChannelNumber * 2 + 1)) != 0;
+                valve.IsStopRequested = true;
+            }
+        }
+        public async Task SendData()
+        {
+            if (valves[actualProcessedChannel].IsStarted)
+            {
+                string dataToDriver = await valves[actualProcessedChannel].ExecuteStep(driver.MasterMask[actualProcessedChannel]);
+                if (Valve.testSettings.IsLogOutDataSelected)
+                {
+                    CommunicationLogChanged?.Invoke(this, dataToDriver);
+                }
+            }
+        }
+        public async Task ReceiveData()
+        {
+            string dataFromDriver = await valves[actualProcessedChannel].Receive();
+            if (testSettings.IsLogInDataSelected)
+            {
+                CommunicationLogChanged?.Invoke(this, dataFromDriver);
+            }
+        }
+        public void SetNextProcessedChannel()
+        {
+            previousProcessedChannel = actualProcessedChannel;
+            while (true)
+            {
+                actualProcessedChannel++;
+                if (actualProcessedChannel >= valves.Count)
+                {
+                    actualProcessedChannel = 0;
+                }
+                if (valves[actualProcessedChannel].IsStarted |
+                    actualProcessedChannel == previousProcessedChannel)
+                {
+                    break;
+                }
             }
         }
         private void DigitalIO_InputsRead(object sender, string errorCode, byte[] buffer)
         {
             foreach (Valve valve in valves)
             {
-                valve.IsInflateSensorOn = (buffer[0] & (1 << valve.ChannelNumber * 2)) != 0;
-                valve.IsDeflateSensorOn = (buffer[0] & (1 << valve.ChannelNumber * 2 + 1)) != 0;
+                valve.IsInflated = (buffer[0] & (1 << valve.ChannelNumber * 2)) != 0;
+                valve.IsDeflated = (buffer[0] & (1 << valve.ChannelNumber * 2 + 1)) != 0;
             }
         }
     }

@@ -12,6 +12,7 @@ namespace Jogger.Sequence
 {
     public class Sequencer : ISequencer
     {
+        public Valve parentValve { get; set; }
         private readonly Timer minStepTimer;
         private readonly Timer maxStepTimer;
         protected UInt64 accessMask = 0;

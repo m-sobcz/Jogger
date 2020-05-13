@@ -1,4 +1,5 @@
 ﻿using Jogger.Drivers;
+using Jogger.Valves;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,16 +10,49 @@ namespace Jogger.Receive
     public class Receiver : IReceiver
     {
         IDriver driver;
-        public List<string> ActiveErrorList { get; set; } = new List<string>();
-        public List<string> OccuredErrorList { get; set; } = new List<string>();
-        public bool isNewActiveListAvailable { get; private set; }
-        public bool isNewOccuredListAvailable { get; private set; }
+        public event ErrorsEventHandler ActiveErrorsChanged;
+        public event ErrorsEventHandler OccuredErrorsChanged;
+        public delegate void ErrorsEventHandler(object sender, string errors, int channelNumber);
+        private List<string> activeErrorList = new List<string>();
+        private List<string> occuredErrorList = new List<string>();
+        public List<string> ActiveErrorList
+        {
+            get { return activeErrorList; }
+            set
+            {
+                activeErrorList = value;
+                string errors = "";
+                foreach (string s in activeErrorList)
+                {
+                    errors += s + "\n";
+                }
+                ActiveErrorsChanged?.Invoke(this, errors, parentValve.ChannelNumber);
+                parentValve.ActiveErrors = errors;
+            }
+        }
+        public List<string> OccuredErrorList
+        {
+            get { return occuredErrorList; }
+            set
+            {
+                occuredErrorList = value;
+                string errors = "";
+                foreach (string s in occuredErrorList)
+                {
+                    errors += s + "\n";
+                }
+                parentValve.OccuredErrors = errors;
+            }
+        }
+        bool isReadingActiveError;
+        bool isReadingOccuredError;
         public bool HasCriticalError { get; private set; }
         public bool HasAnyErrorCodeRead { get; private set; }
         public bool HasReceivedAnyMessage { get; private set; }
+        public Valve parentValve { get; set; }
+
         protected Dictionary<Int16, string> errorCodes = new Dictionary<Int16, string>();
-        bool isReadingActiveError;
-        bool isReadingOccuredError;
+
         public Receiver()
         {
             byte[] b = new byte[4];
@@ -34,8 +68,8 @@ namespace Jogger.Receive
         {
             string dataFromDriver = await Task<string>.Run(() => driver.Receive());
             HasReceivedAnyMessage = HasReceivedAnyMessage | dataFromDriver.Contains("RX"); ;
-            isNewActiveListAvailable = CheckErrorInData(ref isReadingActiveError, ActiveErrorList, 0x14);
-            isNewOccuredListAvailable = CheckErrorInData(ref isReadingOccuredError, OccuredErrorList, 0x15);
+            CheckErrorInData(ref isReadingActiveError, ActiveErrorList, 0x14);
+            CheckErrorInData(ref isReadingOccuredError, OccuredErrorList, 0x15);
             return dataFromDriver;
         }
 

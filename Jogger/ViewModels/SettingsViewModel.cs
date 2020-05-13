@@ -1,4 +1,5 @@
-﻿using Jogger.Services;
+﻿using Jogger.Models;
+using Jogger.Services;
 using System;
 using System.Collections.Generic;
 using System.Text;

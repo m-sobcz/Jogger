@@ -1,12 +1,18 @@
-﻿using Jogger.Services;
+﻿using Jogger.Models;
+using Jogger.Services;
+using System.Threading.Tasks;
 
 namespace Jogger.Valves
 {
     public interface IValveManager
     {
+        bool IsTestingDone { get; set; }
+
         ActionStatus Initialize(int channelsCount);
-        void SetReceiverType(string valveType);
-        void SetSensorsState(byte[] ioResult);
-        void SetSequencerType(string valveType);
+        Task ReceiveData();
+        Task SendData();
+        void SetNextProcessedChannel();
+        ActionStatus Start(TestSettings testSettings, string valveType);
+        void Stop();
     }
 }

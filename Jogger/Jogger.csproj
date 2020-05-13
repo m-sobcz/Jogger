@@ -7,6 +7,7 @@
     <ApplicationIcon>Resources\kaico13.ico</ApplicationIcon>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>StrongKey.pfx</AssemblyOriginatorKeyFile>
+    <StartupObject>Jogger.App</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

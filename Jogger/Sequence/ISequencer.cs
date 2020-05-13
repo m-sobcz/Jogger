@@ -1,10 +1,12 @@
 ﻿using Jogger.Drivers;
+using Jogger.Valves;
 using System.Threading.Tasks;
 
 namespace Jogger.Sequence
 {
     public interface ISequencer
     {
+        Valve parentValve { get; set; }
         bool IsDeflated { get; set; }
         bool IsDone { get; set; }
         bool IsInflated { get; set; }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jogger.Services
+namespace Jogger.Models
 {
     public class ConfigurationSettings
     {

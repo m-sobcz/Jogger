@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jogger.Services
+namespace Jogger.Models
 {
     public class TestSettings
     {
@@ -16,6 +16,7 @@ namespace Jogger.Services
         public int ValveMinDeflateTime { get; set; } = 200;
         public int ValveMaxDeflateTime { get; set; } = 3000;
         public int ValveMaxInflateTime { get; set; } = 3000;
+        
 
         public static TestSettings GetActual()
         {

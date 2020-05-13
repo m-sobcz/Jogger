@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Jogger.Models;
 using Jogger.Services;
 using Jogger.ViewModels;
-using Jogger.Communication;
+
 using Jogger.IO;
 using System.Diagnostics;
 using Jogger.Views;
@@ -42,7 +42,7 @@ namespace Jogger
             // Build the our IServiceProvider and set our static reference to it
             ServiceProvider = serviceCollection.BuildServiceProvider();
             ServiceProvider.GetRequiredService<TestSettings>();
-            ServiceProvider.GetRequiredService<Services.ConfigurationSettings>();
+            ServiceProvider.GetRequiredService<Models.ConfigurationSettings>();
             StartWindow startWindow = ServiceProvider.GetRequiredService<StartWindow>();
             ServiceProvider.GetRequiredService<MainWindowViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
             //ServiceProvider.GetRequiredService<MainWindowViewModel>();
@@ -59,11 +59,10 @@ namespace Jogger
         private void ConfigureServices(IServiceCollection services)
         {
             services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
-            services.AddScoped<IDriver, DriverStub>();
-            services.AddScoped<Valve>();
             services.AddSingleton<ITesterService, TesterService>();
-            services.AddSingleton<TestSettings>();
-            services.AddSingleton<Services.ConfigurationSettings>();
+            //Models
+            services.AddTransient<TestSettings>();
+            services.AddTransient<Models.ConfigurationSettings>();
             //ViewModels
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<JoggingViewModel>();
@@ -71,9 +70,10 @@ namespace Jogger
             services.AddSingleton<DiagnosticsViewModel>();
             //Views
             services.AddTransient<StartWindow>();
-            //Stubs
-            services.AddScoped<ICommunication, CommunicationStub>();
-            services.AddScoped<IDigitalIO, DigitalIOStub>();
+            //...
+            
+            services.AddScoped<IDigitalIO, Advantech>();
+            services.AddScoped<IDriver, LinDriver>();
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

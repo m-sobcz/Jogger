@@ -15,6 +15,7 @@ namespace Jogger.ViewModels
         readonly JoggingModel model = new JoggingModel();
         readonly TestSettings testSettings;
         readonly ConfigurationSettings configurationSettings;
+        private readonly IValveManager valveManager;
         public ShowInfo showInfo = new ShowInfo();
         ObservableCollection<ValveModel> valveTypes = new ObservableCollection<ValveModel>();
         ValveModel selectedType;
@@ -37,11 +38,12 @@ namespace Jogger.ViewModels
         private ICommand startCommand;
         private ICommand stopCommand;
         private ICommand selectValveType;
-        public JoggingViewModel(ITesterService testerService, TestSettings testSettings, ConfigurationSettings configurationSettings)
+        public JoggingViewModel(ITesterService testerService, IValveManager valveManager, TestSettings testSettings, ConfigurationSettings configurationSettings)
         {
             this.testerService = testerService;
             this.testSettings = testSettings;
             this.configurationSettings = configurationSettings;
+            this.valveManager = valveManager;
             valveTypes.Add(new ValveModel("", "Sprawdzanie obecności"));
             valveTypes.Add(new ValveModel("2Up", "GM MBM 2UP LIN"));
             //valveTypes.Add(new ValveModel("3_5Up", "GM 3,5Up"));
@@ -51,9 +53,11 @@ namespace Jogger.ViewModels
             testSettings = TestSettings.GetActual();
             configurationSettings = ConfigurationSettings.GetActual();
             IsLogInDataSelected = true;
+
             testerService.ResultChanged += TesterService_ResultEventHandler_Change;
             testerService.ActiveErrorsChanged += TesterService_ActiveErrorsEventHandler_Change;
             testerService.OccuredErrorsChanged += TesterService_OccuredErrorsEventHandler_Change;
+
             testerService.CommunicationLogChanged += TesterService_CommunicationLogEventHandler_Change;
             testerService.ProgramStateChanged += TesterService_ProgramStateEventHandler_Change;
         }
