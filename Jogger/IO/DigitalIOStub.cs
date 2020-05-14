@@ -16,6 +16,7 @@ namespace Jogger.IO
         public byte[] ResultData { get; set; }
 
         public event InputsReadEventHandler InputsRead;
+        public event CommunicationLogEventHandler CommunicationLogChanged;
 
         public void Dispose()
         {

@@ -12,6 +12,8 @@ namespace Jogger.IO
         void Dispose();
         ActionStatus Initialize();
         Task<(string, byte[])> ReadInputs();
+        public event CommunicationLogEventHandler CommunicationLogChanged;
+        public delegate void CommunicationLogEventHandler(object sender, string log);
 
     }
 }

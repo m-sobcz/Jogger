@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Jogger.ViewModels
 {
-    public class DiagnosticsViewModel : ObservedObject
+    public class DiagnosticsViewModel : ViewModelBase
     {
         ITesterService testerService;
         IDigitalIO digitalIO;

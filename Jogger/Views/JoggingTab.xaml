@@ -213,5 +213,6 @@
             <Label Content="{StaticResource occuredErrors4}" HorizontalAlignment="Center" Grid.Row="6"/>
             <TextBox Name="occuredErrors4" Text="{Binding OccuredErrors4}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="7" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" />
         </Grid>
+        
     </Grid>
 </UserControl>

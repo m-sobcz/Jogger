@@ -45,6 +45,10 @@ namespace Jogger
             ServiceProvider.GetRequiredService<Models.ConfigurationSettings>();
             StartWindow startWindow = ServiceProvider.GetRequiredService<StartWindow>();
             ServiceProvider.GetRequiredService<MainWindowViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
+            ServiceProvider.GetRequiredService<JoggingViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
+            ServiceProvider.GetRequiredService<SettingsViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
+            ServiceProvider.GetRequiredService<DiagnosticsViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
+
             //ServiceProvider.GetRequiredService<MainWindowViewModel>();
             //startWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
             Trace.WriteLine(MainWindow.DataContext);

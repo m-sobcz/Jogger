@@ -6,12 +6,11 @@ using System.Text;
 
 namespace Jogger.ViewModels
 {
-    public class SettingsViewModel : ObservedObject
+    public class SettingsViewModel : ViewModelBase
     {
         ITesterService testerService;
         readonly TestSettings testSettings;
         readonly ConfigurationSettings configurationSettings;
-        public ShowInfo showInfo = new ShowInfo();
         public SettingsViewModel(ITesterService testerService,TestSettings testSettings, ConfigurationSettings configurationSettings)
         {
             this.testerService = testerService;

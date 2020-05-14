@@ -17,11 +17,14 @@ namespace Jogger.IO
         readonly int startPort = 0;
         readonly int portCount = 1;
         readonly byte[] buffer = new byte[64];
+        string communicationLog = "";
         InstantDiCtrl advantechDIControl = new InstantDiCtrl();
         ErrorCode errorCode = ErrorCode.ErrorUndefined;
         DioPort[] dioPort;
 
         public event InputsReadEventHandler InputsRead;
+        public event CommunicationLogEventHandler CommunicationLogChanged;
+
         public ActionStatus Initialize()
         {
             try
@@ -32,9 +35,9 @@ namespace Jogger.IO
             }
             catch (Exception e)
             {
-                Trace.WriteLine($"Advantech init exception {e.Message} {e.StackTrace}!");
+                CommunicationLogChanged?.Invoke(this, $"Advantech init exception {e.Message}!\n");
             }
-            Trace.WriteLine($"Advantech Init: {errorCode}");
+            CommunicationLogChanged?.Invoke(this, $"Advantech Init: {errorCode}\n");
             return ErrorCodeToActionStatus(errorCode);
         }
         ActionStatus ErrorCodeToActionStatus(ErrorCode errorCode) 
@@ -54,7 +57,7 @@ namespace Jogger.IO
             }
             catch (Exception e)
             {
-                Trace.WriteLine($"Advantech read exception {e.Message} {e.StackTrace}!");
+                CommunicationLogChanged?.Invoke(this, $"Advantech read exception {e.Message} !\n");
             }
             return (errorCode.ToString(), buffer);
         }

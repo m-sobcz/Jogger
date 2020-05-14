@@ -25,7 +25,11 @@
         <conv:ResultToStringConverter x:Key="ResultToStringConverter" />
         <conv:ResultToImageSourceConverter x:Key="ResultToImageSource" />
         <conv:DigitalStateToFillConverter x:Key="DigitalStateToFillConverter" />
+        <conv:ProgramStateToStringConverter x:Key="ProgramStateToStringConverter" />
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <sys:String x:Key="LogInData">Logowanie danych wejściowych</sys:String>
+        <sys:String x:Key="LogOutData">Logowanie danych wyjściowych</sys:String>
+        <sys:String x:Key="LogTimeout">Logowanie Timeout</sys:String>
         <sys:String x:Key="File">_Plik</sys:String>
         <sys:String x:Key="Tools">_Narzędzia</sys:String>
         <sys:String x:Key="Help">P_omoc</sys:String>
@@ -65,26 +69,28 @@
                     <MenuItem x:Name="ViewHelp" Header="{StaticResource ViewHelp}" Command="{Binding HelpCommand}"/>
                     <MenuItem x:Name="About" Header="{StaticResource About}" Command="{Binding AboutCommand}"/>
                 </MenuItem>
-                
+
 
             </Menu>
         </DockPanel>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <DockPanel Name="MiddleSection" DockPanel.Dock="Bottom" Margin="5" DataContext="{Binding Source={StaticResource Locator}, Path=JoggingViewModel}">
+            <DockPanel>
+                <WrapPanel Grid.Row="1" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" DockPanel.Dock="Top">
+                    <CheckBox Name="LogInData" Content="{StaticResource LogInData}" IsChecked="{Binding IsLogInDataSelected}" Margin="5" />
+                    <CheckBox Name="LogOutData" Content="{StaticResource LogOutData}" IsChecked="{Binding IsLogOutDataSelected}" Margin="5"/>
+                    <CheckBox Name="LogTimeout" Content="{StaticResource LogTimeout}" IsChecked="{Binding IsLogTimeoutSelected}" Margin="5"/>
+                </WrapPanel>
+                <Label Content="{Binding ProgramState,  Converter={StaticResource ProgramStateToStringConverter}}" DockPanel.Dock="Bottom" HorizontalAlignment="Right"/>
+                
+                <TextBox Name="CommunicationLog" Text="{Binding CommunicationLog}"  
+                     Background="{DynamicResource {x:Static SystemColors.InfoColor}}" 
+                     Height="200" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" >
+                    <b:Interaction.Behaviors>
+                        <behaviors:TextBoxAutoScroll/>
+                    </b:Interaction.Behaviors>
+                </TextBox>
+            </DockPanel>
+        </DockPanel>
 
         <TabControl DockPanel.Dock="Bottom" Background="Azure" Margin="5">
 

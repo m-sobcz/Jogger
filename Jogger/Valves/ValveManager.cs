@@ -47,7 +47,7 @@ namespace Jogger.Valves
         {
             for (int i = 0; i < channelsCount; i++)
             {
-                valves.Add(App.ServiceProvider.GetRequiredService<Valve>());
+                valves.Add(new Valve(driver));//TOD
                 valves[i].OccuredErrorsChanged += Receiver_OccuredErrorsChanged;
                 valves[i].ActiveErrorsChanged += Receiver_ActiveErrorsChanged;
             }

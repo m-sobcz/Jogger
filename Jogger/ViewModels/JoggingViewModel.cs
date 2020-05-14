@@ -1,4 +1,5 @@
 ﻿using Jogger.Drivers;
+using Jogger.IO;
 using Jogger.Models;
 using Jogger.Services;
 using Jogger.Valves;
@@ -10,15 +11,15 @@ using System.Windows.Input;
 
 namespace Jogger.ViewModels
 {
-    public class JoggingViewModel : ObservedObject
+    public class JoggingViewModel : ViewModelBase
     {
+        private readonly IDigitalIO digitalIO;
         private readonly IDriver driver;
         readonly ITesterService testerService;
         readonly JoggingModel model = new JoggingModel();
         readonly TestSettings testSettings;
         readonly ConfigurationSettings configurationSettings;
         private readonly IValveManager valveManager;
-        public ShowInfo showInfo = new ShowInfo();
         ObservableCollection<ValveModel> valveTypes = new ObservableCollection<ValveModel>();
         ValveModel selectedType;
         public ObservableCollection<ValveModel> ValveTypes
@@ -40,8 +41,11 @@ namespace Jogger.ViewModels
         private ICommand startCommand;
         private ICommand stopCommand;
         private ICommand selectValveType;
-        public JoggingViewModel(ITesterService testerService, IValveManager valveManager, IDriver driver, TestSettings testSettings, ConfigurationSettings configurationSettings)
+        private ProgramState programState;
+
+        public JoggingViewModel(ITesterService testerService, IValveManager valveManager, IDriver driver, TestSettings testSettings, ConfigurationSettings configurationSettings, IDigitalIO digitalIO)
         {
+            this.digitalIO = digitalIO;
             this.driver = driver;
             this.testerService = testerService;
             this.testSettings = testSettings;
@@ -58,8 +62,12 @@ namespace Jogger.ViewModels
             valveManager.OccuredErrorsChanged += ValveManager_OccuredErrorsChanged;
             valveManager.ResultChanged += ValveManager_ResultChanged;
             testerService.ProgramStateChanged += TesterService_ProgramStateEventHandler_Change;
-            driver.CommunicationLogChanged += Driver_CommunicationLogChanged;
+            driver.CommunicationLogChanged += CommunicationLogChanged;
+            digitalIO.CommunicationLogChanged += CommunicationLogChanged;
         }
+
+        
+
         public bool IsLogInDataSelected
         {
             get { return testSettings.IsLogInDataSelected; }
@@ -93,7 +101,9 @@ namespace Jogger.ViewModels
                                     showInfo.Show("Zły parametr inicjalizacji", "Ostrzeżenie");
                                     break;
                                 case ActionStatus.Error:
-                                    showInfo.Show("Inicjalizacja drivera zakończona niepowodzeniem!\n\nSprawdź czy Vector jest podłączony i poprawnie skonfigurowany.\nUruchom aplikację ponownie.", "Błąd");
+                                    showInfo.Show("Inicjalizacja zakończona niepowodzeniem!\n\n" +
+                                        "Sprawdź podłączenie urządzeń oraz informacje zawarte w logu na dole ekranu.\n" +
+                                        "Aplikacja wymaga ponownego uruchomienia.", "Błąd inicjalizacji");
                                     break;
                             }
                         },
@@ -122,7 +132,9 @@ namespace Jogger.ViewModels
                                 break;
                         }
                     },
-                    o => (testerService.State == ProgramState.Initialized | testerService.State == ProgramState.Idle | testerService.State == ProgramState.Done)
+                    o => (testerService.State == ProgramState.Initialized | 
+                    testerService.State == ProgramState.Idle | 
+                    testerService.State == ProgramState.Done)
                     );
                 }
                 return startCommand;
@@ -291,14 +303,20 @@ namespace Jogger.ViewModels
             }
         }
 
-        private void Driver_CommunicationLogChanged(object sender, string log)
+        private void CommunicationLogChanged(object sender, string log)
         {
-            CommunicationLog = log;
+            CommunicationLog += log;
         }
 
         private void TesterService_ProgramStateEventHandler_Change(object sender, ProgramState programState)
         {
+            ProgramState = programState;
             CommandManager.InvalidateRequerySuggested();
+        }
+        public ProgramState ProgramState
+        {
+            get { return programState; }
+            set { programState = value; OnPropertyChanged(nameof(ProgramState)); }
         }
     }
 }

@@ -43,7 +43,7 @@ namespace Jogger.Services
         {
             State = ProgramState.Initializing;
             List<ActionStatus> actionList = new List<ActionStatus>();
-            actionList.Add(digitalIO.Initialize());
+            actionList.Add(digitalIO.Initialize());//show error to user
             actionList.Add(driver.Initialize(configurationSettings.HardwareChannelCount));
             actionList.Add(valveManager.Initialize(configurationSettings.HardwareChannelCount)); 
             actionStatus = ActionListStatusToActionStatus(actionList);
