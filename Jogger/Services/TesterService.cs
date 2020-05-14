@@ -19,7 +19,6 @@ namespace Jogger.Services
         ActionStatus actionStatus;
         ProgramState state = ProgramState.NotInitialized;
         public Result[] results = new Result[4];
-        string communicationLog = "";
         public event ProgramStateEventHandler ProgramStateChanged;
         public delegate void ProgramStateEventHandler(object sender, ProgramState programState);
         public string ValveType { get; set; } = "";
@@ -43,11 +42,12 @@ namespace Jogger.Services
         {
             State = ProgramState.Initializing;
             List<ActionStatus> actionList = new List<ActionStatus>();
-            actionList.Add(digitalIO.Initialize());//show error to user
+            actionList.Add(digitalIO.Initialize());
             actionList.Add(driver.Initialize(configurationSettings.HardwareChannelCount));
-            actionList.Add(valveManager.Initialize(configurationSettings.HardwareChannelCount)); 
+            actionList.Add(valveManager.Initialize(configurationSettings.HardwareChannelCount));
             actionStatus = ActionListStatusToActionStatus(actionList);
             State = (actionStatus == ActionStatus.Error) ? ProgramState.Error : ProgramState.Initialized;
+            if (State == ProgramState.Initialized) _ = CommunicationLoop();
             return actionStatus;
         }
         public ActionStatus Start(TestSettings testSettings)
@@ -55,7 +55,6 @@ namespace Jogger.Services
             State = (ProgramState.Starting);
             actionStatus = valveManager.Start(testSettings, ValveType);//startFunc(testSettings, ValveType);
             if (actionStatus == ActionStatus.OK) State = (ProgramState.Started);
-            else State = ProgramState.Error;
             return actionStatus;
         }
         public async Task CommunicationLoop()
@@ -63,8 +62,9 @@ namespace Jogger.Services
             while (true)
             {
                 await digitalIO.ReadInputs();
-                await valveManager.SendData();
+                if (State == ProgramState.Started) await valveManager.SendData();
                 await Task.WhenAny(valveManager.ReceiveData(), Task.Delay(5000));
+                if (State == ProgramState.Started & valveManager.IsTestingDone) State = ProgramState.Done;
                 valveManager.SetNextProcessedChannel();
             }
         }

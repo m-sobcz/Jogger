@@ -80,7 +80,7 @@
                     <CheckBox Name="LogOutData" Content="{StaticResource LogOutData}" IsChecked="{Binding IsLogOutDataSelected}" Margin="5"/>
                     <CheckBox Name="LogTimeout" Content="{StaticResource LogTimeout}" IsChecked="{Binding IsLogTimeoutSelected}" Margin="5"/>
                 </WrapPanel>
-                <Label Content="{Binding ProgramState,  Converter={StaticResource ProgramStateToStringConverter}}" DockPanel.Dock="Bottom" HorizontalAlignment="Right"/>
+                <Label Content="{Binding ProgramState,  Converter={StaticResource ProgramStateToStringConverter}}" DockPanel.Dock="Bottom" HorizontalAlignment="Right" FontStyle="Italic"/>
                 
                 <TextBox Name="CommunicationLog" Text="{Binding CommunicationLog}"  
                      Background="{DynamicResource {x:Static SystemColors.InfoColor}}" 

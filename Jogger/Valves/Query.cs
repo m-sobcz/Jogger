@@ -22,7 +22,14 @@ namespace Jogger.Valves
         }
         public async Task<string> ExecuteStep(IDriver driver, ulong accessMask)
         {
-            driver.SetSendData(Commands[step].sendData, Commands[step].id, Command.dataLengthCode, accessMask);
+            try
+            {
+               if (!isDone) driver.SetSendData(Commands[step].sendData, Commands[step].id, Command.dataLengthCode, accessMask);
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Trace.WriteLine(e.Message+ e.StackTrace);
+            }
             string message = await Task<string>.Run(() => driver.Send());
             step++;
             if (step >= Commands.Count)

@@ -65,8 +65,8 @@ namespace Jogger
             services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
             services.AddSingleton<ITesterService, TesterService>();
             //Models
-            services.AddTransient<TestSettings>();
-            services.AddTransient<Models.ConfigurationSettings>();
+            services.AddSingleton<TestSettings>();
+            services.AddSingleton<Models.ConfigurationSettings>();
             //ViewModels
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<JoggingViewModel>();

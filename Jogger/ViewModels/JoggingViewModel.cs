@@ -61,27 +61,28 @@ namespace Jogger.ViewModels
             valveManager.ActiveErrorsChanged += ValveManager_ActiveErrorsChanged;
             valveManager.OccuredErrorsChanged += ValveManager_OccuredErrorsChanged;
             valveManager.ResultChanged += ValveManager_ResultChanged;
+            valveManager.CommunicationLogChanged += CommunicationLogChanged;
             testerService.ProgramStateChanged += TesterService_ProgramStateEventHandler_Change;
             driver.CommunicationLogChanged += CommunicationLogChanged;
             digitalIO.CommunicationLogChanged += CommunicationLogChanged;
         }
 
-        
+
 
         public bool IsLogInDataSelected
         {
             get { return testSettings.IsLogInDataSelected; }
-            set { testSettings.IsLogInDataSelected = value; }
+            set { testSettings.IsLogInDataSelected = value; valveManager.SetTestSettings(testSettings); }
         }
         public bool IsLogOutDataSelected
         {
             get { return testSettings.IsLogOutDataSelected; }
-            set { testSettings.IsLogOutDataSelected = value; }
+            set { testSettings.IsLogOutDataSelected = value; valveManager.SetTestSettings(testSettings); }
         }
         public bool IsLogTimeoutSelected
         {
             get { return testSettings.IsLogTimeoutSelected; }
-            set { testSettings.IsLogTimeoutSelected = value; }
+            set { testSettings.IsLogTimeoutSelected = value; valveManager.SetTestSettings(testSettings); }
         }
         public ICommand InitializeCommand
         {
@@ -126,14 +127,15 @@ namespace Jogger.ViewModels
                         switch (actionStatus)
                         {
                             case ActionStatus.Error:
-                                showInfo.Show("Wystąpił problem z załadowaniem wybranego typu !", "Błąd");
+                                showInfo.Show("Wystąpił problem z załadowaniem wybranego typu zaworu!\n\n" +
+                                    "Start testu został zatrzymany.", "Błąd");
                                 break;
                             default:
                                 break;
                         }
                     },
-                    o => (testerService.State == ProgramState.Initialized | 
-                    testerService.State == ProgramState.Idle | 
+                    o => (testerService.State == ProgramState.Initialized |
+                    testerService.State == ProgramState.Idle |
                     testerService.State == ProgramState.Done)
                     );
                 }
@@ -237,7 +239,12 @@ namespace Jogger.ViewModels
         public string CommunicationLog
         {
             get { return model.communicationLog ?? "?"; }
-            set { model.communicationLog = value; OnPropertyChanged("CommunicationLog"); }
+            set
+            {
+                if (model.communicationLog.Length > 10000) model.communicationLog = model.communicationLog.Substring(2000);
+                model.communicationLog += value;
+                OnPropertyChanged("CommunicationLog");
+            }
         }
 
         private void ValveManager_ResultChanged(object sender, Result result, int channelNumber)
@@ -305,7 +312,7 @@ namespace Jogger.ViewModels
 
         private void CommunicationLogChanged(object sender, string log)
         {
-            CommunicationLog += log;
+            CommunicationLog = log;
         }
 
         private void TesterService_ProgramStateEventHandler_Change(object sender, ProgramState programState)

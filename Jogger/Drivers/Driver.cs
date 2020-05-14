@@ -12,7 +12,7 @@ namespace Jogger.Drivers
 {
     public class Driver : IDriver
     {
-        readonly XLDefine.XL_LIN_CalcChecksum calcChecksumType;
+        XLDefine.XL_LIN_CalcChecksum calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;
         private  ConfigurationSettings configurationSettings;
         readonly XLDefine.XL_LIN_Mode linMode;
         readonly XLDefine.XL_LIN_Version linVersion;
@@ -32,7 +32,7 @@ namespace Jogger.Drivers
         public ulong[] MasterMask { get; set; }
         byte dataLengthCode = 2;
         readonly XLDriver driver = new XLDriver();
-        readonly String applicationName = "KA Tester";
+        readonly String applicationName = "Jogger";
         XLClass.xl_driver_config driverConfig = new XLClass.xl_driver_config();
         public ulong SlaveMask { get; } = 0;
         int portHandle = -1;
@@ -41,11 +41,13 @@ namespace Jogger.Drivers
         XLDefine.XL_Status status;
         private bool initializationWithoutErrors;
 
-        public Driver(ConfigurationSettings configurationSettings, XLDefine.XL_LIN_Version linVersion = XLDefine.XL_LIN_Version.XL_LIN_VERSION_2_0, XLDefine.XL_LIN_Mode linMode = XLDefine.XL_LIN_Mode.XL_LIN_MASTER, XLDefine.XL_LIN_CalcChecksum calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM, byte zeroSize = 8, byte otherSize = 8)
+        public Driver(ConfigurationSettings configurationSettings)
         {
-            this.linVersion = linVersion;
-            this.linMode = linMode;
-            this.calcChecksumType = calcChecksumType;
+            byte zeroSize = 8;
+            byte otherSize = 8;
+            this.linVersion = XLDefine.XL_LIN_Version.XL_LIN_VERSION_2_0;
+            this.linMode = XLDefine.XL_LIN_Mode.XL_LIN_MASTER;
+            this.calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;
             this.configurationSettings = configurationSettings;
             DLC[0] = zeroSize;
             for (int i = 1; i < 63; i++)
@@ -61,7 +63,7 @@ namespace Jogger.Drivers
             {
                 linData[i] = data[i];
             }
-
+            
             if (!isReceivingData)
             {
                 SetLinSlave(accessMask);
@@ -77,7 +79,7 @@ namespace Jogger.Drivers
         {
             XLDefine.XL_Status status;
             status = driver.XL_LinSendRequest(portHandle, currentAccessMask, linSlaveId, 0);
-            string message = "linSlaveId: " + linSlaveId + ", accessMask: " + currentAccessMask + " data ";
+            string message = "linSlaveId: " + linSlaveId + ", accessMask: " + currentAccessMask + " data " + "porthHandle " + portHandle;
             foreach (byte b in linData)
             {
                 message += b.ToString().PadLeft(4) + "   ";
@@ -235,7 +237,9 @@ namespace Jogger.Drivers
         }
         bool SetLinSlave(UInt64 accessMask)
         {
+            calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;
             status = driver.XL_LinSetSlave(portHandle, accessMask, linSlaveId, linData, dataLengthCode, calcChecksumType);
+            Trace.WriteLine($"portHandle {portHandle} accessMask {accessMask} linSlaveId {linSlaveId} dataLengthCode {dataLengthCode} calcChecksumType {calcChecksumType}");
             return DriverAction("Set Lin Slave", status, false);
         }
         bool ActivateChannel()

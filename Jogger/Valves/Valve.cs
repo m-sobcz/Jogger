@@ -1,7 +1,5 @@
 ﻿using Jogger.Drivers;
 using Jogger.Models;
-using Jogger.Receive;
-using Jogger.Sequence;
 using Jogger.Services;
 using System;
 using System.Collections.Generic;
@@ -29,7 +27,8 @@ namespace Jogger.Valves
         bool IsMinStepTimerDone { get; set; } = false;
         bool IsMaxStepTimerDone { get; set; } = false;
         protected IDriver driver;
-        List<Query> Queries = new List<Query>();
+        public List<Query> Queries = new List<Query>();
+        public Dictionary<Int16, string> errorCodes = new Dictionary<Int16, string>();
         private int actualRepetition;
         public bool IsStopRequested { get; set; }
         public event ErrorsEventHandler ActiveErrorsChanged;
@@ -70,7 +69,7 @@ namespace Jogger.Valves
         public bool HasCriticalError { get; private set; }
         public bool HasAnyErrorCodeRead { get; private set; }
         public bool HasReceivedAnyMessage { get; private set; }
-        protected Dictionary<Int16, string> errorCodes = new Dictionary<Int16, string>();
+        
         static int count = 0;
         public string ActiveErrors { get; set; } = "---";
         public string OccuredErrors { get; set; } = "---";
@@ -92,12 +91,20 @@ namespace Jogger.Valves
             this.driver = driver;
             minStepTimer = new Timer(new TimerCallback((o) => IsMinStepTimerDone = true), null, 0, Timeout.Infinite);
             maxStepTimer = new Timer(new TimerCallback((o) => IsMaxStepTimerDone = true), null, 0, Timeout.Infinite);
-            byte[] b = new byte[4];
-            b[0] = 0x00;
-            b[1] = 0x00;
-            errorCodes.Add(BitConverter.ToInt16(b, 0), "<no error>");
             ChannelNumber = count;
             count++;
+        }
+        public void Start()
+        {
+            HasReceivedAnyMessage = false;
+            HasAnyErrorCodeRead = false;
+            HasCriticalError = false;
+            IsStopRequested = false;
+            isUntimelyDone = false;
+            IsStarted = true;
+            Result = Result.Testing;
+            ActiveErrors = "...";
+            OccuredErrors = "...";
         }
         public async Task<string> Receive()
         {
@@ -110,26 +117,25 @@ namespace Jogger.Valves
         }
         public void CheckResult()
         {
-            Result result;
             if (IsStopRequested)
             {
-                result = Result.Stopped;
+                Result = Result.Stopped;
             }
             else if (!HasReceivedAnyMessage)
             {
-                result = Result.DoneErrorConnection;
+                Result = Result.DoneErrorConnection;
             }
             else if (isUntimelyDone)
             {
-                result = Result.DoneErrorTimeout;
+                Result = Result.DoneErrorTimeout;
             }
             else if (HasCriticalError)
             {
-                result = Result.DoneErrorCriticalCode;
+                Result = Result.DoneErrorCriticalCode;
             }
             else
             {
-                result = Result.DoneOk;
+                Result = Result.DoneOk;
             }
             IsDone = false;
 
@@ -267,17 +273,6 @@ namespace Jogger.Valves
                 query.Restart();
             }
         }
-        public void Start()
-        {
-            HasReceivedAnyMessage = false;
-            HasAnyErrorCodeRead = false;
-            HasCriticalError = false;
-            IsStopRequested = false;
-            isUntimelyDone = false;
-            IsStarted = true;
-            Result = Result.Testing;
-            ActiveErrors = "...";
-            OccuredErrors = "...";
-        }
+        
     }
 }

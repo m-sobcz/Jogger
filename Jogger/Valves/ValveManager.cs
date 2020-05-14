@@ -1,9 +1,8 @@
 ﻿using Jogger.Drivers;
 using Jogger.IO;
 using Jogger.Models;
-using Jogger.Receive;
-using Jogger.Sequence;
 using Jogger.Services;
+using Jogger.ValveTypes;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.Text;
 using System.Threading.Tasks;
-using static Jogger.Receive.Receiver;
+using static Jogger.Valves.IValveManager;
 
 namespace Jogger.Valves
 {
@@ -26,22 +25,25 @@ namespace Jogger.Valves
         IDigitalIO digitalIO;
         private TestSettings testSettings;
         public bool IsTestingDone { get; set; } = false;
-        public event CommunicationLogEventHandler CommunicationLogChanged;
-        public delegate void CommunicationLogEventHandler(object sender, string log);
+        public event CommunicationLogEventHandler CommunicationLogChanged;      
         public event ErrorsEventHandler ActiveErrorsChanged;
         public event ErrorsEventHandler OccuredErrorsChanged;
         public event ResultEventHandler ResultChanged;
-        public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
         static ValveManager()
         {
             namespacePrefix = System.Reflection.Assembly.GetExecutingAssembly().EntryPoint.DeclaringType.Namespace;
             namespacePrefix += ".";
         }
-        public ValveManager(IDigitalIO digitalIO, IDriver driver)
+        public ValveManager(IDigitalIO digitalIO, IDriver driver, TestSettings testSettings)
         {
+            this.testSettings = testSettings;
             this.driver = driver;
             this.digitalIO = digitalIO;
             digitalIO.InputsRead += DigitalIO_InputsRead;
+        }
+        public void SetTestSettings(TestSettings testSettings) 
+        {
+            this.testSettings = testSettings;
         }
         public ActionStatus Initialize(int channelsCount)
         {
@@ -50,20 +52,52 @@ namespace Jogger.Valves
                 valves.Add(new Valve(driver));//TOD
                 valves[i].OccuredErrorsChanged += Receiver_OccuredErrorsChanged;
                 valves[i].ActiveErrorsChanged += Receiver_ActiveErrorsChanged;
+                valves[i].ResultChanged += ValveManager_ResultChanged;
             }
             return ActionStatus.OK;
         }
-        public ActionStatus Start(TestSettings testSettings, string valveType)
+        private void ValveManager_ResultChanged(object sender, Result result, int channelNumber)
         {
-            ActionStatus actionStatus = ActionStatus.OK;
-            this.testSettings = testSettings;
-            Valve.testSettings = testSettings;
+            bool testDoneCheck = true;
             foreach (Valve valve in valves)
             {
-                valve.Start();
+                if (valve.Result == Result.Idle | valve.Result == Result.Testing) testDoneCheck = false;
             }
-            IsTestingDone = false;
-            return actionStatus;
+            IsTestingDone = testDoneCheck;
+            ResultChanged?.Invoke(sender, result, channelNumber);
+        }
+        public ActionStatus Start(TestSettings testSettings, string valveTypeTxt)
+        {
+            this.testSettings = testSettings;
+            Valve.testSettings = testSettings;
+            ValveType valveType = GetValveType(valveTypeTxt);
+            if (valveType is null) return ActionStatus.Error;
+            else
+            {
+                foreach (Valve valve in valves)
+                {
+                    valve.Queries = valveType.queryList;
+                    valve.errorCodes = valveType.errorCodes;
+                    valve.Start();
+                }
+                IsTestingDone = false;
+                return ActionStatus.OK;
+            }
+        }
+        ValveType GetValveType(string valveTypeTxt)
+        {
+            string namespacePrefix = System.Reflection.Assembly.GetExecutingAssembly().EntryPoint.DeclaringType.Namespace;
+
+            Type valveType = Type.GetType(namespacePrefix + ".ValveTypes.ValveType" + valveTypeTxt, false);
+            if (valveType is null)
+            {
+                Trace.WriteLine("ValveType could not be created !");
+                return null;
+            }
+            else
+            {
+                return Activator.CreateInstance(valveType) as ValveType;
+            }
         }
         public void Stop()
         {
@@ -79,16 +113,16 @@ namespace Jogger.Valves
                 string dataToDriver = await valves[actualProcessedChannel].ExecuteStep(driver.MasterMask[actualProcessedChannel]);
                 if (Valve.testSettings.IsLogOutDataSelected)
                 {
-                    CommunicationLogChanged?.Invoke(this, dataToDriver);
+                    CommunicationLogChanged?.Invoke(this, dataToDriver+"\n");
                 }
             }
         }
         public async Task ReceiveData()
         {
             string dataFromDriver = await valves[actualProcessedChannel].Receive();
-            if (testSettings.IsLogInDataSelected)
+            if (testSettings.IsLogInDataSelected &(testSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
             {
-                CommunicationLogChanged?.Invoke(this, dataFromDriver);
+                CommunicationLogChanged?.Invoke(this, dataFromDriver+"\n");
             }
         }
         public void SetNextProcessedChannel()
