@@ -1,4 +1,4 @@
-﻿<Window x:Class="Jogger.Views.StartWindow"
+﻿<Window x:Class="Jogger.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -56,7 +56,7 @@
 
     <DockPanel>
         <DockPanel Name="TopMenu" DockPanel.Dock="Top">
-            <Menu Width="Auto" Height="Auto" DockPanel.Dock="Top">
+            <Menu  Height="Auto" DockPanel.Dock="Top" HorizontalAlignment="Left">
                 <MenuItem Header="{StaticResource File}">
                     <MenuItem x:Name="Exit" Header="{StaticResource Exit}" Command="{Binding ClosingCommand}"/>
                 </MenuItem>
@@ -70,6 +70,7 @@
                     <MenuItem x:Name="About" Header="{StaticResource About}" Command="{Binding AboutCommand}"/>
                 </MenuItem>
 
+                
 
             </Menu>
         </DockPanel>

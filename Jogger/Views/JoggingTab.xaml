@@ -122,7 +122,7 @@
 
             </WrapPanel>
             <WrapPanel Orientation="Vertical" Grid.Row="1" Margin="5" HorizontalAlignment="Center">
-
+                <Button Content="{StaticResource Initialize}" Height="50" Width="100" Command="{Binding InitializeCommand}"  Margin="5"/>
                 <ListView ItemsSource="{Binding ValveTypes}" SelectedItem="{Binding SelectedType}"  >
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="SelectionChanged">

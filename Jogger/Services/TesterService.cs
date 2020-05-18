@@ -54,7 +54,7 @@ namespace Jogger.Services
         {
             State = (ProgramState.Starting);
             actionStatus = valveManager.Start(testSettings, ValveType);//startFunc(testSettings, ValveType);
-            if (actionStatus == ActionStatus.OK) State = (ProgramState.Started);
+            State = (actionStatus == ActionStatus.OK) ? ProgramState.Started : ProgramState.Idle;
             return actionStatus;
         }
         public async Task CommunicationLoop()

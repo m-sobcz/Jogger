@@ -33,8 +33,8 @@ namespace Jogger
         protected override void OnStartup(StartupEventArgs e)
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
-               .SetBasePath(Directory.GetCurrentDirectory())
-               .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+      .SetBasePath(Directory.GetCurrentDirectory())
+      .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             Configuration = builder.Build();
             ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
@@ -45,7 +45,7 @@ namespace Jogger
             ServiceProvider.GetRequiredService<SettingsViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
             ServiceProvider.GetRequiredService<DiagnosticsViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
 
-            ServiceProvider.GetRequiredService<StartWindow>().Show();
+            ServiceProvider.GetRequiredService<MainWindow>().Show();
         }
 
         private void ShowInfo_ShowInformation(object sender, string text, string caption)
@@ -66,7 +66,7 @@ namespace Jogger
             services.AddSingleton<SettingsViewModel>();
             services.AddSingleton<DiagnosticsViewModel>();
             //Views
-            services.AddTransient<StartWindow>();
+            services.AddTransient<MainWindow>();
             //Logic
             services.AddScoped<IValveManager, ValveManager>();
             services.AddScoped<IDigitalIO, Advantech>();
