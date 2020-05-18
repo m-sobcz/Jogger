@@ -36,23 +36,16 @@ namespace Jogger
                .SetBasePath(Directory.GetCurrentDirectory())
                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             Configuration = builder.Build();
-            // Create a service collection and configure our dependencies
             ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
-            // Build the our IServiceProvider and set our static reference to it
             ServiceProvider = serviceCollection.BuildServiceProvider();
-            ServiceProvider.GetRequiredService<TestSettings>();
-            ServiceProvider.GetRequiredService<Models.ConfigurationSettings>();
-            StartWindow startWindow = ServiceProvider.GetRequiredService<StartWindow>();
+
             ServiceProvider.GetRequiredService<MainWindowViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
             ServiceProvider.GetRequiredService<JoggingViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
             ServiceProvider.GetRequiredService<SettingsViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
             ServiceProvider.GetRequiredService<DiagnosticsViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
 
-            //ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            //startWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            Trace.WriteLine(MainWindow.DataContext);
-            startWindow.Show();
+            ServiceProvider.GetRequiredService<StartWindow>().Show();
         }
 
         private void ShowInfo_ShowInformation(object sender, string text, string caption)

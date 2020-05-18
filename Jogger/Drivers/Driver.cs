@@ -12,7 +12,7 @@ namespace Jogger.Drivers
 {
     public class Driver : IDriver
     {
-        XLDefine.XL_LIN_CalcChecksum calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;
+        XLDefine.XL_LIN_CalcChecksum calcChecksumType;
         private  ConfigurationSettings configurationSettings;
         readonly XLDefine.XL_LIN_Mode linMode;
         readonly XLDefine.XL_LIN_Version linVersion;
@@ -46,7 +46,7 @@ namespace Jogger.Drivers
             byte zeroSize = 8;
             byte otherSize = 8;
             this.linVersion = XLDefine.XL_LIN_Version.XL_LIN_VERSION_2_0;
-            this.linMode = XLDefine.XL_LIN_Mode.XL_LIN_MASTER;
+            this.linMode = XLDefine.XL_LIN_Mode.XL_LIN_MASTER;        
             this.calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;
             this.configurationSettings = configurationSettings;
             DLC[0] = zeroSize;
@@ -237,9 +237,8 @@ namespace Jogger.Drivers
         }
         bool SetLinSlave(UInt64 accessMask)
         {
-            calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;
+            calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;//WTF
             status = driver.XL_LinSetSlave(portHandle, accessMask, linSlaveId, linData, dataLengthCode, calcChecksumType);
-            Trace.WriteLine($"portHandle {portHandle} accessMask {accessMask} linSlaveId {linSlaveId} dataLengthCode {dataLengthCode} calcChecksumType {calcChecksumType}");
             return DriverAction("Set Lin Slave", status, false);
         }
         bool ActivateChannel()
