@@ -13,11 +13,10 @@ namespace Jogger.IO
     public class Advantech : IDigitalIO
     {
         readonly string deviceDescription = "USB-4761,BID#0";//z device manager
-        readonly string profilePath = "../../Resources/staticDi4761.xml";
+        readonly string profilePath = "../../../Resources/staticDi4761.xml"; 
         readonly int startPort = 0;
         readonly int portCount = 1;
         readonly byte[] buffer = new byte[64];
-        string communicationLog = "";
         InstantDiCtrl advantechDIControl = new InstantDiCtrl();
         ErrorCode errorCode = ErrorCode.ErrorUndefined;
         DioPort[] dioPort;

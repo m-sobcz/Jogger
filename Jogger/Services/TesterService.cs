@@ -63,7 +63,7 @@ namespace Jogger.Services
             {
                 await digitalIO.ReadInputs();
                 if (State == ProgramState.Started) await valveManager.SendData();
-                await Task.WhenAny(valveManager.ReceiveData(), Task.Delay(5000));
+                await Task.WhenAny(valveManager.ReceiveData(), Task.Delay(1000));
                 if (State == ProgramState.Started & valveManager.IsTestingDone) State = ProgramState.Done;
                 valveManager.SetNextProcessedChannel();
             }
