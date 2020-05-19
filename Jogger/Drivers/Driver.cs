@@ -49,7 +49,6 @@ namespace Jogger.Drivers
             this.linVersion = XLDefine.XL_LIN_Version.XL_LIN_VERSION_2_0;
             this.linMode = XLDefine.XL_LIN_Mode.XL_LIN_MASTER;        
             this.calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;
-            this.intCalcChecksumType=(int)XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;
             this.configurationSettings = configurationSettings;
             DLC[0] = zeroSize;
             for (int i = 1; i < 63; i++)

@@ -20,8 +20,8 @@ namespace Jogger.ViewModels
             Repetitions = 3;
             ValveMinInflateTime = 200;
             ValveMinDeflateTime = 200;
-            ValveMaxDeflateTime = 3000;
-            ValveMaxInflateTime = 3000;
+            ValveMaxDeflateTime = 30000;
+            ValveMaxInflateTime = 30000;
             testerService.ProgramStateChanged += TesterService_ProgramStateEventHandler_Change;
         }
 
