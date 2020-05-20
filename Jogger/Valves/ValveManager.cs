@@ -129,14 +129,7 @@ namespace Jogger.Valves
                 CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
             }
             bool allChannelsDone = false;
-            if (valves[actualProcessedChannel].canSetNextProcessedChannel)
-            {
-                valves[actualProcessedChannel].canSetNextProcessedChannel = false;
-                int previousProcessedChannel = actualProcessedChannel;
-                
-            }
-            //allChannelsDone = SetNextProcessedChannel();
-            //Trace.WriteLine($"Setting next channel: previous {previousProcessedChannel}, actual {actualProcessedChannel}");
+                  
             return allChannelsDone;
         }
         public bool SetNextProcessedChannel()
