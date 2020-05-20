@@ -71,6 +71,7 @@ namespace Jogger
             services.AddSingleton<IValveManager, ValveManager>();
             services.AddSingleton<IDigitalIO, Advantech>();
             services.AddSingleton<IDriver, Driver>();
+
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
