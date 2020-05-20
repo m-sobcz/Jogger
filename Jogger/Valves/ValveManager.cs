@@ -111,7 +111,7 @@ namespace Jogger.Valves
             if (valves[actualProcessedChannel].IsStarted) // If query done go to next channel
             {
                 Trace.WriteLine($"actualProcessedChannel: {actualProcessedChannel} driver mask {driver.MasterMask[actualProcessedChannel]}");
-                string dataToDriver = await valves[actualProcessedChannel].ExecuteStep(driver.MasterMask[actualProcessedChannel]);
+                string dataToDriver = await valves[actualProcessedChannel].ExecuteStep();
                 if (Valve.testSettings.IsLogOutDataSelected)
                 {
                     CommunicationLogChanged?.Invoke(this, dataToDriver + "\n");
@@ -119,33 +119,43 @@ namespace Jogger.Valves
             }
 
         }
-        public async Task ReceiveData()
+        public async Task<bool> ReceiveData()
         {
             string dataFromDriver = await valves[actualProcessedChannel].Receive();
             if (testSettings.IsLogInDataSelected & (testSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
             {
                 CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
             }
-            SetNextProcessedChannel();
+            bool allChannelsDone = false;
+            if (valves[actualProcessedChannel].canSetNextProcessedChannel)
+            {
+                allChannelsDone = SetNextProcessedChannel();
+            }
+            return allChannelsDone;
         }
-        public void SetNextProcessedChannel()
+        public bool SetNextProcessedChannel()
         {
-                previousProcessedChannel = actualProcessedChannel;
-                while (true)
+            bool allChannelsDone = false;
+            previousProcessedChannel = actualProcessedChannel;
+            while (true)
+            {
+                actualProcessedChannel++;
+                if (actualProcessedChannel >= valves.Count)
                 {
-                    actualProcessedChannel++;
-                    if (actualProcessedChannel >= valves.Count)
-                    {
-                        actualProcessedChannel = 0;
-                    }
-                    if (valves[actualProcessedChannel].IsStarted |
-                        actualProcessedChannel == previousProcessedChannel)
-                    {
-                        break;
-                    }
+                    actualProcessedChannel = 0;
                 }
-                valves[actualProcessedChannel].queryFinished = false;
-            
+                if (valves[actualProcessedChannel].IsStarted)
+                {
+                    break;
+                }
+                if (actualProcessedChannel == previousProcessedChannel)
+                {
+                    allChannelsDone = true;
+                    break;
+                }
+            }
+            valves[actualProcessedChannel].queryFinished = false;
+            return allChannelsDone;
         }
         private void Receiver_ActiveErrorsChanged(object sender, string errors, int channelNumber)
         {

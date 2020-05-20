@@ -12,7 +12,7 @@ namespace Jogger.Drivers
         uint hardwareIndex = 0;
         uint hardwareChannel = 0;
         readonly int numberOfChannels;
-        public UInt64[] accessMaskMaster;
+        public ulong[] accessMaskMaster;
         public int[] channelIndex;
         XLDefine.XL_HardwareType hwType = XLDefine.XL_HardwareType.XL_HWTYPE_NONE;
         readonly String applicationName;
@@ -24,7 +24,7 @@ namespace Jogger.Drivers
             this.driverConfig = driverConfig;
             this.applicationName = applicationName;
             this.numberOfChannels = numberOfChannels;
-            this.accessMaskMaster = new UInt64[numberOfChannels];
+            this.accessMaskMaster = new ulong[numberOfChannels];
             this.channelIndex = new int[numberOfChannels];
         }
         public XLDefine.XL_Status SetConfiguration()

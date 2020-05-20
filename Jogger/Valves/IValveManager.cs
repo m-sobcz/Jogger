@@ -17,9 +17,8 @@ namespace Jogger.Valves
         
 
         ActionStatus Initialize(int channelsCount);
-        Task ReceiveData();
+        Task<bool> ReceiveData();
         Task SendData();
-        void SetNextProcessedChannel();
         ActionStatus Start(TestSettings testSettings, string valveType);
         void Stop();
         void SetTestSettings(TestSettings testSettings);

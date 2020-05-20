@@ -56,5 +56,10 @@ namespace Jogger.Drivers
         {
             throw new NotImplementedException();
         }
+
+        public void SetSendData(byte[] data, byte id, byte dataLengthCode, int channelNumber)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

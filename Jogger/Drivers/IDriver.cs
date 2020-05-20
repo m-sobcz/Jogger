@@ -17,7 +17,7 @@ namespace Jogger.Drivers
         void OnInitializationFailed();
         string Receive();
         string Send();
-        void SetSendData(byte[] data, byte id, byte dataLengthCode, ulong accessMask);
+        void SetSendData(byte[] data, byte id, byte dataLengthCode, int channelNumber);
         bool WakeUp();
     }
 }

@@ -20,11 +20,11 @@ namespace Jogger.Valves
         {
             Commands.Add(command);
         }
-        public async Task<string> ExecuteStep(IDriver driver, ulong accessMask)
+        public async Task<string> ExecuteStep(IDriver driver, int channelNumber)
         {
             try
             {
-               if (!isDone) driver.SetSendData(Commands[step].sendData, Commands[step].id, Command.dataLengthCode, accessMask);
+               if (!isDone) driver.SetSendData(Commands[step].sendData, Commands[step].id, Command.dataLengthCode, channelNumber);
             }
             catch (Exception e)
             {

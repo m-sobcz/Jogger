@@ -16,7 +16,7 @@ namespace Jogger.Valves
         public static TestSettings testSettings;
         private readonly Timer minStepTimer;
         private readonly Timer maxStepTimer;
-        protected UInt64 accessMask = 0;
+        protected uint accessMask = 0;
         public bool queryFinished;
         protected int Step { get; set; }
         public bool IsStarted { get; set; }
@@ -142,9 +142,9 @@ namespace Jogger.Valves
             IsDone = false;
 
         }
-        public async Task<string> ExecuteStep(ulong accessMask)
+        public async Task<string> ExecuteStep()
         {
-            string message = await Queries[Step].ExecuteStep(driver, accessMask);
+            string message = await Queries[Step].ExecuteStep(driver, ChannelNumber);
             if (IsStopRequested)
             {
                 UntimelyFinish();

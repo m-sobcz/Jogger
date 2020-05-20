@@ -29,16 +29,16 @@ namespace Jogger.Drivers
         readonly byte[] DLC = new byte[64];
         readonly byte[] linData = new byte[8];
         public byte[] ReceivedData { get; set; } = new byte[8];
-        UInt64 currentAccessMask = 0;
+        ulong currentAccessMask = 0;
         public ulong[] MasterMask { get; set; }
         byte dataLengthCode = 2;
         readonly XLDriver driver = new XLDriver();
-        readonly String applicationName = "Jogger";
+        readonly string applicationName = "Jogger";
         XLClass.xl_driver_config driverConfig = new XLClass.xl_driver_config();
         public ulong SlaveMask { get; } = 0;
         int portHandle = -1;
         int eventHandle = -1;
-        UInt64 permissionMask = 0;
+        ulong permissionMask = 0;
         XLDefine.XL_Status status;
         private bool initializationWithoutErrors;
 
@@ -55,8 +55,9 @@ namespace Jogger.Drivers
             { DLC[i] = otherSize; }
             DLC[60] = zeroSize;
         }
-        public void SetSendData(byte[] data, byte id, byte dataLengthCode, UInt64 accessMask)
+        public void SetSendData(byte[] data, byte id, byte dataLengthCode, int channelNumber)
         {
+            ulong accessMask = MasterMask[channelNumber];
             linSlaveId = id;
             bool isReceivingData = (id % 2 == 1);
             this.dataLengthCode = dataLengthCode;
