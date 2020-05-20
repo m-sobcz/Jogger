@@ -13,7 +13,6 @@ namespace Jogger.Drivers
     public class Driver : IDriver
     {
         XLDefine.XL_LIN_CalcChecksum calcChecksumType;
-        int intCalcChecksumType;
         private  ConfigurationSettings configurationSettings;
         readonly XLDefine.XL_LIN_Mode linMode;
         readonly XLDefine.XL_LIN_Version linVersion;
@@ -41,7 +40,6 @@ namespace Jogger.Drivers
         ulong permissionMask = 0;
         XLDefine.XL_Status status;
         private bool initializationWithoutErrors;
-
         public Driver(ConfigurationSettings configurationSettings)
         {
             byte zeroSize = 8;
@@ -87,7 +85,7 @@ namespace Jogger.Drivers
                 message += b.ToString().PadLeft(4) + "   ";
             }
             message += ": " + status.ToString();
-            DriverAction(message, status, false);
+          DriverAction(message, status, false);
             return message;
         }
         public string Receive()
@@ -145,7 +143,7 @@ namespace Jogger.Drivers
                             break;
 
                         case XLDefine.XL_EventTags.XL_LIN_NOANS:
-                            dataFromDriver += ("XL_LIN_NOANS");
+                            dataFromDriver += ("XL_LIN_NOANS" )  +" (cha-1) " +  receivedEvent.chanIndex.ToString();
                             break;
 
                         case XLDefine.XL_EventTags.XL_LIN_WAKEUP:
@@ -166,6 +164,7 @@ namespace Jogger.Drivers
             {
                 dataFromDriver += "Timeout";
             }
+            //Trace.WriteLine(dataFromDriver);
             driver.XL_FlushReceiveQueue(portHandle);
             return dataFromDriver;
         }
@@ -237,7 +236,7 @@ namespace Jogger.Drivers
             XLDefine.XL_Status maxChannelStatus = status.Max();
             return DriverAction("Set Data Length Control", maxChannelStatus);
         }
-        bool SetLinSlave(UInt64 accessMask)
+        bool SetLinSlave(ulong accessMask)
         {
             calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;//short enum bug
             status = driver.XL_LinSetSlave(portHandle, accessMask, linSlaveId, linData, dataLengthCode, calcChecksumType);

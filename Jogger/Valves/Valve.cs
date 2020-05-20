@@ -69,7 +69,7 @@ namespace Jogger.Valves
         public bool HasCriticalError { get; private set; }
         public bool HasAnyErrorCodeRead { get; private set; }
         public bool HasReceivedAnyMessage { get; private set; }
-        
+
         static int count = 0;
         public string ActiveErrors { get; set; } = "---";
         public string OccuredErrors { get; set; } = "---";
@@ -77,7 +77,7 @@ namespace Jogger.Valves
         public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
         public int ChannelNumber { get; set; }
         private Result result = Result.Idle;
-        public bool canSetNextProcessedChannel=false;
+        public bool canSetNextProcessedChannel = false;
 
         public Result Result
         {
@@ -192,8 +192,8 @@ namespace Jogger.Valves
                     {
                         Queries[Step].Restart();
                     }
+                    canSetNextProcessedChannel = true;
                 }
-                canSetNextProcessedChannel = true;
             }
             queryFinished = Queries[Step].isDone;
             return (message);
@@ -276,6 +276,6 @@ namespace Jogger.Valves
                 query.Restart();
             }
         }
-        
+
     }
 }

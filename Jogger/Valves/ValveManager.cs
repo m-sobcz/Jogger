@@ -108,19 +108,21 @@ namespace Jogger.Valves
         }
         public async Task SendData()
         {
+            
             if (valves[actualProcessedChannel].IsStarted) // If query done go to next channel
             {
-                Trace.WriteLine($"actualProcessedChannel: {actualProcessedChannel} driver mask {driver.MasterMask[actualProcessedChannel]}");
                 string dataToDriver = await valves[actualProcessedChannel].ExecuteStep();
                 if (Valve.testSettings.IsLogOutDataSelected)
                 {
                     CommunicationLogChanged?.Invoke(this, dataToDriver + "\n");
                 }
             }
+            //if (!valves[actualProcessedChannel].IsStarted) SetNextProcessedChannel();
 
         }
         public async Task<bool> ReceiveData()
         {
+            //actualProcessedChannel = 1;
             string dataFromDriver = await valves[actualProcessedChannel].Receive();
             if (testSettings.IsLogInDataSelected & (testSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
             {
@@ -129,8 +131,12 @@ namespace Jogger.Valves
             bool allChannelsDone = false;
             if (valves[actualProcessedChannel].canSetNextProcessedChannel)
             {
-                allChannelsDone = SetNextProcessedChannel();
+                valves[actualProcessedChannel].canSetNextProcessedChannel = false;
+                int previousProcessedChannel = actualProcessedChannel;
+                
             }
+            //allChannelsDone = SetNextProcessedChannel();
+            //Trace.WriteLine($"Setting next channel: previous {previousProcessedChannel}, actual {actualProcessedChannel}");
             return allChannelsDone;
         }
         public bool SetNextProcessedChannel()
