@@ -122,14 +122,14 @@ namespace Jogger.Valves
         }
         public async Task<bool> ReceiveData()
         {
-            //actualProcessedChannel = 1;
             string dataFromDriver = await valves[actualProcessedChannel].Receive();
             if (testSettings.IsLogInDataSelected & (testSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
             {
                 CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
             }
             bool allChannelsDone = false;
-                  
+            if (!valves[actualProcessedChannel].IsStarted) SetNextProcessedChannel();
+
             return allChannelsDone;
         }
         public bool SetNextProcessedChannel()
