@@ -9,12 +9,15 @@ namespace Jogger.Valves
     public class Query
     {
         readonly List<Command> Commands = new List<Command>();
-        protected int step;
+        static int count = 0;
+        int id;
+        protected int step=0;
         public bool isDone = false;
         public QueryType queryType;
         public Query(QueryType queryType = QueryType.singleExecution)
         {
             this.queryType = queryType;
+            id = count++;
         }
         public void AddCommand(Command command)
         {

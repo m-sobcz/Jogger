@@ -68,21 +68,23 @@ namespace Jogger.Valves
         }
         public ActionStatus Start(TestSettings testSettings, string valveTypeTxt)
         {
+            ActionStatus actionStatus = ActionStatus.OK;
             this.testSettings = testSettings;
             Valve.testSettings = testSettings;
-            ValveType valveType = GetValveType(valveTypeTxt);
-            if (valveType is null) return ActionStatus.Error;
-            else
+            foreach (Valve valve in valves)
             {
-                foreach (Valve valve in valves)
+                ValveType valveType = GetValveType(valveTypeTxt);
+                if (valveType is null) actionStatus= ActionStatus.Error;
+                else
                 {
                     valve.Queries = valveType.queryList;
                     valve.errorCodes = valveType.errorCodes;
                     valve.Start();
+                    IsTestingDone = false;
+                    
                 }
-                IsTestingDone = false;
-                return ActionStatus.OK;
             }
+            return actionStatus;
         }
         ValveType GetValveType(string valveTypeTxt)
         {
@@ -108,7 +110,7 @@ namespace Jogger.Valves
         }
         public async Task SendData()
         {
-            
+
             if (valves[actualProcessedChannel].IsStarted) // If query done go to next channel
             {
                 string dataToDriver = await valves[actualProcessedChannel].ExecuteStep();
@@ -128,7 +130,11 @@ namespace Jogger.Valves
                 CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
             }
             bool allChannelsDone = false;
-            if (!valves[actualProcessedChannel].IsStarted) SetNextProcessedChannel();
+            if (valves[actualProcessedChannel].canSetNextProcessedChannel)
+            {
+                valves[actualProcessedChannel].canSetNextProcessedChannel = false;
+                SetNextProcessedChannel();
+            }
 
             return allChannelsDone;
         }
