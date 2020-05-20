@@ -25,7 +25,7 @@ namespace Jogger.Valves
         IDigitalIO digitalIO;
         private TestSettings testSettings;
         public bool IsTestingDone { get; set; } = false;
-        public event CommunicationLogEventHandler CommunicationLogChanged;      
+        public event CommunicationLogEventHandler CommunicationLogChanged;
         public event ErrorsEventHandler ActiveErrorsChanged;
         public event ErrorsEventHandler OccuredErrorsChanged;
         public event ResultEventHandler ResultChanged;
@@ -41,7 +41,7 @@ namespace Jogger.Valves
             this.digitalIO = digitalIO;
             digitalIO.InputsRead += DigitalIO_InputsRead;
         }
-        public void SetTestSettings(TestSettings testSettings) 
+        public void SetTestSettings(TestSettings testSettings)
         {
             this.testSettings = testSettings;
         }
@@ -108,39 +108,44 @@ namespace Jogger.Valves
         }
         public async Task SendData()
         {
-            if (valves[actualProcessedChannel].IsStarted)
+            if (valves[actualProcessedChannel].IsStarted) // If query done go to next channel
             {
+                Trace.WriteLine($"actualProcessedChannel: {actualProcessedChannel} driver mask {driver.MasterMask[actualProcessedChannel]}");
                 string dataToDriver = await valves[actualProcessedChannel].ExecuteStep(driver.MasterMask[actualProcessedChannel]);
                 if (Valve.testSettings.IsLogOutDataSelected)
                 {
-                    CommunicationLogChanged?.Invoke(this, dataToDriver+"\n");
+                    CommunicationLogChanged?.Invoke(this, dataToDriver + "\n");
                 }
             }
+
         }
         public async Task ReceiveData()
         {
             string dataFromDriver = await valves[actualProcessedChannel].Receive();
-            if (testSettings.IsLogInDataSelected &(testSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
+            if (testSettings.IsLogInDataSelected & (testSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
             {
-                CommunicationLogChanged?.Invoke(this, dataFromDriver+"\n");
+                CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
             }
+            SetNextProcessedChannel();
         }
         public void SetNextProcessedChannel()
         {
-            previousProcessedChannel = actualProcessedChannel;
-            while (true)
-            {
-                actualProcessedChannel++;
-                if (actualProcessedChannel >= valves.Count)
+                previousProcessedChannel = actualProcessedChannel;
+                while (true)
                 {
-                    actualProcessedChannel = 0;
+                    actualProcessedChannel++;
+                    if (actualProcessedChannel >= valves.Count)
+                    {
+                        actualProcessedChannel = 0;
+                    }
+                    if (valves[actualProcessedChannel].IsStarted |
+                        actualProcessedChannel == previousProcessedChannel)
+                    {
+                        break;
+                    }
                 }
-                if (valves[actualProcessedChannel].IsStarted |
-                    actualProcessedChannel == previousProcessedChannel)
-                {
-                    break;
-                }
-            }
+                valves[actualProcessedChannel].queryFinished = false;
+            
         }
         private void Receiver_ActiveErrorsChanged(object sender, string errors, int channelNumber)
         {

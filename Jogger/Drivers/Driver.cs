@@ -67,11 +67,11 @@ namespace Jogger.Drivers
             
             if (!isReceivingData)
             {
-                SetLinSlave(accessMask);
+                SetLinSlave(accessMask);//accessMask
             }
             else
             {
-                SetLinSlave(SlaveMask);
+                SetLinSlave(SlaveMask);//SlaveMask
             }
             currentAccessMask = accessMask;
 

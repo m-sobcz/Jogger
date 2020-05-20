@@ -18,6 +18,7 @@ namespace Jogger.ValveTypes
 
             queryList.Add(GetTesterPresentQuery());
             queryList.Add(GetTesterPresentQuery());
+            queryList.Add(GetTesterPresentQuery());
         }
 
         protected Query GetTesterPresentQuery()

@@ -77,6 +77,8 @@ namespace Jogger.Valves
         public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
         public int ChannelNumber { get; set; }
         private Result result = Result.Idle;
+        public bool canSetNextProcessedChannel=false;
+
         public Result Result
         {
             get => result;
@@ -153,7 +155,7 @@ namespace Jogger.Valves
                     bool isStandardProcessingFinished = (Queries[Step].queryType == QueryType.singleExecution) ||
                         (IsInflated && !IsDeflated && Queries[Step].queryType == QueryType.inflate) ||
                         (IsDeflated && !IsInflated && Queries[Step].queryType == QueryType.deflate);
-                    Trace.WriteLine($"QueryType {Queries[Step].queryType },Repetition {actualRepetition},Step {Step}, IsInflated {IsInflated}, IsDeflated {IsDeflated}");
+                    Trace.WriteLine($"ChannelNumber {ChannelNumber} QueryType {Queries[Step].queryType },Repetition {actualRepetition},Step {Step}, IsInflated {IsInflated}, IsDeflated {IsDeflated}");
                     if (IsMaxStepTimerDone | (IsMinStepTimerDone & (isStandardProcessingFinished)))
                     {
                         Step++;
@@ -191,6 +193,7 @@ namespace Jogger.Valves
                         Queries[Step].Restart();
                     }
                 }
+                canSetNextProcessedChannel = true;
             }
             queryFinished = Queries[Step].isDone;
             return (message);
