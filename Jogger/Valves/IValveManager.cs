@@ -1,23 +1,24 @@
 ﻿using Jogger.Models;
 using Jogger.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace Jogger.Valves
 {
     public interface IValveManager
     {
+        event EventHandler TestingFinished;
         public delegate void ErrorsEventHandler(object sender, string errors, int channelNumber);
         public delegate void CommunicationLogEventHandler(object sender, string log);
         public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
-        bool IsTestingDone { get; set; }
         event ErrorsEventHandler ActiveErrorsChanged;
         event CommunicationLogEventHandler CommunicationLogChanged;
         event ErrorsEventHandler OccuredErrorsChanged;
         event ResultEventHandler ResultChanged;
-        
+
 
         ActionStatus Initialize(int channelsCount);
-        Task<bool> ReceiveData();
+        Task ReceiveData();
         Task SendData();
         ActionStatus Start(TestSettings testSettings, string valveType);
         void Stop();

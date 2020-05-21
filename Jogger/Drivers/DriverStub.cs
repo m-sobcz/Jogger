@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static Jogger.Drivers.IDriver;
 
 namespace Jogger.Drivers
 {
@@ -14,7 +15,7 @@ namespace Jogger.Drivers
 
         public ActionStatus initializeStatus { get; set; } = ActionStatus.OK;
 
-        public event Driver.CommunicationLogEventHandler CommunicationLogChanged;
+        public event CommunicationLogEventHandler CommunicationLogChanged;
         public event EventHandler InitializationFailed;
 
         public void Close()
@@ -58,6 +59,11 @@ namespace Jogger.Drivers
         }
 
         public void SetSendData(byte[] data, byte id, byte dataLengthCode, int channelNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
         {
             throw new NotImplementedException();
         }

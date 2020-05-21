@@ -70,7 +70,7 @@ namespace Jogger
             //Logic
             services.AddSingleton<IValveManager, ValveManager>();
             services.AddSingleton<IDigitalIO, Advantech>();
-            services.AddSingleton<IDriver, Driver>();
+            services.AddSingleton<IDriver, LinDriver>();
 
         }
 

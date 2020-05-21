@@ -13,14 +13,13 @@ namespace Jogger.IO
     public class Advantech : IDigitalIO
     {
         readonly string deviceDescription = "USB-4761,BID#0";//z device manager
-        readonly string profilePath = "../../../Resources/staticDi4761.xml"; 
+        readonly string profilePath = "../../../Resources/staticDi4761.xml";
         readonly int startPort = 0;
         readonly int portCount = 1;
         readonly byte[] buffer = new byte[64];
-        InstantDiCtrl advantechDIControl = new InstantDiCtrl();
+        readonly InstantDiCtrl advantechDIControl = new InstantDiCtrl();
         ErrorCode errorCode = ErrorCode.ErrorUndefined;
-        DioPort[] dioPort;
-
+        private DioPort[] dioPort;
         public event InputsReadEventHandler InputsRead;
         public event CommunicationLogEventHandler CommunicationLogChanged;
 
@@ -36,16 +35,8 @@ namespace Jogger.IO
             {
                 CommunicationLogChanged?.Invoke(this, $"Advantech init exception {e.Message}!\n");
             }
-            CommunicationLogChanged?.Invoke(this, $"Advantech Init: {errorCode}\n");
+            CommunicationLogChanged?.Invoke(this, $"Advantech Init status: {errorCode}\n");
             return ErrorCodeToActionStatus(errorCode);
-        }
-        ActionStatus ErrorCodeToActionStatus(ErrorCode errorCode) 
-        {
-            ActionStatus actionStatus;
-            if (errorCode.ToString().Contains("Error")) actionStatus = ActionStatus.Error;
-            else if (errorCode.ToString().Contains("Warning")) actionStatus = ActionStatus.WarnigInExecution;
-            else actionStatus = ActionStatus.OK;
-            return actionStatus;
         }
         public async Task<(string, byte[])> ReadInputs()
         {
@@ -64,7 +55,15 @@ namespace Jogger.IO
         {
             advantechDIControl.Dispose();
         }
-        void OnInputsRead(object sender, string errorCode, byte[] buffer) 
+        ActionStatus ErrorCodeToActionStatus(ErrorCode errorCode)
+        {
+            ActionStatus actionStatus;
+            if (errorCode.ToString().Contains("Error")) actionStatus = ActionStatus.Error;
+            else if (errorCode.ToString().Contains("Warning")) actionStatus = ActionStatus.WarnigInExecution;
+            else actionStatus = ActionStatus.OK;
+            return actionStatus;
+        }
+        void OnInputsRead(object sender, string errorCode, byte[] buffer)
         {
             InputsRead.Invoke(sender, errorCode, buffer);
         }

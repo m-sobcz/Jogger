@@ -3,18 +3,12 @@ using System;
 
 namespace Jogger.Drivers
 {
-    public interface IDriver
+    public interface IDriver : IDisposable
     {
-        ulong[] MasterMask { get; set; }
+        public delegate void CommunicationLogEventHandler(object sender, string log);
         byte[] ReceivedData { get; set; }
-        ulong SlaveMask { get; }
-
-        event Driver.CommunicationLogEventHandler CommunicationLogChanged;
-        event EventHandler InitializationFailed;
-
-        void Close();
+        event CommunicationLogEventHandler CommunicationLogChanged;
         ActionStatus Initialize(int numberOfChannels);
-        void OnInitializationFailed();
         string Receive();
         string Send();
         void SetSendData(byte[] data, byte id, byte dataLengthCode, int channelNumber);

@@ -12,7 +12,6 @@ namespace Jogger.ViewModels
         ITesterService testerService;
         IDigitalIO digitalIO;
         IOView iOView = new IOView();
-        public ShowInfo showInfo = new ShowInfo();
         BitArray bitArray;
         public bool IsPreInitialization
         {

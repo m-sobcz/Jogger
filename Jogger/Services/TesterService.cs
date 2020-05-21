@@ -13,9 +13,9 @@ namespace Jogger.Services
 {
     public class TesterService : IDisposable, ITesterService
     {
-        private IValveManager valveManager;
-        IDigitalIO digitalIO;
-        IDriver driver;
+        private readonly IValveManager valveManager;
+        readonly IDigitalIO digitalIO;
+        readonly IDriver driver;
         ActionStatus actionStatus;
         ProgramState state = ProgramState.NotInitialized;
         public Result[] results = new Result[4];
@@ -37,7 +37,9 @@ namespace Jogger.Services
             this.valveManager = valveManager;
             this.digitalIO = digitalIO;
             this.driver = driver;
+            valveManager.TestingFinished += ValveManager_TestingFinished;
         }
+
         public ActionStatus Initialize(ConfigurationSettings configurationSettings)
         {
             State = ProgramState.Initializing;
@@ -62,10 +64,8 @@ namespace Jogger.Services
             while (true)
             {
                 await digitalIO.ReadInputs();
-                if (State == ProgramState.Started | State == ProgramState.Stopping) await valveManager.SendData();
-                bool allChannelsDone = await valveManager.ReceiveData();
-                if (State == ProgramState.Stopping & allChannelsDone) State = ProgramState.Idle;
-                if (State == ProgramState.Started & valveManager.IsTestingDone) State = ProgramState.Done;
+                await valveManager.SendData();
+                await valveManager.ReceiveData();
             }
         }
         public ActionStatus Stop()
@@ -99,5 +99,11 @@ namespace Jogger.Services
             }
             return actionStatus;
         }
+        private void ValveManager_TestingFinished(object sender, EventArgs e)
+        {
+            if (State == ProgramState.Started) State = ProgramState.Done;
+            else if (State == ProgramState.Stopping) State = ProgramState.Idle;
+        }
     }
+
 }

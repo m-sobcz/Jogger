@@ -24,11 +24,11 @@ namespace Jogger.Valves
         private IDriver driver;
         IDigitalIO digitalIO;
         private TestSettings testSettings;
-        public bool IsTestingDone { get; set; } = false;
         public event CommunicationLogEventHandler CommunicationLogChanged;
         public event ErrorsEventHandler ActiveErrorsChanged;
         public event ErrorsEventHandler OccuredErrorsChanged;
         public event ResultEventHandler ResultChanged;
+        public event EventHandler TestingFinished;
         static ValveManager()
         {
             namespacePrefix = System.Reflection.Assembly.GetExecutingAssembly().EntryPoint.DeclaringType.Namespace;
@@ -58,13 +58,17 @@ namespace Jogger.Valves
         }
         private void ValveManager_ResultChanged(object sender, Result result, int channelNumber)
         {
+            CheckTestingDone();
+            ResultChanged?.Invoke(sender, result, channelNumber);
+        }
+        void CheckTestingDone ()
+        {
             bool testDoneCheck = true;
             foreach (Valve valve in valves)
             {
-                if (valve.Result == Result.Idle | valve.Result == Result.Testing) testDoneCheck = false;
+                if (valve.Result == Result.Testing) testDoneCheck = false;
             }
-            IsTestingDone = testDoneCheck;
-            ResultChanged?.Invoke(sender, result, channelNumber);
+            if (testDoneCheck) TestingFinished?.Invoke(this,EventArgs.Empty);
         }
         public ActionStatus Start(TestSettings testSettings, string valveTypeTxt)
         {
@@ -79,9 +83,7 @@ namespace Jogger.Valves
                 {
                     valve.Queries = valveType.queryList;
                     valve.errorCodes = valveType.errorCodes;
-                    valve.Start();
-                    IsTestingDone = false;
-                    
+                    valve.Start();                  
                 }
             }
             return actionStatus;
@@ -110,7 +112,6 @@ namespace Jogger.Valves
         }
         public async Task SendData()
         {
-
             if (valves[actualProcessedChannel].IsStarted) // If query done go to next channel
             {
                 string dataToDriver = await valves[actualProcessedChannel].ExecuteStep();
@@ -119,28 +120,22 @@ namespace Jogger.Valves
                     CommunicationLogChanged?.Invoke(this, dataToDriver + "\n");
                 }
             }
-            //if (!valves[actualProcessedChannel].IsStarted) SetNextProcessedChannel();
-
         }
-        public async Task<bool> ReceiveData()
+        public async Task ReceiveData()
         {
             string dataFromDriver = await valves[actualProcessedChannel].Receive();
             if (testSettings.IsLogInDataSelected & (testSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
             {
                 CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
             }
-            bool allChannelsDone = false;
             if (valves[actualProcessedChannel].canSetNextProcessedChannel)
             {
                 valves[actualProcessedChannel].canSetNextProcessedChannel = false;
                 SetNextProcessedChannel();
             }
-
-            return allChannelsDone;
         }
-        public bool SetNextProcessedChannel()
+        void SetNextProcessedChannel()
         {
-            bool allChannelsDone = false;
             previousProcessedChannel = actualProcessedChannel;
             while (true)
             {
@@ -155,12 +150,11 @@ namespace Jogger.Valves
                 }
                 if (actualProcessedChannel == previousProcessedChannel)
                 {
-                    allChannelsDone = true;
+                    TestingFinished?.Invoke(this,EventArgs.Empty);
                     break;
                 }
             }
             valves[actualProcessedChannel].queryFinished = false;
-            return allChannelsDone;
         }
         private void Receiver_ActiveErrorsChanged(object sender, string errors, int channelNumber)
         {

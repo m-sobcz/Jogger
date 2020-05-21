@@ -88,6 +88,18 @@ namespace Jogger.ViewModels
                 OnPropertyChanged(nameof(HardwareChannelCount));
             }
         }
+        public int Baudrate
+        {
+            get
+            {
+                return configurationSettings.Baudrate;
+            }
+            set
+            {
+                configurationSettings.Baudrate = getParameterInBounds(value, 1, 64000) ?? configurationSettings.HardwareChannelCount;
+                OnPropertyChanged(nameof(Baudrate));
+            }
+        }
         public bool IsPreInitialization
         {
             get

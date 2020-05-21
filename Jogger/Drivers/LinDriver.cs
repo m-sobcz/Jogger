@@ -7,24 +7,24 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using vxlapi_NET;
+using static Jogger.Drivers.IDriver;
 
 namespace Jogger.Drivers
 {
-    public class Driver : IDriver
+    public class LinDriver : IDriver
     {
         XLDefine.XL_LIN_CalcChecksum calcChecksumType;
-        private  ConfigurationSettings configurationSettings;
+        private ConfigurationSettings configurationSettings;
         readonly XLDefine.XL_LIN_Mode linMode;
         readonly XLDefine.XL_LIN_Version linVersion;
         public event EventHandler InitializationFailed;
         VectorHardware vectorHardware;
         string InitializeInfo { get; set; } = "";
         public event CommunicationLogEventHandler CommunicationLogChanged;
-        public delegate void CommunicationLogEventHandler(object sender, string log);
+
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern int WaitForSingleObject(int handle, int timeOut);
         byte linSlaveId = 0x1;
-        public int baudrate = 19200;
         readonly byte[] DLC = new byte[64];
         readonly byte[] linData = new byte[8];
         public byte[] ReceivedData { get; set; } = new byte[8];
@@ -39,13 +39,12 @@ namespace Jogger.Drivers
         int eventHandle = -1;
         ulong permissionMask = 0;
         XLDefine.XL_Status status;
-        private bool initializationWithoutErrors;
-        public Driver(ConfigurationSettings configurationSettings)
+        public LinDriver(ConfigurationSettings configurationSettings)
         {
             byte zeroSize = 8;
             byte otherSize = 8;
             this.linVersion = XLDefine.XL_LIN_Version.XL_LIN_VERSION_2_0;
-            this.linMode = XLDefine.XL_LIN_Mode.XL_LIN_MASTER;        
+            this.linMode = XLDefine.XL_LIN_Mode.XL_LIN_MASTER;
             this.calcChecksumType = XLDefine.XL_LIN_CalcChecksum.XL_LIN_CALC_CHECKSUM;
             this.configurationSettings = configurationSettings;
             DLC[0] = zeroSize;
@@ -63,7 +62,7 @@ namespace Jogger.Drivers
             {
                 linData[i] = data[i];
             }
-            
+
             if (!isReceivingData)
             {
                 SetLinSlave(accessMask);//accessMask
@@ -85,7 +84,7 @@ namespace Jogger.Drivers
                 message += b.ToString().PadLeft(4) + "   ";
             }
             message += ": " + status.ToString();
-          DriverAction(message, status, false);
+            DriverAction(message, status, false);
             return message;
         }
         public string Receive()
@@ -143,7 +142,7 @@ namespace Jogger.Drivers
                             break;
 
                         case XLDefine.XL_EventTags.XL_LIN_NOANS:
-                            dataFromDriver += ("XL_LIN_NOANS" )  +" (cha-1) " +  receivedEvent.chanIndex.ToString();
+                            dataFromDriver += ("XL_LIN_NOANS") + " (cha-1) " + receivedEvent.chanIndex.ToString();
                             break;
 
                         case XLDefine.XL_EventTags.XL_LIN_WAKEUP:
@@ -168,14 +167,9 @@ namespace Jogger.Drivers
             driver.XL_FlushReceiveQueue(portHandle);
             return dataFromDriver;
         }
-        public void Close()
-        {
-            DriverAction("Close port", (driver.XL_ClosePort(portHandle)));
-            DriverAction("Close driver", driver.XL_CloseDriver());
-        }
         public ActionStatus Initialize(int numberOfChannels)
         {
-            initializationWithoutErrors = true;
+            bool initializationWithoutErrors = true;
             this.MasterMask = new ulong[numberOfChannels];
             vectorHardware = new VectorHardware(driver, driverConfig, applicationName, numberOfChannels);
             OpenDriver();
@@ -214,7 +208,7 @@ namespace Jogger.Drivers
         {
             XLClass.xl_linStatPar linChannelParameters = new XLClass.xl_linStatPar
             {
-                baudrate = baudrate,
+                baudrate = configurationSettings.Baudrate,
                 LINMode = linMode,
                 LINVersion = linVersion
             };
@@ -288,7 +282,6 @@ namespace Jogger.Drivers
             }
             if (!status.Equals(XLDefine.XL_Status.XL_SUCCESS))
             {
-                initializationWithoutErrors = false;
                 OnInitializationFailed();
             }
             return status.Equals(XLDefine.XL_Status.XL_SUCCESS);
@@ -298,5 +291,10 @@ namespace Jogger.Drivers
             InitializationFailed?.Invoke(this, EventArgs.Empty);
         }
 
+        public void Dispose()
+        {
+            DriverAction("Close port", driver.XL_ClosePort(portHandle));
+            DriverAction("Close driver", driver.XL_CloseDriver());
+        }
     }
 }
