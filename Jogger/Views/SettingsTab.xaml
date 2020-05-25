@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:sys="clr-namespace:System;assembly=System.Runtime" 
              xmlns:conv="clr-namespace:Jogger.Converters"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Jogger.Views"
              mc:Ignorable="d" 
@@ -27,6 +28,7 @@
         <sys:String x:Key="valveMaxDeflateTime">Czas do wykrycia błędu spuszczania zaworu</sys:String>
         <sys:String x:Key="hardwareChannelCount">Liczba obsługiwanych kanałów</sys:String>
         <sys:String x:Key="baudrate">Prędkość transmisji</sys:String>
+        <sys:String x:Key="baudrateHeader">Prędkość transmisji</sys:String>
 
     </UserControl.Resources>
     <WrapPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -70,23 +72,29 @@
                 <ColumnDefinition Width="5*"/>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions >
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="1*"/>
+                <RowDefinition Height="auto"/>
 
             </Grid.RowDefinitions>
             <Label  Grid.Column="0" Grid.Row="0" Content="{DynamicResource hardwareChannelCount}"/>
             <TextBox Name="hardwareChannelCountText"  Grid.Column="1" Grid.Row="0" Text="{Binding HardwareChannelCount, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}" Width="50" VerticalAlignment="Center" IsEnabled="{Binding IsPreInitialization}"/>
             <Label Grid.Column="2" Grid.Row="0" Content=""/>
             <Label  Grid.Column="0" Grid.Row="1" Content="{DynamicResource baudrate}"/>
+
             <TextBox  Grid.Column="1" Grid.Row="1" Text="{Binding Baudrate, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}" Width="50" VerticalAlignment="Center" IsEnabled="{Binding IsPreInitialization}"/>
             <Label Grid.Column="2" Grid.Row="1" Content="kb/s"/>
+            <ComboBox Grid.Column="3"  Grid.Row="1" ItemsSource="{Binding BaudrateOptions}" SelectedItem="{Binding SelectedBaudrate, Mode=TwoWay, Converter={StaticResource IntToStringConverter}}" IsEnabled="{Binding IsPreInitialization}" Width="100">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="SelectionChanged">
+                        <b:InvokeCommandAction Command="{Binding SelectBaudrate}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+
+            </ComboBox>
         </Grid>
     </WrapPanel>
 </UserControl>

@@ -2,7 +2,9 @@
 using Jogger.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
+using System.Windows.Input;
 
 namespace Jogger.ViewModels
 {
@@ -11,6 +13,8 @@ namespace Jogger.ViewModels
         ITesterService testerService;
         readonly TestSettings testSettings;
         readonly ConfigurationSettings configurationSettings;
+        private ICommand selectBaudrate;
+        int selectedBaudrate=19200;
         public SettingsViewModel(ITesterService testerService,TestSettings testSettings, ConfigurationSettings configurationSettings)
         {
             this.testerService = testerService;
@@ -23,8 +27,27 @@ namespace Jogger.ViewModels
             ValveMaxDeflateTime = 30000;
             ValveMaxInflateTime = 30000;
             testerService.ProgramStateChanged += TesterService_ProgramStateEventHandler_Change;
+            baudrateOptions.Add(9600);
+            baudrateOptions.Add(10417);
+            baudrateOptions.Add(19200);
         }
 
+        ObservableCollection<int> baudrateOptions = new ObservableCollection<int>();
+        public ObservableCollection<int> BaudrateOptions
+        {
+            get { return baudrateOptions; }
+            set
+            {
+                baudrateOptions = value;
+                OnPropertyChanged(nameof(BaudrateOptions));
+            }
+        }
+
+        public int SelectedBaudrate
+        {
+            get { return selectedBaudrate; }
+            set { selectedBaudrate = value; OnPropertyChanged(nameof(SelectedBaudrate)); }
+        }
         private void TesterService_ProgramStateEventHandler_Change(object sender, ProgramState programState)
         {
             OnPropertyChanged(nameof(IsPreInitialization));
@@ -116,6 +139,26 @@ namespace Jogger.ViewModels
             }
             return parameter;
         }
+
+        public ICommand SelectBaudrate
+        {
+            get
+            {
+                if (selectBaudrate is null)
+                {
+                    selectBaudrate = new RelayCommand(
+                    o =>
+                    {
+                        Baudrate = selectedBaudrate;
+                        
+                    },
+                    o => true//testerService.State != ProgramState.NotInitialized
+                    );
+                }
+                return selectBaudrate;
+            }
+        }
+
 
     }
 }

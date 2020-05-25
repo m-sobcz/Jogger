@@ -16,7 +16,7 @@ namespace Jogger.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!int.TryParse(((string)value), out int number)) number = -1;
+            if (!int.TryParse((value.ToString()), out int number)) number = -1;
             return number;
         }
     }
