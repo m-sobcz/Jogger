@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Jogger.ValveTypes
 {
-    public class ValveType2Up : ValveType
+    public class ValveType3_5Up : ValveType
     {
-        public ValveType2Up()
+        public ValveType3_5Up()
         {
             byte[] b = new byte[4];
             b[0] = 0x01;
@@ -57,6 +57,12 @@ namespace Jogger.ValveTypes
             b[0] = 0x08;
             b[1] = 0x04;
             errorCodes.Add(BitConverter.ToInt16(b, 0), "Valve 4 failure");
+            b[0] = 0x08;
+            b[1] = 0x05;
+            errorCodes.Add(BitConverter.ToInt16(b, 0), "Valve 5 failure");
+            b[0] = 0x08;
+            b[1] = 0x06;
+            errorCodes.Add(BitConverter.ToInt16(b, 0), "Valve 6 failure");
             b[0] = 0x09;
             b[1] = 0x01;
             errorCodes.Add(BitConverter.ToInt16(b, 0), "Input switch stuck");
@@ -76,6 +82,7 @@ namespace Jogger.ValveTypes
             b[1] = 0x01;
             errorCodes.Add(BitConverter.ToInt16(b, 0), "Current out of range");
 
+
             queryList.Add(GetTesterPresentQuery());
             queryList.Add(GetTesterPresentQuery());
             queryList.Add(GetActivateDebugQuery());
@@ -84,6 +91,8 @@ namespace Jogger.ValveTypes
             queryList.Add(GetValve2OnQuery());//Cell 1 deflate - lumbar top
             queryList.Add(GetValve3OnQuery());//Cell 2 inflate - lumbar bottom            
             queryList.Add(GetValve4OnQuery());//Cell 2 deflate - lumbar bottom
+            queryList.Add(GetValve5OnQuery());//Cell 2 inflate - lumbar central            
+            queryList.Add(GetValve6OnQuery());//Cell 2 deflate - lumbar central
             queryList.Add(GetActiveErrors());
             queryList.Add(GetOccuredErrors());
         }
@@ -164,6 +173,24 @@ namespace Jogger.ValveTypes
             Query query = new Query(QueryType.deflate);
             query.AddCommand(new Command(0x3c, new byte[] { 0x90, 0x10, 0x0C, 0x2E, 0xFD, 0x08, 0x00, 0x00 }));
             query.AddCommand(new Command(0x3c, new byte[] { 0x90, 0x21, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00 }));
+            query.AddCommand(new Command(0x3c, new byte[] { 0x90, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }));
+            query.AddCommand(new Command(0x3d));
+            return query;
+        }
+        Query GetValve5OnQuery()
+        {
+            Query query = new Query(QueryType.inflate);
+            query.AddCommand(new Command(0x3c, new byte[] { 0x90, 0x10, 0x0C, 0x2E, 0xFD, 0x08, 0x04, 0x00 }));
+            query.AddCommand(new Command(0x3c, new byte[] { 0x90, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }));
+            query.AddCommand(new Command(0x3c, new byte[] { 0x90, 0x22, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 }));
+            query.AddCommand(new Command(0x3d));
+            return query;
+        }
+        Query GetValve6OnQuery()
+        {
+            Query query = new Query(QueryType.deflate);
+            query.AddCommand(new Command(0x3c, new byte[] { 0x90, 0x10, 0x0C, 0x2E, 0xFD, 0x08, 0x00, 0x00 }));
+            query.AddCommand(new Command(0x3c, new byte[] { 0x90, 0x21, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00 }));
             query.AddCommand(new Command(0x3c, new byte[] { 0x90, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }));
             query.AddCommand(new Command(0x3d));
             return query;

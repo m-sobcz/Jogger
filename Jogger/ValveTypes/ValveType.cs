@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jogger.ValveTypes
 {
-    class ValveType
+    public class ValveType
     {
         public Dictionary<short, string> errorCodes = new Dictionary<short, string>();
         public List<Query> queryList = new List<Query>();
