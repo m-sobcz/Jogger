@@ -13,8 +13,7 @@ namespace Jogger.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            Trace.WriteLine($"targetType is {targetType}");          
-            ObservableCollection<int> intCollection = value as ObservableCollection<int>;
+            ObservableCollection<int> intCollection = (ObservableCollection<int>)value;
             ObservableCollection<string> stringCollection = new ObservableCollection<string>();
             foreach (int i in intCollection) 
             {

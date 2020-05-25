@@ -53,9 +53,8 @@ namespace Jogger.ViewModels
             this.valveManager = valveManager;
             valveTypes.Add(new ValveModel("", "Sprawdzanie obecności"));
             valveTypes.Add(new ValveModel("2Up", "GM MBM 2UP LIN"));
-            valveTypes.Add(new ValveModel("3_5Up", "JLR 3,5Up LIN"));
+            valveTypes.Add(new ValveModel("3_5Up", "JLR 3,5UP LIN"));
             valveTypes.Add(new ValveModel("6Up", "GM MBM 6UP LIN"));
-            //valveTypes.Add(new ValveModel("11Up", "GM 11Up"));
             SelectedType = valveTypes[0];
             IsLogInDataSelected = true;
             valveManager.ActiveErrorsChanged += ValveManager_ActiveErrorsChanged;
