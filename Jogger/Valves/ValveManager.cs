@@ -49,7 +49,7 @@ namespace Jogger.Valves
         {
             for (int i = 0; i < channelsCount; i++)
             {
-                valves.Add(new Valve(driver));//TOD
+                valves.Add(new Valve(driver));
                 valves[i].OccuredErrorsChanged += Receiver_OccuredErrorsChanged;
                 valves[i].ActiveErrorsChanged += Receiver_ActiveErrorsChanged;
                 valves[i].ResultChanged += ValveManager_ResultChanged;
@@ -128,11 +128,7 @@ namespace Jogger.Valves
             {
                 CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
             }
-            if (valves[actualProcessedChannel].canSetNextProcessedChannel)
-            {
-                valves[actualProcessedChannel].canSetNextProcessedChannel = false;
-                SetNextProcessedChannel();
-            }
+            SetNextProcessedChannel();
         }
         void SetNextProcessedChannel()
         {

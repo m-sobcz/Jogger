@@ -112,8 +112,8 @@ namespace Jogger.Valves
         {
             string dataFromDriver = await Task<string>.Run(() => driver.Receive());
             HasReceivedAnyMessage = HasReceivedAnyMessage | dataFromDriver.Contains("RX"); ;
-            CheckErrorInData(ref isReadingActiveError, ActiveErrorList, 0x14);
-            CheckErrorInData(ref isReadingOccuredError, OccuredErrorList, 0x15);
+            ActiveErrorList=CheckErrorInData(ref isReadingActiveError, ActiveErrorList, 0x14);
+            OccuredErrorList=CheckErrorInData(ref isReadingOccuredError, OccuredErrorList, 0x15);
             if (IsDone) CheckResult();
             return dataFromDriver;
         }
@@ -202,9 +202,8 @@ namespace Jogger.Valves
         {
             driver.WakeUp();
         }
-        protected bool CheckErrorInData(ref bool isReadingActive, List<string> list, byte errorType)
+        protected List<string> CheckErrorInData(ref bool isReadingActive, List<string> list, byte errorType)
         {
-            bool newErrorListAvailable = false;
             if (isReadingActive & (driver.ReceivedData[1] == 0x20 | driver.ReceivedData[1] == 0x21 |
                 driver.ReceivedData[1] == 0x22 | driver.ReceivedData[1] == 0x23))
             {
@@ -224,7 +223,6 @@ namespace Jogger.Valves
             {
                 if (isReadingActive)
                 {
-                    newErrorListAvailable = true;
                     isReadingActive = false;
                 }
             }
@@ -235,13 +233,14 @@ namespace Jogger.Valves
                 AddError(list, driver.ReceivedData[6], driver.ReceivedData[7]);
                 isReadingActive = true;
             }
-            return newErrorListAvailable;
+            return list;
         }
         protected void AddError(List<string> list, byte data0, byte data1)
         {
             HasAnyErrorCodeRead = true;
             byte[] b = { data0, data1 };
             string s = "???";
+            int code = BitConverter.ToInt16(b, 0);
             if (!(errorCodes.TryGetValue(BitConverter.ToInt16(b, 0), out s)))
             {
                 s = b[0].ToString() + b[1].ToString();

@@ -42,6 +42,9 @@ namespace Jogger.ValveTypes
             b[0] = 0x04;
             b[1] = 0x01;
             errorCodes.Add(BitConverter.ToInt16(b, 0), "Pump is in error");
+            //b[0] = 0x04;
+            //b[1] = 0x09;
+            //errorCodes.Add(BitConverter.ToInt16(b, 0), "TestLowError");//!
             b[0] = 0x05;
             b[1] = 0x01;
             errorCodes.Add(BitConverter.ToInt16(b, 0), "Pressure sensor out of range");
