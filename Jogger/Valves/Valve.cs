@@ -105,8 +105,10 @@ namespace Jogger.Valves
             isUntimelyDone = false;
             IsStarted = true;
             Result = Result.Testing;
-            ActiveErrors = "...";
-            OccuredErrors = "...";
+            ActiveErrorList.Clear();
+            ActiveErrorList.Add("...");
+            OccuredErrorList.Clear();
+            OccuredErrorList.Add("...");
         }
         public async Task<string> Receive()
         {
