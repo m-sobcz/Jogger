@@ -238,12 +238,12 @@ namespace Jogger.Valves
         protected void AddError(List<string> list, byte data0, byte data1)
         {
             HasAnyErrorCodeRead = true;
-            byte[] b = { data0, data1 };
+            byte[] b = { data1, data0 };
             string s = "???";
             int code = BitConverter.ToInt16(b, 0);
             if (!(errorCodes.TryGetValue(BitConverter.ToInt16(b, 0), out s)))
             {
-                s = b[0].ToString() + b[1].ToString();
+                s = b[1].ToString("x2") + b[0].ToString("x2");
             }
 
             if (s.Contains("Valve"))
