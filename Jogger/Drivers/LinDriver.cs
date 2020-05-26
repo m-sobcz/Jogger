@@ -293,8 +293,11 @@ namespace Jogger.Drivers
 
         public void Dispose()
         {
-            DriverAction("Close port", driver.XL_ClosePort(portHandle));
-            DriverAction("Close driver", driver.XL_CloseDriver());
+            if (driver != null)
+            {
+                DriverAction("Close port", driver.XL_ClosePort(portHandle));
+                DriverAction("Close driver", driver.XL_CloseDriver());
+            }
         }
     }
 }

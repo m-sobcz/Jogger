@@ -53,7 +53,7 @@ namespace Jogger.IO
         }
         public void Dispose()
         {
-            advantechDIControl.Dispose();
+            advantechDIControl?.Dispose();
         }
         ActionStatus ErrorCodeToActionStatus(ErrorCode errorCode)
         {
