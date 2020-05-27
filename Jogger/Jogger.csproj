@@ -21,6 +21,8 @@
     <None Remove="Images\monitor.png" />
     <None Remove="Images\settings.png" />
     <None Remove="Images\slash.png" />
+    <None Remove="Resources\kaico13.ico" />
+    <None Remove="Resources\staticDi4761.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,6 +66,8 @@
     <Resource Include="Images\monitor.png" />
     <Resource Include="Images\settings.png" />
     <Resource Include="Images\slash.png" />
+    <Resource Include="Resources\kaico13.ico" />
+    <Resource Include="Resources\staticDi4761.xml" />
   </ItemGroup>
 
   <ItemGroup>

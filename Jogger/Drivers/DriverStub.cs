@@ -8,12 +8,11 @@ namespace Jogger.Drivers
 {
     public class DriverStub : IDriver
     {
-        public ulong[] MasterMask { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public byte[] ReceivedData { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public ulong SlaveMask => throw new NotImplementedException();
 
-        public ActionStatus initializeStatus { get; set; } = ActionStatus.OK;
+        public ActionStatus initializationStatus { get; set; } = ActionStatus.OK;
+        public byte[] ReceivedData { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event CommunicationLogEventHandler CommunicationLogChanged;
         public event EventHandler InitializationFailed;
@@ -25,7 +24,7 @@ namespace Jogger.Drivers
 
         public ActionStatus Initialize()
         {
-            return initializeStatus;
+            return initializationStatus;
         }
 
         public void OnInitializationFailed()
@@ -55,7 +54,7 @@ namespace Jogger.Drivers
 
         public ActionStatus Initialize(int numberOfChannels)
         {
-            throw new NotImplementedException();
+            return initializationStatus;
         }
 
         public void SetSendData(byte[] data, byte id, byte dataLengthCode, int channelNumber)

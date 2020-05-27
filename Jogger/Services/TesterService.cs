@@ -3,6 +3,7 @@ using Jogger.Drivers;
 using Jogger.IO;
 using Jogger.Models;
 using Jogger.Valves;
+using Jogger.ValveTypes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -55,7 +56,7 @@ namespace Jogger.Services
         public ActionStatus Start(TestSettings testSettings)
         {
             State = (ProgramState.Starting);
-            actionStatus = valveManager.Start(testSettings, ValveType);//startFunc(testSettings, ValveType);
+            actionStatus = valveManager.Start(testSettings, ValveType);//startFunc.Invoke(testSettings, ValveType)
             State = (actionStatus == ActionStatus.OK) ? ProgramState.Started : ProgramState.Idle;
             return actionStatus;
         }
@@ -77,6 +78,7 @@ namespace Jogger.Services
         public void Dispose()
         {
             digitalIO?.Dispose();
+            driver?.Dispose();
         }
         ActionStatus ActionListStatusToActionStatus(List<ActionStatus> actionList)
         {
