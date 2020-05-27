@@ -90,6 +90,12 @@ namespace Jogger.Services.Tests
             valveManagerStub.OnTestingFinished();
             Assert.AreEqual(finalState, testerService.State);
         }
+        [TestMethod()]
+        public void Dispose_DriverAndDigitalIODisposed()
+        {
+            testerService.Dispose();
+            Assert.AreEqual(true,driverStub.isDisposed&digitalIOStub.isDisposed);
+        }
         public static IEnumerable<object[]> GetTestingFinishedData()
         {
             yield return new object[] { ProgramState.Started, ProgramState.Done };

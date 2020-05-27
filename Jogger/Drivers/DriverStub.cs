@@ -8,7 +8,7 @@ namespace Jogger.Drivers
 {
     public class DriverStub : IDriver
     {
-
+        public bool isDisposed = false;
         public ulong SlaveMask => throw new NotImplementedException();
 
         public ActionStatus initializationStatus { get; set; } = ActionStatus.OK;
@@ -64,7 +64,7 @@ namespace Jogger.Drivers
 
         public void Dispose()
         {
-            throw new NotImplementedException();
-        }
+           isDisposed = true;
+    }
     }
 }
