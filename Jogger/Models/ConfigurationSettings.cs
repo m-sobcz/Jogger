@@ -6,8 +6,8 @@ namespace Jogger.Models
 {
     public class ConfigurationSettings
     {
-        public int HardwareChannelCount { get; set; } = 3;
-        public int Baudrate { get; set; } = 19200;
+        public int HardwareChannelCount { get; set; }
+        public int Baudrate { get; set; }
     }
 
 }

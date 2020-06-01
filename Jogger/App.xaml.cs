@@ -65,11 +65,12 @@ namespace Jogger
             services.AddSingleton<DiagnosticsViewModel>();
             //Views
             services.AddTransient<MainWindow>();
-            //Logic
+            //Logic - Core
             services.AddSingleton<IValveManager, ValveManager>();
             services.AddSingleton<IDigitalIO, Advantech>();
             services.AddSingleton<IDriver, LinDriver>();
-            services.AddSingleton<IValve, Valve>();
+            //Logic - Other 
+            services.AddTransient<IValve, Valve>();
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

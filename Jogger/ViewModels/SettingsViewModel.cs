@@ -14,18 +14,19 @@ namespace Jogger.ViewModels
         readonly TestSettings testSettings;
         readonly ConfigurationSettings configurationSettings;
         private ICommand selectBaudrate;
-        int selectedBaudrate=19200;
+        int selectedBaudrate=9600;
         public SettingsViewModel(ITesterService testerService,TestSettings testSettings, ConfigurationSettings configurationSettings)
         {
             this.testerService = testerService;
             this.testSettings = testSettings;
             this.configurationSettings = configurationSettings;
-            HardwareChannelCount = 2;
-            Repetitions = 3;
+            HardwareChannelCount = 3;
+            Repetitions = 1;
             ValveMinInflateTime = 200;
             ValveMinDeflateTime = 200;
             ValveMaxDeflateTime = 30000;
             ValveMaxInflateTime = 30000;
+            Baudrate = 9600;
             testerService.ProgramStateChanged += TesterService_ProgramStateEventHandler_Change;
             baudrateOptions.Add(9600);
             baudrateOptions.Add(10417);
