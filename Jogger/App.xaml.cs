@@ -34,7 +34,7 @@ namespace Jogger
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
       .SetBasePath(Directory.GetCurrentDirectory())
-      .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+      .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             Configuration = builder.Build();
             ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
