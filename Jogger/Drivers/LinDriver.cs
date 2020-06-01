@@ -172,20 +172,20 @@ namespace Jogger.Drivers
             bool initializationWithoutErrors = true;
             this.MasterMask = new ulong[numberOfChannels];
             vectorHardware = new VectorHardware(driver, driverConfig, applicationName, numberOfChannels);
-            OpenDriver();
-            GetDriverConfiguration();
-            InitializeVectorHardware();
+            initializationWithoutErrors&=OpenDriver();
+            initializationWithoutErrors &= GetDriverConfiguration();
+            initializationWithoutErrors &= InitializeVectorHardware();
             permissionMask = 0;
             for (int i = 0; i < numberOfChannels; i++)
             {
                 permissionMask |= vectorHardware.accessMaskMaster[i];
                 MasterMask[i] = vectorHardware.accessMaskMaster[i];
             }
-            OpenPort();
-            SetLinChannelParameters();
-            SetDataLengthControl();
-            ActivateChannel();
-            SetNotificationAndReadHandle();
+            initializationWithoutErrors &= OpenPort();
+            initializationWithoutErrors &= SetLinChannelParameters();
+            initializationWithoutErrors &= SetDataLengthControl();
+            initializationWithoutErrors &= ActivateChannel();
+            initializationWithoutErrors &= SetNotificationAndReadHandle();
             CommunicationLogChanged?.Invoke(this, InitializeInfo);
             return initializationWithoutErrors ? ActionStatus.OK : ActionStatus.Error;
         }

@@ -20,8 +20,8 @@ namespace Jogger.ViewModels
             this.testerService = testerService;
             this.testSettings = testSettings;
             this.configurationSettings = configurationSettings;
-            HardwareChannelCount = 3;
-            Repetitions = 1;
+            HardwareChannelCount = 4;
+            Repetitions = 3;
             ValveMinInflateTime = 200;
             ValveMinDeflateTime = 200;
             ValveMaxDeflateTime = 30000;
