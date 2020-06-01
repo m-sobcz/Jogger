@@ -22,12 +22,12 @@ namespace Jogger.Valves
             return initializationStatus;
         }
 
-        public Task ReceiveData()
+        public Task Receive()
         {
             throw new NotImplementedException();
         }
 
-        public Task SendData()
+        public Task Send()
         {
             throw new NotImplementedException();
         }
@@ -42,13 +42,15 @@ namespace Jogger.Valves
             return startStatus;
         }
 
-        public void Stop()
-        {
-           
-        }
+
         public void OnTestingFinished() 
         {
             TestingFinished?.Invoke(this, EventArgs.Empty);
+        }
+
+        public ActionStatus Stop()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 
 namespace Jogger.Valves
 {
-    public class Valve
+    public class Valve : IValve
     {
         public static TestSettings testSettings;
         private readonly Timer minStepTimer;
         private readonly Timer maxStepTimer;
         protected uint accessMask = 0;
-        public bool queryFinished;
+        public bool QueryFinished { get; set; } = false;
         protected int Step { get; set; }
         public bool IsStarted { get; set; }
         public bool IsDone { get; set; } = false;
@@ -114,8 +114,8 @@ namespace Jogger.Valves
         {
             string dataFromDriver = await Task<string>.Run(() => driver.Receive());
             HasReceivedAnyMessage = HasReceivedAnyMessage | dataFromDriver.Contains("RX"); ;
-            ActiveErrorList=CheckErrorInData(ref isReadingActiveError, ActiveErrorList, 0x14);
-            OccuredErrorList=CheckErrorInData(ref isReadingOccuredError, OccuredErrorList, 0x15);
+            ActiveErrorList = CheckErrorInData(ref isReadingActiveError, ActiveErrorList, 0x14);
+            OccuredErrorList = CheckErrorInData(ref isReadingOccuredError, OccuredErrorList, 0x15);
             if (IsDone) CheckResult();
             return dataFromDriver;
         }
@@ -197,7 +197,7 @@ namespace Jogger.Valves
                     canSetNextProcessedChannel = true;
                 }
             }
-            queryFinished = Queries[Step].isDone;
+            QueryFinished = Queries[Step].isDone;
             return (message);
         }
         public void WakeUp()

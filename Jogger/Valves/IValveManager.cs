@@ -7,21 +7,19 @@ namespace Jogger.Valves
 {
     public interface IValveManager
     {
-        event EventHandler TestingFinished;
-        public delegate void ErrorsEventHandler(object sender, string errors, int channelNumber);
-        public delegate void CommunicationLogEventHandler(object sender, string log);
-        public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
-        event ErrorsEventHandler ActiveErrorsChanged;
-        event CommunicationLogEventHandler CommunicationLogChanged;
-        event ErrorsEventHandler OccuredErrorsChanged;
-        event ResultEventHandler ResultChanged;
-
-
         ActionStatus Initialize(int channelsCount);
-        Task ReceiveData();
-        Task SendData();
         ActionStatus Start(TestSettings testSettings, string valveType);
-        void Stop();
+        ActionStatus Stop();
+        Task Receive();
+        Task Send();    
         void SetTestSettings(TestSettings testSettings);
+        event EventHandler TestingFinished;
+        event CommunicationLogEventHandler CommunicationLogChanged;
+        public delegate void CommunicationLogEventHandler(object sender, string log);
+        event ErrorsEventHandler ActiveErrorsChanged;
+        event ErrorsEventHandler OccuredErrorsChanged;
+        public delegate void ErrorsEventHandler(object sender, string errors, int channelNumber);
+        event ResultEventHandler ResultChanged;
+        public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
     }
 }

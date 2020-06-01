@@ -56,7 +56,7 @@ namespace Jogger.Services
         public ActionStatus Start(TestSettings testSettings)
         {
             State = (ProgramState.Starting);
-            actionStatus = valveManager.Start(testSettings, ValveType);//startFunc.Invoke(testSettings, ValveType)
+            actionStatus = valveManager.Start(testSettings, ValveType);
             State = (actionStatus == ActionStatus.OK) ? ProgramState.Started : ProgramState.Idle;
             return actionStatus;
         }
@@ -65,8 +65,8 @@ namespace Jogger.Services
             while (true)
             {
                 await digitalIO.ReadInputs();
-                await valveManager.SendData();
-                await valveManager.ReceiveData();
+                await valveManager.Send();
+                await valveManager.Receive();
             }
         }
         public ActionStatus Stop()

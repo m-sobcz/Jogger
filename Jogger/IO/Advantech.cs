@@ -67,5 +67,10 @@ namespace Jogger.IO
         {
             InputsRead.Invoke(sender, errorCode, buffer);
         }
+        public Task<string> WriteOutputs(byte[] output)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

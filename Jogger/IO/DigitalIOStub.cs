@@ -34,5 +34,11 @@ namespace Jogger.IO
         {
             throw new NotImplementedException();
         }
+
+        public Task<string> WriteOutputs(byte[] outpudData)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

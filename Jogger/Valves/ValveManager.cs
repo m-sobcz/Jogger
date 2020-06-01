@@ -19,7 +19,7 @@ namespace Jogger.Valves
     {
         int actualProcessedChannel = 0;
         int previousProcessedChannel = 0;
-        public List<Valve> valves = new List<Valve>();
+        public List<IValve> valves = new List<IValve>();
         readonly static string namespacePrefix;
         private IDriver driver;
         IDigitalIO digitalIO;
@@ -48,28 +48,15 @@ namespace Jogger.Valves
         public ActionStatus Initialize(int channelsCount)
         {
             for (int i = 0; i < channelsCount; i++)
-            {
-                valves.Add(new Valve(driver));
+            {            
+                valves.Add(App.ServiceProvider.GetRequiredService<IValve>());
                 valves[i].OccuredErrorsChanged += Receiver_OccuredErrorsChanged;
                 valves[i].ActiveErrorsChanged += Receiver_ActiveErrorsChanged;
                 valves[i].ResultChanged += ValveManager_ResultChanged;
             }
             return ActionStatus.OK;
         }
-        private void ValveManager_ResultChanged(object sender, Result result, int channelNumber)
-        {
-            CheckTestingDone();
-            ResultChanged?.Invoke(sender, result, channelNumber);
-        }
-        void CheckTestingDone ()
-        {
-            bool testDoneCheck = true;
-            foreach (Valve valve in valves)
-            {
-                if (valve.Result == Result.Testing) testDoneCheck = false;
-            }
-            if (testDoneCheck) TestingFinished?.Invoke(this,EventArgs.Empty);
-        }
+        
         public ActionStatus Start(TestSettings testSettings, string valveTypeTxt)
         {
             ActionStatus actionStatus = ActionStatus.OK;
@@ -103,14 +90,15 @@ namespace Jogger.Valves
                 return Activator.CreateInstance(valveType) as ValveType;
             }
         }
-        public void Stop()
+        public ActionStatus Stop()
         {
             foreach (Valve valve in valves)
             {
                 valve.IsStopRequested = true;
             }
+            return ActionStatus.OK;
         }
-        public async Task SendData()
+        public async Task Send()
         {
             if (valves[actualProcessedChannel].IsStarted) // If query done go to next channel
             {
@@ -121,7 +109,7 @@ namespace Jogger.Valves
                 }
             }
         }
-        public async Task ReceiveData()
+        public async Task Receive()
         {
             string dataFromDriver = await valves[actualProcessedChannel].Receive();
             if (testSettings.IsLogInDataSelected & (testSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
@@ -129,6 +117,20 @@ namespace Jogger.Valves
                 CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
             }
             SetNextProcessedChannel();
+        }
+        void ValveManager_ResultChanged(object sender, Result result, int channelNumber)
+        {
+            CheckTestingDone();
+            ResultChanged?.Invoke(sender, result, channelNumber);
+        }
+        void CheckTestingDone()
+        {
+            bool testDoneCheck = true;
+            foreach (Valve valve in valves)
+            {
+                if (valve.Result == Result.Testing) testDoneCheck = false;
+            }
+            if (testDoneCheck) TestingFinished?.Invoke(this, EventArgs.Empty);
         }
         void SetNextProcessedChannel()
         {
@@ -150,7 +152,7 @@ namespace Jogger.Valves
                     break;
                 }
             }
-            valves[actualProcessedChannel].queryFinished = false;
+            valves[actualProcessedChannel].QueryFinished = false;
         }
         private void Receiver_ActiveErrorsChanged(object sender, string errors, int channelNumber)
         {

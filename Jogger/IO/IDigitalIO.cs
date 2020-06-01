@@ -7,13 +7,13 @@ namespace Jogger.IO
 {
     public interface IDigitalIO
     {
-        event InputsReadEventHandler InputsRead;
-        delegate void InputsReadEventHandler(object sender, string errorCode, byte[] buffer);
         void Dispose();
         ActionStatus Initialize();
         Task<(string, byte[])> ReadInputs();
-        public event CommunicationLogEventHandler CommunicationLogChanged;
-        public delegate void CommunicationLogEventHandler(object sender, string log);
-
+        Task<string> WriteOutputs(byte[] outpudData);
+        event CommunicationLogEventHandler CommunicationLogChanged;
+        delegate void CommunicationLogEventHandler(object sender, string log);
+        event InputsReadEventHandler InputsRead;  
+        delegate void InputsReadEventHandler(object sender, string errorCode, byte[] buffer);
     }
 }
