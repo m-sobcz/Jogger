@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace Jogger.Valves
 {
-   public class ValveManagerStub : IValveManager
+    public class ValveManagerStub : IValveManager
     {
         public ActionStatus initializationStatus { get; set; } = ActionStatus.OK;
         public ActionStatus startStatus { get; set; } = ActionStatus.OK;
+        public ActionStatus stopStatus { get; set; } = ActionStatus.OK;
         public event EventHandler TestingFinished;
         public event IValveManager.ErrorsEventHandler ActiveErrorsChanged;
         public event IValveManager.CommunicationLogEventHandler CommunicationLogChanged;
@@ -43,14 +44,14 @@ namespace Jogger.Valves
         }
 
 
-        public void OnTestingFinished() 
+        public void OnTestingFinished()
         {
             TestingFinished?.Invoke(this, EventArgs.Empty);
         }
 
         public ActionStatus Stop()
         {
-            throw new NotImplementedException();
+            return stopStatus;
         }
     }
 }

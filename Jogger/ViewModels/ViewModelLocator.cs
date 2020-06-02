@@ -7,32 +7,37 @@ namespace Jogger.ViewModels
 {
     public class ViewModelLocator
     {
+        IServiceProvider serviceProvider;
+        public ViewModelLocator()
+        {
+            this.serviceProvider = App.ServiceProvider;
+        }
         public MainWindowViewModel MainWindowViewModel
         {
             get
             {
-                return App.ServiceProvider.GetRequiredService<MainWindowViewModel>();
+                return serviceProvider.GetRequiredService<MainWindowViewModel>();
             }
         }
         public JoggingViewModel JoggingViewModel
         {
             get
             {
-                return App.ServiceProvider.GetRequiredService<JoggingViewModel>();
+                return serviceProvider.GetRequiredService<JoggingViewModel>();
             }
         }
         public SettingsViewModel SettingsViewModel
         {
             get
             {
-                return App.ServiceProvider.GetRequiredService<SettingsViewModel>();
+                return serviceProvider.GetRequiredService<SettingsViewModel>();
             }
         }
         public DiagnosticsViewModel DiagnosticsViewModel
         {
             get
             {
-                return App.ServiceProvider.GetRequiredService<DiagnosticsViewModel>();
+                return serviceProvider.GetRequiredService<DiagnosticsViewModel>();
             }
         }
     }
