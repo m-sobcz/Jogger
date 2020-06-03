@@ -94,7 +94,7 @@ namespace Jogger.Services.Tests
         public void Dispose_DriverAndDigitalIODisposed()
         {
             testerService.Dispose();
-            Assert.AreEqual(true,driverStub.isDisposed&digitalIOStub.isDisposed);
+            Assert.AreEqual(true, driverStub.isDisposed & digitalIOStub.isDisposed);
         }
         public static IEnumerable<object[]> GetTestingFinishedData()
         {
@@ -103,5 +103,7 @@ namespace Jogger.Services.Tests
             yield return new object[] { ProgramState.Error, ProgramState.Error };
             yield return new object[] { ProgramState.Initialized, ProgramState.Initialized };
         }
+
+       
     }
 }

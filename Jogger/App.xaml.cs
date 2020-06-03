@@ -19,6 +19,7 @@ using System.Diagnostics;
 using Jogger.Views;
 using Jogger.Valves;
 
+
 namespace Jogger
 {
     /// <summary>
@@ -33,8 +34,8 @@ namespace Jogger
         protected override void OnStartup(StartupEventArgs e)
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
-      .SetBasePath(Directory.GetCurrentDirectory())
-      .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+      .SetBasePath(Directory.GetCurrentDirectory());
+      //.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             Configuration = builder.Build();
             ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
@@ -71,6 +72,7 @@ namespace Jogger
             services.AddSingleton<IDriver, LinDriver>();
             //Logic - Other 
             services.AddTransient<IValve, Valve>();
+            services.AddSingleton<Func<IValve>>(x=>()=>x.GetRequiredService<IValve>());   
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

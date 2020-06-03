@@ -20,24 +20,19 @@ namespace Jogger.Valves
         int actualProcessedChannel = 0;
         int previousProcessedChannel = 0;
         public List<IValve> valves = new List<IValve>();
-        readonly static string namespacePrefix;
-        private IDriver driver;
-        IDigitalIO digitalIO;
+        readonly Func<IValve> getValve;
+        //private IDriver driver;
+        readonly IDigitalIO digitalIO;
         private TestSettings testSettings;
         public event CommunicationLogEventHandler CommunicationLogChanged;
         public event ErrorsEventHandler ActiveErrorsChanged;
         public event ErrorsEventHandler OccuredErrorsChanged;
         public event ResultEventHandler ResultChanged;
         public event EventHandler TestingFinished;
-        static ValveManager()
+        public ValveManager(IDigitalIO digitalIO, TestSettings testSettings, Func<IValve> getValve)
         {
-            namespacePrefix = System.Reflection.Assembly.GetExecutingAssembly().EntryPoint.DeclaringType.Namespace;
-            namespacePrefix += ".";
-        }
-        public ValveManager(IDigitalIO digitalIO, IDriver driver, TestSettings testSettings)
-        {
+            this.getValve = getValve;
             this.testSettings = testSettings;
-            this.driver = driver;
             this.digitalIO = digitalIO;
             digitalIO.InputsRead += DigitalIO_InputsRead;
         }
@@ -48,15 +43,15 @@ namespace Jogger.Valves
         public ActionStatus Initialize(int channelsCount)
         {
             for (int i = 0; i < channelsCount; i++)
-            {            
-                valves.Add(App.ServiceProvider.GetRequiredService<IValve>());
+            {
+                valves.Add(getValve());
                 valves[i].OccuredErrorsChanged += Receiver_OccuredErrorsChanged;
                 valves[i].ActiveErrorsChanged += Receiver_ActiveErrorsChanged;
                 valves[i].ResultChanged += ValveManager_ResultChanged;
             }
             return ActionStatus.OK;
         }
-        
+
         public ActionStatus Start(TestSettings testSettings, string valveTypeTxt)
         {
             ActionStatus actionStatus = ActionStatus.OK;
@@ -65,12 +60,12 @@ namespace Jogger.Valves
             foreach (Valve valve in valves)
             {
                 ValveType valveType = GetValveType(valveTypeTxt);
-                if (valveType is null) actionStatus= ActionStatus.Error;
+                if (valveType is null) actionStatus = ActionStatus.Error;
                 else
                 {
                     valve.Queries = valveType.queryList;
                     valve.errorCodes = valveType.errorCodes;
-                    valve.Start();                  
+                    valve.Start();
                 }
             }
             return actionStatus;
@@ -148,7 +143,7 @@ namespace Jogger.Valves
                 }
                 if (actualProcessedChannel == previousProcessedChannel)
                 {
-                    TestingFinished?.Invoke(this,EventArgs.Empty);
+                    TestingFinished?.Invoke(this, EventArgs.Empty);
                     break;
                 }
             }
