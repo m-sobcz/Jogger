@@ -8,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Jogger.IO;
 using Jogger.Models;
 using Jogger.Drivers;
+using Jogger.Services;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
+using System.Reflection;
 
 namespace Jogger.Valves.Tests
 {
@@ -40,15 +43,20 @@ namespace Jogger.Valves.Tests
         }
         [DataTestMethod]
         [DataRow(1)]
-        [DataRow(2)]
-        [DataRow(3)]
         [DataRow(4)]
         public void Initialize_CreatesAsManyValvesAsNumberOfChannels(int numberOfChannels)
         {
             valveManager.Initialize(numberOfChannels);
             Assert.AreEqual(numberOfChannels, valveManager.valves.Count);
         }
-
-        
+        [DataTestMethod]
+        [DataRow(1)]
+        [DataRow(4)]
+        public void Initialize_ReturnsActionStatusOk(int numberOfChannels)
+        {
+            ActionStatus actionStatus =valveManager.Initialize(numberOfChannels);
+            Assert.AreEqual(ActionStatus.OK, actionStatus);
+        }
+       
     }
 }

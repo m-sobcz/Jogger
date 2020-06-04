@@ -45,8 +45,10 @@ namespace Jogger.Valves
             for (int i = 0; i < channelsCount; i++)
             {
                 valves.Add(getValve());
-                valves[i].OccuredErrorsChanged += Receiver_OccuredErrorsChanged;
-                valves[i].ActiveErrorsChanged += Receiver_ActiveErrorsChanged;
+                valves[i].OccuredErrorsChanged +=
+                    (object sender, string errors, int channelNumber) => OccuredErrorsChanged?.Invoke(sender, errors, channelNumber);
+                valves[i].ActiveErrorsChanged +=
+                    (object sender, string errors, int channelNumber) => ActiveErrorsChanged?.Invoke(sender, errors, channelNumber);
                 valves[i].ResultChanged += ValveManager_ResultChanged;
             }
             return ActionStatus.OK;
@@ -120,12 +122,12 @@ namespace Jogger.Valves
         }
         void CheckTestingDone()
         {
-            bool testDoneCheck = true;
+            bool isTestingDone = true;
             foreach (Valve valve in valves)
             {
-                if (valve.Result == Result.Testing) testDoneCheck = false;
+                if (valve.Result == Result.Testing) isTestingDone = false;
             }
-            if (testDoneCheck) TestingFinished?.Invoke(this, EventArgs.Empty);
+            if (isTestingDone) TestingFinished?.Invoke(this, EventArgs.Empty);
         }
         void SetNextProcessedChannel()
         {
@@ -148,15 +150,7 @@ namespace Jogger.Valves
                 }
             }
             valves[actualProcessedChannel].QueryFinished = false;
-        }
-        private void Receiver_ActiveErrorsChanged(object sender, string errors, int channelNumber)
-        {
-            ActiveErrorsChanged?.Invoke(sender, errors, channelNumber);
-        }
-        private void Receiver_OccuredErrorsChanged(object sender, string errors, int channelNumber)
-        {
-            OccuredErrorsChanged?.Invoke(sender, errors, channelNumber);
-        }
+        }//
         private void DigitalIO_InputsRead(object sender, string errorCode, byte[] buffer)
         {
             foreach (Valve valve in valves)

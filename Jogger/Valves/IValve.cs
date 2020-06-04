@@ -5,6 +5,8 @@ namespace Jogger.Valves
 {
     public interface IValve
     {
+        public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
+        public delegate void ErrorsEventHandler(object sender, string errors, int channelNumber);
         bool QueryFinished { get; set; }
         List<string> ActiveErrorList { get; set; }
         string ActiveErrors { get; set; }
@@ -22,9 +24,9 @@ namespace Jogger.Valves
         string OccuredErrors { get; set; }
         Result Result { get; set; }
 
-        event Valve.ErrorsEventHandler ActiveErrorsChanged;
-        event Valve.ErrorsEventHandler OccuredErrorsChanged;
-        event Valve.ResultEventHandler ResultChanged;
+        event ErrorsEventHandler ActiveErrorsChanged;
+        event ErrorsEventHandler OccuredErrorsChanged;
+        event ResultEventHandler ResultChanged;
 
         void CheckResult();
         Task<string> ExecuteStep();
