@@ -40,6 +40,7 @@ namespace Jogger
             ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
             ServiceProvider = serviceCollection.BuildServiceProvider();
+            ServiceProvider.GetRequiredService<IWiringIO>();
             ServiceProvider.GetRequiredService<MainWindowViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
             ServiceProvider.GetRequiredService<JoggingViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
             ServiceProvider.GetRequiredService<SettingsViewModel>().showInfo.ShowInformation += ShowInfo_ShowInformation;
@@ -72,7 +73,8 @@ namespace Jogger
             services.AddSingleton<IDriver, LinDriver>();
             //Logic - Other 
             services.AddTransient<IValve, Valve>();
-            services.AddSingleton<Func<IValve>>(x=>()=>x.GetRequiredService<IValve>());   
+            services.AddSingleton<Func<IValve>>(x=>()=>x.GetRequiredService<IValve>());
+            services.AddSingleton<IWiringIO,ValvesWiring>();
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

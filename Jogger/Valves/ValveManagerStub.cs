@@ -12,6 +12,8 @@ namespace Jogger.Valves
         public ActionStatus initializationStatus { get; set; } = ActionStatus.OK;
         public ActionStatus startStatus { get; set; } = ActionStatus.OK;
         public ActionStatus stopStatus { get; set; } = ActionStatus.OK;
+        public TestSettings TestSettings { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public event EventHandler TestingFinished;
         public event IValveManager.ErrorsEventHandler ActiveErrorsChanged;
         public event IValveManager.CommunicationLogEventHandler CommunicationLogChanged;
@@ -52,6 +54,16 @@ namespace Jogger.Valves
         public ActionStatus Stop()
         {
             return stopStatus;
+        }
+
+        public bool SetValveSensorsState(int valveNumber, bool isInflated, bool isDeflated)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int GetNumberOfValves()
+        {
+            throw new NotImplementedException();
         }
     }
 }

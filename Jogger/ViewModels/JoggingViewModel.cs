@@ -71,17 +71,17 @@ namespace Jogger.ViewModels
         public bool IsLogInDataSelected
         {
             get { return testSettings.IsLogInDataSelected; }
-            set { testSettings.IsLogInDataSelected = value; valveManager.SetTestSettings(testSettings); }
+            set { testSettings.IsLogInDataSelected = value; valveManager.TestSettings=testSettings; }
         }
         public bool IsLogOutDataSelected
         {
             get { return testSettings.IsLogOutDataSelected; }
-            set { testSettings.IsLogOutDataSelected = value; valveManager.SetTestSettings(testSettings); }
+            set { testSettings.IsLogOutDataSelected = value; valveManager.TestSettings=testSettings; }
         }
         public bool IsLogTimeoutSelected
         {
             get { return testSettings.IsLogTimeoutSelected; }
-            set { testSettings.IsLogTimeoutSelected = value; valveManager.SetTestSettings(testSettings); }
+            set { testSettings.IsLogTimeoutSelected = value; valveManager.TestSettings=testSettings; }
         }
         public ICommand InitializeCommand
         {

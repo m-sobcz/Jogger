@@ -17,12 +17,12 @@ namespace Jogger.Valves.Tests
     [TestClass()]
     public class ValveManagerTests
     {
-        ValveManager valveManager; 
+        ValveManager valveManager;
         public static IServiceProvider ServiceProvider { get; private set; }
         public IConfiguration Configuration { get; private set; }
 
-        [TestInitialize]
-        public void TestInitializeAttribute()
+        [ClassInitialize]
+        public void ClassInitializeAttribute()
         {
             ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
@@ -54,21 +54,29 @@ namespace Jogger.Valves.Tests
         [DataRow(4)]
         public void Initialize_ReturnsActionStatusOk(int numberOfChannels)
         {
-            ActionStatus actionStatus =valveManager.Initialize(numberOfChannels);
+            ActionStatus actionStatus = valveManager.Initialize(numberOfChannels);
             Assert.AreEqual(ActionStatus.OK, actionStatus);
         }
 
         [DataTestMethod]
-        [DataRow(1)]
-        [DataRow(4)]
-        public void Initialize_(int numberOfChannels)
+        [DataRow(0, false, true)]
+        [DataRow(3, true, false)]
+        public void SetValveSensorsState_TargetValveIsInflatedAndDeflatedAccoringToArguments(int valveNumber, bool isInflated, bool isDeflated)
         {
-            valveManager.Initialize(numberOfChannels);
-            DigitalIOStub digitalIO =(DigitalIOStub)ServiceProvider.GetRequiredService<IDigitalIO>();
-            digitalIO.ReadInputsErrorString = "OK";
-            //digitalIO.ReadInputsBuffer=new byte { }
+            valveManager.Initialize(4);
+            valveManager.SetValveSensorsState(valveNumber, isInflated, isDeflated);
+            Assert.AreEqual(isInflated, valveManager.valves[valveNumber].IsInflated);
+            Assert.AreEqual(isDeflated, valveManager.valves[valveNumber].IsDeflated);
         }
 
-
+        [DataTestMethod]
+        [DataRow(4, 3, true)]
+        [DataRow(4, 4, false)]
+        public void SetValveSensorsState_ReturnsTrueIfAbleToSetElement(int numberOfValves, int valveNumber, bool expectedReturn)
+        {
+            valveManager.Initialize(numberOfValves);
+            bool result = valveManager.SetValveSensorsState(valveNumber, true, false);
+            Assert.AreEqual(expectedReturn, result);
+        }
     }
 }

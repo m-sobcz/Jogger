@@ -7,12 +7,14 @@ namespace Jogger.Valves
 {
     public interface IValveManager
     {
-        ActionStatus Initialize(int channelsCount);
+        ActionStatus Initialize(int numberOfValves);
         ActionStatus Start(TestSettings testSettings, string valveType);
         ActionStatus Stop();
         Task Receive();
-        Task Send();    
-        void SetTestSettings(TestSettings testSettings);
+        Task Send();
+        TestSettings TestSettings{get;set;}
+        bool SetValveSensorsState(int valveNumber, bool isInflated, bool isDeflated);
+        int GetNumberOfValves();
         event EventHandler TestingFinished;
         event CommunicationLogEventHandler CommunicationLogChanged;
         public delegate void CommunicationLogEventHandler(object sender, string log);

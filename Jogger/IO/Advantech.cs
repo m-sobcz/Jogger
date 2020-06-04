@@ -22,7 +22,6 @@ namespace Jogger.IO
         private DioPort[] dioPort;
         public event InputsReadEventHandler InputsRead;
         public event CommunicationLogEventHandler CommunicationLogChanged;
-
         public ActionStatus Initialize()
         {
             try
@@ -71,6 +70,5 @@ namespace Jogger.IO
         {
             throw new NotImplementedException();
         }
-
     }
 }
