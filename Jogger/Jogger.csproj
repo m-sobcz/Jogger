@@ -69,7 +69,9 @@
     <Resource Include="Images\settings.png" />
     <Resource Include="Images\slash.png" />
     <Resource Include="Resources\kaico13.ico" />
-    <Resource Include="Resources\staticDi4761.xml" />
+    <Resource Include="Resources\staticDi4761.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>

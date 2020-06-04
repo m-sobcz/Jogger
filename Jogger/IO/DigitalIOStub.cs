@@ -16,6 +16,8 @@ namespace Jogger.IO
 
         public ActionStatus Status { get; set; }
         public bool isDisposed = false;
+        public string ReadInputsErrorString { get; set; }
+        public byte[] ReadInputsBuffer { get; set; }
 
         public event InputsReadEventHandler InputsRead;
         public event CommunicationLogEventHandler CommunicationLogChanged;

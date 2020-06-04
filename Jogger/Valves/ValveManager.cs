@@ -150,7 +150,7 @@ namespace Jogger.Valves
                 }
             }
             valves[actualProcessedChannel].QueryFinished = false;
-        }//
+        }
         private void DigitalIO_InputsRead(object sender, string errorCode, byte[] buffer)
         {
             foreach (Valve valve in valves)
@@ -159,5 +159,6 @@ namespace Jogger.Valves
                 valve.IsDeflated = (buffer[0] & (1 << valve.ChannelNumber * 2 + 1)) != 0;
             }
         }
+
     }
 }

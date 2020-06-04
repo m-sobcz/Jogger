@@ -57,6 +57,18 @@ namespace Jogger.Valves.Tests
             ActionStatus actionStatus =valveManager.Initialize(numberOfChannels);
             Assert.AreEqual(ActionStatus.OK, actionStatus);
         }
-       
+
+        [DataTestMethod]
+        [DataRow(1)]
+        [DataRow(4)]
+        public void Initialize_(int numberOfChannels)
+        {
+            valveManager.Initialize(numberOfChannels);
+            DigitalIOStub digitalIO =(DigitalIOStub)ServiceProvider.GetRequiredService<IDigitalIO>();
+            digitalIO.ReadInputsErrorString = "OK";
+            //digitalIO.ReadInputsBuffer=new byte { }
+        }
+
+
     }
 }

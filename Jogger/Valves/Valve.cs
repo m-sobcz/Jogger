@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using static Jogger.Valves.IValve;
 
 namespace Jogger.Valves
 {
@@ -33,7 +34,6 @@ namespace Jogger.Valves
         public bool IsStopRequested { get; set; }
         public event ErrorsEventHandler ActiveErrorsChanged;
         public event ErrorsEventHandler OccuredErrorsChanged;
-        public delegate void ErrorsEventHandler(object sender, string errors, int channelNumber);
         private List<string> activeErrorList = new List<string>();
         private List<string> occuredErrorList = new List<string>();
         public List<string> ActiveErrorList
@@ -74,7 +74,7 @@ namespace Jogger.Valves
         public string ActiveErrors { get; set; } = "---";
         public string OccuredErrors { get; set; } = "---";
         public event ResultEventHandler ResultChanged;
-        public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
+
         public int ChannelNumber { get; set; }
         private Result result = Result.Idle;
         public bool canSetNextProcessedChannel = false;
