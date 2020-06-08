@@ -67,6 +67,7 @@ namespace Jogger.Services
                 await digitalIO.ReadInputs();
                 await valveManager.Send();
                 await valveManager.Receive();
+                valveManager.SetNextProcessedChannel();
             }
         }
         public ActionStatus Stop()

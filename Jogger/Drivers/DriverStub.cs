@@ -12,6 +12,7 @@ namespace Jogger.Drivers
         public ulong SlaveMask => throw new NotImplementedException();
 
         public ActionStatus initializationStatus { get; set; } = ActionStatus.OK;
+        public string SendReturn { get; set; } = "SendTest";
         public byte[] ReceivedData { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event CommunicationLogEventHandler CommunicationLogChanged;
@@ -39,12 +40,12 @@ namespace Jogger.Drivers
 
         public string Send()
         {
-            throw new NotImplementedException();
+            return SendReturn;
         }
 
         public void SetSendData(byte[] data, byte id, byte dataLengthCode, ulong accessMask)
         {
-            throw new NotImplementedException();
+            
         }
 
         public bool WakeUp()

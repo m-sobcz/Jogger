@@ -5,20 +5,20 @@ using System.Text;
 
 namespace Jogger.ValveTypes
 {
-    public class ValveType
+    public class ValveType : IValveType
     {
-        public Dictionary<short, string> errorCodes = new Dictionary<short, string>();
-        public List<Query> queryList = new List<Query>();
+        public Dictionary<short, string> ErrorCodes { get; set; } = new Dictionary<short, string>();
+        public List<Query> QueryList { get; set; } = new List<Query>();
         public ValveType()
         {
             byte[] b = new byte[4];
             b[0] = 0x00;
             b[1] = 0x00;
-            errorCodes.Add(BitConverter.ToInt16(b, 0), "<no error>");
+            ErrorCodes.Add(BitConverter.ToInt16(b, 0), "<no error>");
 
-            queryList.Add(GetTesterPresentQuery());
-            queryList.Add(GetTesterPresentQuery());
-            queryList.Add(GetTesterPresentQuery());
+            QueryList.Add(GetTesterPresentQuery());
+            QueryList.Add(GetTesterPresentQuery());
+            QueryList.Add(GetTesterPresentQuery());
         }
 
         protected Query GetTesterPresentQuery()

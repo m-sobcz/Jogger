@@ -11,6 +11,8 @@ using Jogger.Drivers;
 using Jogger.Services;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
 using System.Reflection;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Jogger.Valves.Tests
 {
@@ -20,26 +22,21 @@ namespace Jogger.Valves.Tests
         ValveManager valveManager;
         public static IServiceProvider ServiceProvider { get; private set; }
         public IConfiguration Configuration { get; private set; }
-
         [ClassInitialize]
-        public void ClassInitializeAttribute()
+        public static void ClassInitialize(TestContext testContext)
         {
             ServiceCollection serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection);
-            ServiceProvider = serviceCollection.BuildServiceProvider();
-            valveManager = ServiceProvider.GetRequiredService<ValveManager>();
-        }
-        private void ConfigureServices(ServiceCollection serviceCollection)
-        {
-            //services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
-            //Logic - Core
-            serviceCollection.AddSingleton<ValveManager>();
+            serviceCollection.AddTransient<IValveManager, ValveManager>();
             serviceCollection.AddSingleton<TestSettings>();
-            serviceCollection.AddSingleton<IDigitalIO, Advantech>();
             serviceCollection.AddSingleton<IDriver, DriverStub>();
-            //Logic - Other 
-            serviceCollection.AddTransient<IValve, Valve>();
+            serviceCollection.AddTransient<IValve, ValveStub>();
             serviceCollection.AddSingleton<Func<IValve>>(x => () => x.GetRequiredService<IValve>());
+            ServiceProvider = serviceCollection.BuildServiceProvider();
+        }
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            valveManager = (ValveManager)ServiceProvider.GetRequiredService<IValveManager>();
         }
         [DataTestMethod]
         [DataRow(1)]
@@ -59,11 +56,12 @@ namespace Jogger.Valves.Tests
         }
 
         [DataTestMethod]
-        [DataRow(0, false, true)]
-        [DataRow(3, true, false)]
-        public void SetValveSensorsState_TargetValveIsInflatedAndDeflatedAccoringToArguments(int valveNumber, bool isInflated, bool isDeflated)
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        public void SetValveSensorsState_TargetValveIsInflatedAndDeflatedAccoringToArguments(bool isInflated, bool isDeflated)
         {
-            valveManager.Initialize(4);
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            int valveNumber = 0;
             valveManager.SetValveSensorsState(valveNumber, isInflated, isDeflated);
             Assert.AreEqual(isInflated, valveManager.valves[valveNumber].IsInflated);
             Assert.AreEqual(isDeflated, valveManager.valves[valveNumber].IsDeflated);
@@ -74,9 +72,98 @@ namespace Jogger.Valves.Tests
         [DataRow(4, 4, false)]
         public void SetValveSensorsState_ReturnsTrueIfAbleToSetElement(int numberOfValves, int valveNumber, bool expectedReturn)
         {
-            valveManager.Initialize(numberOfValves);
+            for (int i = 0; i < numberOfValves; i++) 
+            {
+                valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            }
             bool result = valveManager.SetValveSensorsState(valveNumber, true, false);
             Assert.AreEqual(expectedReturn, result);
+        }
+        [TestMethod()]
+        public void Start_ValveTypeIsNull_ReturnsActionStatusError()
+        {
+            ActionStatus actionStatus = valveManager.Start(ServiceProvider.GetRequiredService<TestSettings>(), null);
+            Assert.AreEqual(ActionStatus.Error, actionStatus);
+        }
+        [DataTestMethod]
+        [DataRow("")]
+        [DataRow("2Up")]
+        [DataRow("3_5Up")]
+        public void Start_ValveTypeIsSupported_ReturnsActionStatusOk(string valveTypeTxt)
+        {
+            ActionStatus actionStatus = valveManager.Start(ServiceProvider.GetRequiredService<TestSettings>(), valveTypeTxt);
+            Assert.AreEqual(ActionStatus.OK, actionStatus);
+        }
+        [TestMethod()]
+        public void Start_ValveTypeNotSupported_ReturnsActionStatusError()
+        {
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            ActionStatus actionStatus = valveManager.Start(ServiceProvider.GetRequiredService<TestSettings>(), "Test");
+            Assert.AreEqual(ActionStatus.Error, actionStatus);
+        }
+        [TestMethod()]
+        public void Stop_ReturnsActionStatusOk()
+        {
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            ActionStatus actionStatus = valveManager.Stop();
+            Assert.AreEqual(ActionStatus.OK, actionStatus);
+        }
+        [TestMethod()]
+        public void Stop_SetsIsStopRequestedOnAllValves()
+        {
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.Stop();
+            foreach (IValve valve in valveManager.valves)
+            {
+                Assert.AreEqual(true, valve.IsStopRequested);
+            }
+        }
+        [TestMethod]
+        public void Send_ExecuteStepDone()
+        {
+            ValveStub valve = (ValveStub)ServiceProvider.GetRequiredService<IValve>();
+            valveManager.valves.Add(valve);
+            Task<bool> task = valveManager.Send();
+            Assert.AreEqual(true, valve.executeStepDone);
+        }
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void Send_TriggerCommunicationLogChangedIfLogOutDataSelected(bool isLogOutDataSelected)
+        {
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            TestSettings testSettings = ServiceProvider.GetRequiredService<TestSettings>();
+            testSettings.IsLogOutDataSelected = isLogOutDataSelected;
+            bool communicationLogChangedTriggered = false;
+            valveManager.CommunicationLogChanged += (object sender, string log)=> communicationLogChangedTriggered=true;
+            Task<bool> task = valveManager.Send();
+            task.Wait();
+            Assert.AreEqual(isLogOutDataSelected, communicationLogChangedTriggered);
+        }
+        [TestMethod]
+        public void Receive_ValveReceiveExecuted()
+        {
+            ValveStub valve=(ValveStub) ServiceProvider.GetRequiredService<IValve>();
+            valveManager.valves.Add(valve);
+            Task<bool> task = valveManager.Receive();
+            Assert.AreEqual(true,valve.receiveDone);
+        }
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void Receive_TriggerCommunicationLogChangedIfLogInDataSelected(bool isLogInDataSelected)
+        {
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            TestSettings testSettings = ServiceProvider.GetRequiredService<TestSettings>();
+            testSettings.IsLogInDataSelected = isLogInDataSelected;
+            bool communicationLogChangedTriggered = false;
+            valveManager.CommunicationLogChanged += (object sender, string log) => communicationLogChangedTriggered = true;
+            Task<bool> task = valveManager.Receive();
+            task.Wait();
+            Assert.AreEqual(isLogInDataSelected, communicationLogChangedTriggered);
         }
     }
 }

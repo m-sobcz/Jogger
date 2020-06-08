@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Jogger.ValveTypes;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Jogger.Valves
@@ -31,7 +32,7 @@ namespace Jogger.Valves
         void CheckResult();
         Task<string> ExecuteStep();
         Task<string> Receive();
-        void Start();
+        void Start(IValveType valveType);
         void WakeUp();
     }
 }

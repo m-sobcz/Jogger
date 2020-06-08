@@ -25,14 +25,14 @@ namespace Jogger.Valves
             return initializationStatus;
         }
 
-        public Task Receive()
+        public Task<bool> Receive()
         {
-            throw new NotImplementedException();
+            return Task.FromResult<bool>(true);
         }
 
-        public Task Send()
+        public Task<bool> Send()
         {
-            throw new NotImplementedException();
+            return Task.FromResult<bool>(true);
         }
 
         public void SetTestSettings(TestSettings testSettings)
@@ -62,6 +62,11 @@ namespace Jogger.Valves
         }
 
         public int GetNumberOfValves()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetNextProcessedChannel()
         {
             throw new NotImplementedException();
         }

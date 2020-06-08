@@ -1,6 +1,7 @@
 ﻿using Jogger.Drivers;
 using Jogger.Models;
 using Jogger.Services;
+using Jogger.ValveTypes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,7 +15,6 @@ namespace Jogger.Valves
 {
     public class Valve : IValve
     {
-        public static TestSettings testSettings;
         private readonly Timer minStepTimer;
         private readonly Timer maxStepTimer;
         protected uint accessMask = 0;
@@ -27,6 +27,8 @@ namespace Jogger.Valves
         public bool isUntimelyDone { get; set; } = false;
         bool IsMinStepTimerDone { get; set; } = false;
         bool IsMaxStepTimerDone { get; set; } = false;
+
+        private IValveManager valveManager;
         protected IDriver driver;
         public List<Query> Queries = new List<Query>();
         public Dictionary<Int16, string> errorCodes = new Dictionary<Int16, string>();
@@ -88,16 +90,19 @@ namespace Jogger.Valves
                 ResultChanged?.Invoke(this, result, ChannelNumber);
             }
         }
-        public Valve(IDriver driver)
+        public Valve(IValveManager valveManager, IDriver driver)
         {
+            this.valveManager = valveManager;
             this.driver = driver;
             minStepTimer = new Timer(new TimerCallback((o) => IsMinStepTimerDone = true), null, 0, Timeout.Infinite);
             maxStepTimer = new Timer(new TimerCallback((o) => IsMaxStepTimerDone = true), null, 0, Timeout.Infinite);
             ChannelNumber = count;
             count++;
         }
-        public void Start()
+        public void Start(IValveType valveType)
         {
+            Queries = valveType.QueryList;
+            errorCodes = valveType.ErrorCodes;
             HasReceivedAnyMessage = false;
             HasAnyErrorCodeRead = false;
             HasCriticalError = false;
@@ -146,6 +151,7 @@ namespace Jogger.Valves
         }
         public async Task<string> ExecuteStep()
         {
+            if (!IsStarted) return null;
             string message = await Queries[Step].ExecuteStep(driver, ChannelNumber);
             if (IsStopRequested)
             {
@@ -174,12 +180,12 @@ namespace Jogger.Valves
                             switch (Queries[Step].queryType)
                             {
                                 case QueryType.inflate:
-                                    minStepTimer.Change(Valve.testSettings.ValveMinInflateTime, Timeout.Infinite);
-                                    maxStepTimer.Change(Valve.testSettings.ValveMaxInflateTime, Timeout.Infinite);
+                                    minStepTimer.Change(valveManager.TestSettings.ValveMinInflateTime, Timeout.Infinite);
+                                    maxStepTimer.Change(valveManager.TestSettings.ValveMaxInflateTime, Timeout.Infinite);
                                     break;
                                 case QueryType.deflate:
-                                    minStepTimer.Change(Valve.testSettings.ValveMinDeflateTime, Timeout.Infinite);
-                                    maxStepTimer.Change(Valve.testSettings.ValveMaxDeflateTime, Timeout.Infinite);
+                                    minStepTimer.Change(valveManager.TestSettings.ValveMinDeflateTime, Timeout.Infinite);
+                                    maxStepTimer.Change(valveManager.TestSettings.ValveMaxDeflateTime, Timeout.Infinite);
                                     break;
                                 default:
                                     minStepTimer.Change(0, Timeout.Infinite);
@@ -261,7 +267,7 @@ namespace Jogger.Valves
         }
         protected void RepetitionDone(bool canContinue = true)
         {
-            if ((actualRepetition + 1 < testSettings.Repetitions) & canContinue)
+            if ((actualRepetition + 1 < valveManager.TestSettings.Repetitions) & canContinue)
             {
                 actualRepetition++;
             }

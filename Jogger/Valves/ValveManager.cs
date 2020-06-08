@@ -54,76 +54,44 @@ namespace Jogger.Valves
 
         public ActionStatus Start(TestSettings testSettings, string valveTypeTxt)
         {
-            ActionStatus actionStatus = ActionStatus.OK;
+            if (valveTypeTxt is null) return ActionStatus.Error;
             this.TestSettings = testSettings;
-            Valve.testSettings = testSettings;
-            foreach (Valve valve in valves)
+            foreach (IValve valve in valves)
             {
-                ValveType valveType = GetValveType(valveTypeTxt);
-                if (valveType is null) actionStatus = ActionStatus.Error;
-                else
-                {
-                    valve.Queries = valveType.queryList;
-                    valve.errorCodes = valveType.errorCodes;
-                    valve.Start();
-                }
+                IValveType valveType = GetValveType(valveTypeTxt);
+                if (valveType is null) return ActionStatus.Error;
+                valve.Start(valveType);
             }
-            return actionStatus;
+            return ActionStatus.OK;
         }
-        ValveType GetValveType(string valveTypeTxt)
-        {
-            string namespacePrefix = System.Reflection.Assembly.GetExecutingAssembly().EntryPoint.DeclaringType.Namespace;
 
-            Type valveType = Type.GetType(namespacePrefix + ".ValveTypes.ValveType" + valveTypeTxt, false);
-            if (valveType is null)
-            {
-                Trace.WriteLine("ValveType could not be created !");
-                return null;
-            }
-            else
-            {
-                return Activator.CreateInstance(valveType) as ValveType;
-            }
-        }
         public ActionStatus Stop()
         {
-            foreach (Valve valve in valves)
+            foreach (IValve valve in valves)
             {
                 valve.IsStopRequested = true;
             }
             return ActionStatus.OK;
         }
-        public async Task Send()
+        public async Task<bool> Send()
         {
-            if (valves[actualProcessedChannel].IsStarted) // If query done go to next channel
+            string dataToDriver = await valves[actualProcessedChannel].ExecuteStep();
+            if (TestSettings.IsLogOutDataSelected & dataToDriver != null)
             {
-                string dataToDriver = await valves[actualProcessedChannel].ExecuteStep();
-                if (Valve.testSettings.IsLogOutDataSelected)
-                {
-                    CommunicationLogChanged?.Invoke(this, dataToDriver + "\n");
-                }
+                CommunicationLogChanged?.Invoke(this, dataToDriver + "\n");
             }
+            return true;
         }
-        public async Task Receive()
+        public async Task<bool> Receive()
         {
             string dataFromDriver = await valves[actualProcessedChannel].Receive();
             if (TestSettings.IsLogInDataSelected & (TestSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
             {
                 CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
             }
-            SetNextProcessedChannel();
+            return true;
         }
-
-        void CheckTestingDone()
-        {
-            bool isTestingDone = true;
-            foreach (Valve valve in valves)
-            {
-                if (valve.Result == Result.Testing) isTestingDone = false;
-            }
-            if (isTestingDone) TestingFinished?.Invoke(this, EventArgs.Empty);
-        }
-        void SetNextProcessedChannel()
+        public void SetNextProcessedChannel()
         {
             previousProcessedChannel = actualProcessedChannel;
             while (true)
@@ -155,5 +123,23 @@ namespace Jogger.Valves
             }
             else return false;
         }
+        IValveType GetValveType(string valveTypeTxt)
+        {
+            string namespacePrefix = System.Reflection.Assembly.GetExecutingAssembly().EntryPoint.DeclaringType.Namespace;
+            Type valveType = Type.GetType(namespacePrefix + ".ValveTypes.ValveType" + valveTypeTxt, false);
+            if (valveType is null) return null;
+            return Activator.CreateInstance(valveType) as IValveType;
+        }
+        void CheckTestingDone()
+        {
+            bool isTestingDone = true;
+            foreach (Valve valve in valves)
+            {
+                if (valve.Result == Result.Testing) isTestingDone = false;
+            }
+            if (isTestingDone) TestingFinished?.Invoke(this, EventArgs.Empty);
+        }
+        
+        
     }
 }
