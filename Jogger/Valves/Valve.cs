@@ -35,8 +35,7 @@ namespace Jogger.Valves
 
         private IValveManager valveManager;
         protected IDriver driver;
-        public List<Query> Queries = new List<Query>();
-        public Dictionary<Int16, string> errorCodes = new Dictionary<Int16, string>();
+        private IValveType valveType;
         private int actualRepetition;
         public bool IsStopRequested { get; set; }
         public event ErrorsEventHandler ActiveErrorsChanged;
@@ -78,8 +77,8 @@ namespace Jogger.Valves
         public bool HasReceivedAnyMessage { get; private set; }
 
         static int valveCount = 0;
-        public string ActiveErrors { get; set; } = "---";
-        public string OccuredErrors { get; set; } = "---";
+        public string ActiveErrors { get; set; }
+        public string OccuredErrors { get; set; }
         public event ResultEventHandler ResultChanged;
 
         public int ValveNumber { get; set; }
@@ -108,8 +107,7 @@ namespace Jogger.Valves
         }
         public void Start(IValveType valveType)
         {
-            Queries = valveType.QueryList;
-            errorCodes = valveType.ErrorCodes;
+            this.valveType = valveType;
             HasReceivedAnyMessage = false;
             HasAnyErrorCodeRead = false;
             HasCriticalError = false;
@@ -159,18 +157,18 @@ namespace Jogger.Valves
         public async Task<string> ExecuteStep()
         {
             if (!IsStarted) return null;
-            string message = await Queries[Step].ExecuteStep(driver, ValveNumber);
+            string message = await valveType.QueryList[Step].ExecuteStep(driver, ValveNumber);
             if (IsStopRequested)
             {
                 UntimelyFinish();
             }
-            if (Queries[Step].isDone)
+            if (valveType.QueryList[Step].isDone)
             {
                 {
-                    bool isStandardProcessingFinished = (Queries[Step].queryType == QueryType.singleExecution) ||
-                        (IsInflated && !IsDeflated && Queries[Step].queryType == QueryType.inflate) ||
-                        (IsDeflated && !IsInflated && Queries[Step].queryType == QueryType.deflate);
-                    Trace.WriteLine($"ChannelNumber {ValveNumber} QueryType {Queries[Step].queryType },Repetition {actualRepetition},Step {Step}, IsInflated {IsInflated}, IsDeflated {IsDeflated}");
+                    bool isStandardProcessingFinished = (valveType.QueryList[Step].queryType == QueryType.singleExecution) ||
+                        (IsInflated && !IsDeflated && valveType.QueryList[Step].queryType == QueryType.inflate) ||
+                        (IsDeflated && !IsInflated && valveType.QueryList[Step].queryType == QueryType.deflate);
+                    Trace.WriteLine($"ChannelNumber {ValveNumber} QueryType {valveType.QueryList[Step].queryType },Repetition {actualRepetition},Step {Step}, IsInflated {IsInflated}, IsDeflated {IsDeflated}");
                     if (IsMaxStepTimerDone | (IsMinStepTimerDone & (isStandardProcessingFinished)))
                     {
                         Step++;
@@ -178,13 +176,13 @@ namespace Jogger.Valves
                         {
                             UntimelyFinish();
                         }
-                        if (Step >= Queries.Count)
+                        if (Step >= valveType.QueryList.Count)
                         {
                             RepetitionDone();
                         }
                         else
                         {
-                            switch (Queries[Step].queryType)
+                            switch (valveType.QueryList[Step].queryType)
                             {
                                 case QueryType.inflate:
                                     minStepTimer.Change(valveManager.TestSettings.ValveMinInflateTime, Timeout.Infinite);
@@ -205,12 +203,12 @@ namespace Jogger.Valves
                     }
                     else
                     {
-                        Queries[Step].Restart();
+                        valveType.QueryList[Step].Restart();
                     }
                     canSetNextProcessedChannel = true;
                 }
             }
-            QueryFinished = Queries[Step].isDone;
+            QueryFinished = valveType.QueryList[Step].isDone;
             return (message);
         }
         public void WakeUp()
@@ -254,18 +252,17 @@ namespace Jogger.Valves
         {
             HasAnyErrorCodeRead = true;
             byte[] b = { data1, data0 };
-            string s = "???";
+            string errorTxt = "???";
             int code = BitConverter.ToInt16(b, 0);
-            if (!(errorCodes.TryGetValue(BitConverter.ToInt16(b, 0), out s)))
+            if (!(valveType.ErrorCodes.TryGetValue(BitConverter.ToInt16(b, 0), out errorTxt)))
             {
-                s = b[1].ToString("x2") + b[0].ToString("x2");
-            }
-
-            if (s.Contains("Valve"))
+                errorTxt = b[1].ToString("x2") + b[0].ToString("x2");
+            }       
+            if (valveType.CriticalErrorCodes.TryGetValue(BitConverter.ToInt16(b, 0), out _))
             {
                 HasCriticalError = true;
             }
-            list.Add(s);
+            list.Add(errorTxt);
         }
         protected void UntimelyFinish()
         {
@@ -285,7 +282,7 @@ namespace Jogger.Valves
                 actualRepetition = 0;
             }
             Step = 0;
-            foreach (Query query in Queries)
+            foreach (Query query in valveType.QueryList)
             {
                 query.Restart();
             }

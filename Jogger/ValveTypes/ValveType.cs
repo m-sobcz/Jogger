@@ -8,6 +8,7 @@ namespace Jogger.ValveTypes
     public class ValveType : IValveType
     {
         public Dictionary<short, string> ErrorCodes { get; set; } = new Dictionary<short, string>();
+        public Dictionary<short, string> CriticalErrorCodes { get; set; } = new Dictionary<short, string>();
         public List<Query> QueryList { get; set; } = new List<Query>();
         public ValveType()
         {

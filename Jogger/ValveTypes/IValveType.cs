@@ -7,7 +7,8 @@ namespace Jogger.ValveTypes
 {
     public interface IValveType
     {
-        public Dictionary<short, string> ErrorCodes { get; set; } 
+        public Dictionary<short, string> ErrorCodes { get; set; }
+        public Dictionary<short, string> CriticalErrorCodes { get; set; }
         public List<Query> QueryList { get; set; }
     }
 }
