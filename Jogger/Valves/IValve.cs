@@ -11,7 +11,7 @@ namespace Jogger.Valves
         bool QueryFinished { get; set; }
         List<string> ActiveErrorList { get; set; }
         string ActiveErrors { get; set; }
-        int ChannelNumber { get; set; }
+        int ValveNumber { get; set; }
         bool HasAnyErrorCodeRead { get; }
         bool HasCriticalError { get; }
         bool HasReceivedAnyMessage { get; }

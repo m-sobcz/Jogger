@@ -14,7 +14,7 @@ namespace Jogger.Valves
         public bool QueryFinished { get; set; }
         public List<string> ActiveErrorList { get; set; }
         public string ActiveErrors { get; set; }
-        public int ChannelNumber { get; set; }
+        public int ValveNumber { get; set; }
 
         public bool HasAnyErrorCodeRead { get; }
 

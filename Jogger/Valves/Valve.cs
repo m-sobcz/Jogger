@@ -15,6 +15,11 @@ namespace Jogger.Valves
 {
     public class Valve : IValve
     {
+        private readonly string alarmProcessingTxt = "...";
+        private readonly string alarmInactiveTxt = "---";
+        private readonly string messageReceiveTxt = "RX";
+        private readonly byte ActiveErrorTypeByte = 0x14;
+        private readonly byte OccuredErrorTypeByte = 0x15;
         private readonly Timer minStepTimer;
         private readonly Timer maxStepTimer;
         protected uint accessMask = 0;
@@ -49,7 +54,7 @@ namespace Jogger.Valves
                 {
                     errors += s + "\n";
                 }
-                ActiveErrorsChanged?.Invoke(this, errors, ChannelNumber);
+                ActiveErrorsChanged?.Invoke(this, errors, ValveNumber);
             }
         }
         public List<string> OccuredErrorList
@@ -63,7 +68,7 @@ namespace Jogger.Valves
                 {
                     errors += s + "\n";
                 }
-                OccuredErrorsChanged?.Invoke(this, errors, ChannelNumber);
+                OccuredErrorsChanged?.Invoke(this, errors, ValveNumber);
             }
         }
         bool isReadingActiveError;
@@ -72,12 +77,12 @@ namespace Jogger.Valves
         public bool HasAnyErrorCodeRead { get; private set; }
         public bool HasReceivedAnyMessage { get; private set; }
 
-        static int count = 0;
+        static int valveCount = 0;
         public string ActiveErrors { get; set; } = "---";
         public string OccuredErrors { get; set; } = "---";
         public event ResultEventHandler ResultChanged;
 
-        public int ChannelNumber { get; set; }
+        public int ValveNumber { get; set; }
         private Result result = Result.Idle;
         public bool canSetNextProcessedChannel = false;
 
@@ -87,7 +92,7 @@ namespace Jogger.Valves
             set
             {
                 result = value;
-                ResultChanged?.Invoke(this, result, ChannelNumber);
+                ResultChanged?.Invoke(this, result, ValveNumber);
             }
         }
         public Valve(IValveManager valveManager, IDriver driver)
@@ -96,8 +101,10 @@ namespace Jogger.Valves
             this.driver = driver;
             minStepTimer = new Timer(new TimerCallback((o) => IsMinStepTimerDone = true), null, 0, Timeout.Infinite);
             maxStepTimer = new Timer(new TimerCallback((o) => IsMaxStepTimerDone = true), null, 0, Timeout.Infinite);
-            ChannelNumber = count;
-            count++;
+            ActiveErrors = alarmInactiveTxt;
+            OccuredErrors = alarmInactiveTxt;
+            ValveNumber = valveCount;
+            valveCount++;
         }
         public void Start(IValveType valveType)
         {
@@ -111,16 +118,16 @@ namespace Jogger.Valves
             IsStarted = true;
             Result = Result.Testing;
             ActiveErrorList.Clear();
-            ActiveErrorList.Add("...");
+            ActiveErrorList.Add(alarmProcessingTxt);
             OccuredErrorList.Clear();
-            OccuredErrorList.Add("...");
+            OccuredErrorList.Add(alarmProcessingTxt);
         }
         public async Task<string> Receive()
         {
             string dataFromDriver = await Task<string>.Run(() => driver.Receive());
-            HasReceivedAnyMessage = HasReceivedAnyMessage | dataFromDriver.Contains("RX"); ;
-            ActiveErrorList = CheckErrorInData(ref isReadingActiveError, ActiveErrorList, 0x14);
-            OccuredErrorList = CheckErrorInData(ref isReadingOccuredError, OccuredErrorList, 0x15);
+            HasReceivedAnyMessage |= dataFromDriver.Contains(messageReceiveTxt); ;
+            ActiveErrorList = CheckErrorInData(ref isReadingActiveError, ActiveErrorList, ActiveErrorTypeByte);
+            OccuredErrorList = CheckErrorInData(ref isReadingOccuredError, OccuredErrorList, OccuredErrorTypeByte);
             if (IsDone) CheckResult();
             return dataFromDriver;
         }
@@ -152,7 +159,7 @@ namespace Jogger.Valves
         public async Task<string> ExecuteStep()
         {
             if (!IsStarted) return null;
-            string message = await Queries[Step].ExecuteStep(driver, ChannelNumber);
+            string message = await Queries[Step].ExecuteStep(driver, ValveNumber);
             if (IsStopRequested)
             {
                 UntimelyFinish();
@@ -163,7 +170,7 @@ namespace Jogger.Valves
                     bool isStandardProcessingFinished = (Queries[Step].queryType == QueryType.singleExecution) ||
                         (IsInflated && !IsDeflated && Queries[Step].queryType == QueryType.inflate) ||
                         (IsDeflated && !IsInflated && Queries[Step].queryType == QueryType.deflate);
-                    Trace.WriteLine($"ChannelNumber {ChannelNumber} QueryType {Queries[Step].queryType },Repetition {actualRepetition},Step {Step}, IsInflated {IsInflated}, IsDeflated {IsDeflated}");
+                    Trace.WriteLine($"ChannelNumber {ValveNumber} QueryType {Queries[Step].queryType },Repetition {actualRepetition},Step {Step}, IsInflated {IsInflated}, IsDeflated {IsDeflated}");
                     if (IsMaxStepTimerDone | (IsMinStepTimerDone & (isStandardProcessingFinished)))
                     {
                         Step++;
