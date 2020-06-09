@@ -40,7 +40,6 @@ namespace Jogger.Services
             this.driver = driver;
             valveManager.TestingFinished += ValveManager_TestingFinished;
         }
-
         public ActionStatus Initialize(ConfigurationSettings configurationSettings)
         {
             State = ProgramState.Initializing;
@@ -67,7 +66,7 @@ namespace Jogger.Services
                 await digitalIO.ReadInputs();
                 await valveManager.Send();
                 await valveManager.Receive();
-                valveManager.SetNextProcessedChannel();
+                valveManager.SetNextProcessedValve();
             }
         }
         public ActionStatus Stop()

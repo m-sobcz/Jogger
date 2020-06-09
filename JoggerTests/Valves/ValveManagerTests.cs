@@ -72,7 +72,7 @@ namespace Jogger.Valves.Tests
         [DataRow(4, 4, false)]
         public void SetValveSensorsState_ReturnsTrueIfAbleToSetElement(int numberOfValves, int valveNumber, bool expectedReturn)
         {
-            for (int i = 0; i < numberOfValves; i++) 
+            for (int i = 0; i < numberOfValves; i++)
             {
                 valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
             }
@@ -125,7 +125,7 @@ namespace Jogger.Valves.Tests
             ValveStub valve = (ValveStub)ServiceProvider.GetRequiredService<IValve>();
             valveManager.valves.Add(valve);
             Task<bool> task = valveManager.Send();
-            Assert.AreEqual(true, valve.executeStepDone);
+            Assert.IsTrue(valve.executeStepDone);
         }
         [DataTestMethod]
         [DataRow(false)]
@@ -137,7 +137,7 @@ namespace Jogger.Valves.Tests
             TestSettings testSettings = ServiceProvider.GetRequiredService<TestSettings>();
             testSettings.IsLogOutDataSelected = isLogOutDataSelected;
             bool communicationLogChangedTriggered = false;
-            valveManager.CommunicationLogChanged += (object sender, string log)=> communicationLogChangedTriggered=true;
+            valveManager.CommunicationLogChanged += (object sender, string log) => communicationLogChangedTriggered = true;
             Task<bool> task = valveManager.Send();
             task.Wait();
             Assert.AreEqual(isLogOutDataSelected, communicationLogChangedTriggered);
@@ -145,10 +145,10 @@ namespace Jogger.Valves.Tests
         [TestMethod]
         public void Receive_ValveReceiveExecuted()
         {
-            ValveStub valve=(ValveStub) ServiceProvider.GetRequiredService<IValve>();
+            ValveStub valve = (ValveStub)ServiceProvider.GetRequiredService<IValve>();
             valveManager.valves.Add(valve);
             Task<bool> task = valveManager.Receive();
-            Assert.AreEqual(true,valve.receiveDone);
+            Assert.IsTrue(valve.receiveDone);
         }
         [DataTestMethod]
         [DataRow(false)]
@@ -165,5 +165,62 @@ namespace Jogger.Valves.Tests
             task.Wait();
             Assert.AreEqual(isLogInDataSelected, communicationLogChangedTriggered);
         }
+        [DataTestMethod]
+        [DataRow(0, 0)]
+        [DataRow(1, 1)]
+        [DataRow(2, 0)]
+        [DataRow(3, 1)]
+        [DataRow(4, 0)]
+        public void SetNextProcessedChannel_TwoValvesAndBothStarted_ActualProceseedValveSwitchesBetweenValves(int numberOfExecutions, int expectedActualProcessedValve)
+        {
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves[0].IsStarted = true;
+            valveManager.valves[1].IsStarted = true;
+            for (int i = 0; i < numberOfExecutions; i++)
+            {
+                valveManager.SetNextProcessedValve();
+            }
+            Assert.AreEqual(expectedActualProcessedValve, valveManager.ActualProcessedValve);
+        }
+        [DataTestMethod]
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void SetNextProcessedChannel_OneValveStarted_OnlyStartedValveIsSetAsActualProcessedValve(int numberOfStartedValve)
+        {
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves[numberOfStartedValve].IsStarted = true;
+            valveManager.SetNextProcessedValve();
+            Assert.AreEqual(numberOfStartedValve, valveManager.ActualProcessedValve);
+        }
+        [DataTestMethod]
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(2)]
+        public void SetNextProcessedChannel_NoValvesStarted_ActualProcessedValveDoesntChange(int numberOfStartedValve)
+        {
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            int previousValve = valveManager.ActualProcessedValve;
+            valveManager.SetNextProcessedValve();
+            Assert.AreEqual(previousValve, valveManager.ActualProcessedValve);
+        }
+        [TestMethod]
+        public void SetNextProcessedChannel_NoValvesStarted_TestingFinishedEventTriggered()
+        {
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
+            bool testingFinishedTriggered = false;
+            valveManager.TestingFinished += (object sender, EventArgs e) => testingFinishedTriggered = true;
+            valveManager.SetNextProcessedValve();
+            Assert.IsTrue(testingFinishedTriggered);
+        }
+
+
     }
 }

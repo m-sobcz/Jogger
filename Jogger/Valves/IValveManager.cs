@@ -11,7 +11,7 @@ namespace Jogger.Valves
         ActionStatus Start(TestSettings testSettings, string valveType);
         ActionStatus Stop();
         Task<bool> Receive();
-        void SetNextProcessedChannel();
+        void SetNextProcessedValve();
         Task<bool> Send();
         TestSettings TestSettings{get;set;}
         bool SetValveSensorsState(int valveNumber, bool isInflated, bool isDeflated);

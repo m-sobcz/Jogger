@@ -17,12 +17,12 @@ namespace Jogger.Valves
 {
     public class ValveManager : IValveManager
     {
-        int actualProcessedChannel = 0;
-        int previousProcessedChannel = 0;
+
         public List<IValve> valves = new List<IValve>();
         readonly Func<IValve> getValve;
-
         public TestSettings TestSettings { get; set; }
+        public int PreviousProcessedValve { get; set; }
+        public int ActualProcessedValve { get; set; }
 
         public int GetNumberOfValves() => valves.Count;
         public event CommunicationLogEventHandler CommunicationLogChanged;
@@ -75,7 +75,7 @@ namespace Jogger.Valves
         }
         public async Task<bool> Send()
         {
-            string dataToDriver = await valves[actualProcessedChannel].ExecuteStep();
+            string dataToDriver = await valves[ActualProcessedValve].ExecuteStep();
             if (TestSettings.IsLogOutDataSelected & dataToDriver != null)
             {
                 CommunicationLogChanged?.Invoke(this, dataToDriver + "\n");
@@ -84,34 +84,34 @@ namespace Jogger.Valves
         }
         public async Task<bool> Receive()
         {
-            string dataFromDriver = await valves[actualProcessedChannel].Receive();
+            string dataFromDriver = await valves[ActualProcessedValve].Receive();
             if (TestSettings.IsLogInDataSelected & (TestSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
             {
                 CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
             }
             return true;
         }
-        public void SetNextProcessedChannel()
+        public void SetNextProcessedValve()
         {
-            previousProcessedChannel = actualProcessedChannel;
+            PreviousProcessedValve = ActualProcessedValve;
             while (true)
             {
-                actualProcessedChannel++;
-                if (actualProcessedChannel >= valves.Count)
+                ActualProcessedValve++;
+                if (ActualProcessedValve >= valves.Count)
                 {
-                    actualProcessedChannel = 0;
+                    ActualProcessedValve = 0;
                 }
-                if (valves[actualProcessedChannel].IsStarted)
+                if (valves[ActualProcessedValve].IsStarted)
                 {
                     break;
                 }
-                if (actualProcessedChannel == previousProcessedChannel)
+                if (ActualProcessedValve == PreviousProcessedValve)
                 {
                     TestingFinished?.Invoke(this, EventArgs.Empty);
                     break;
                 }
             }
-            valves[actualProcessedChannel].QueryFinished = false;
+            valves[ActualProcessedValve].QueryFinished = false;
         }
         public bool SetValveSensorsState(int valveNumber, bool isInflated, bool isDeflated)
         {

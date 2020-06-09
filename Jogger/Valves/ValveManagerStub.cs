@@ -66,7 +66,7 @@ namespace Jogger.Valves
             throw new NotImplementedException();
         }
 
-        public void SetNextProcessedChannel()
+        public void SetNextProcessedValve()
         {
             throw new NotImplementedException();
         }
