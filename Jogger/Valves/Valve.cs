@@ -23,21 +23,18 @@ namespace Jogger.Valves
         private readonly Timer minStepTimer;
         private readonly Timer maxStepTimer;
         protected uint accessMask = 0;
-        public bool QueryFinished { get; set; } = false;
         protected int Step { get; set; }
-        public bool IsStarted { get; set; }
         public bool IsDone { get; set; } = false;
         public bool IsDeflated { get; set; } = false;
         public bool IsInflated { get; set; } = false;
-        public bool isUntimelyDone { get; set; } = false;
         bool IsMinStepTimerDone { get; set; } = false;
         bool IsMaxStepTimerDone { get; set; } = false;
 
         private IValveManager valveManager;
         protected IDriver driver;
+        private readonly IValveDecoder valveDecoder;
         private IValveType valveType;
         private int actualRepetition;
-        public bool IsStopRequested { get; set; }
         public event ErrorsEventHandler ActiveErrorsChanged;
         public event ErrorsEventHandler OccuredErrorsChanged;
         private List<string> activeErrorList = new List<string>();
@@ -72,7 +69,6 @@ namespace Jogger.Valves
         }
         bool isReadingActiveError;
         bool isReadingOccuredError;
-        public bool HasCriticalError { get; private set; }
         public bool HasAnyErrorCodeRead { get; private set; }
         public bool HasReceivedAnyMessage { get; private set; }
 
@@ -84,7 +80,6 @@ namespace Jogger.Valves
         public int ValveNumber { get; set; }
         private Result result = Result.Idle;
         public bool canSetNextProcessedChannel = false;
-
         public Result Result
         {
             get => result;
@@ -94,10 +89,11 @@ namespace Jogger.Valves
                 ResultChanged?.Invoke(this, result, ValveNumber);
             }
         }
-        public Valve(IValveManager valveManager, IDriver driver)
+        public Valve(IValveManager valveManager, IDriver driver, IValveDecoder valveDecoder)
         {
             this.valveManager = valveManager;
             this.driver = driver;
+            this.valveDecoder = valveDecoder;
             minStepTimer = new Timer(new TimerCallback((o) => IsMinStepTimerDone = true), null, 0, Timeout.Infinite);
             maxStepTimer = new Timer(new TimerCallback((o) => IsMaxStepTimerDone = true), null, 0, Timeout.Infinite);
             ActiveErrors = alarmInactiveTxt;
@@ -110,10 +106,6 @@ namespace Jogger.Valves
             this.valveType = valveType;
             HasReceivedAnyMessage = false;
             HasAnyErrorCodeRead = false;
-            HasCriticalError = false;
-            IsStopRequested = false;
-            isUntimelyDone = false;
-            IsStarted = true;
             Result = Result.Testing;
             ActiveErrorList.Clear();
             ActiveErrorList.Add(alarmProcessingTxt);
@@ -122,98 +114,78 @@ namespace Jogger.Valves
         }
         public async Task<string> Receive()
         {
-            string dataFromDriver = await Task<string>.Run(() => driver.Receive());
+            string dataFromDriver = await Task.Run(() => driver.Receive());
             HasReceivedAnyMessage |= dataFromDriver.Contains(messageReceiveTxt); ;
             ActiveErrorList = CheckErrorInData(ref isReadingActiveError, ActiveErrorList, ActiveErrorTypeByte);
             OccuredErrorList = CheckErrorInData(ref isReadingOccuredError, OccuredErrorList, OccuredErrorTypeByte);
-            if (IsDone) CheckResult();
             return dataFromDriver;
         }
-        public void CheckResult()
+        public void Stop()
         {
-            if (IsStopRequested)
-            {
-                Result = Result.Stopped;
-            }
-            else if (!HasReceivedAnyMessage)
-            {
-                Result = Result.DoneErrorConnection;
-            }
-            else if (isUntimelyDone)
-            {
-                Result = Result.DoneErrorTimeout;
-            }
-            else if (HasCriticalError)
-            {
-                Result = Result.DoneErrorCriticalCode;
-            }
-            else
-            {
-                Result = Result.DoneOk;
-            }
-            IsDone = false;
-
+            Result = Result.Stopped;
+            UntimelyFinish();
         }
         public async Task<string> ExecuteStep()
         {
-            if (!IsStarted) return null;
+            if (Result!= Result.Testing) return null;
             string message = await valveType.QueryList[Step].ExecuteStep(driver, ValveNumber);
-            if (IsStopRequested)
-            {
-                UntimelyFinish();
-            }
             if (valveType.QueryList[Step].isDone)
             {
+                ProcessStepDone();
+            }
+            return message;
+        }
+        void ProcessStepDone() 
+        {
+            {
+                if (IsMaxStepTimerDone)
                 {
-                    bool isStandardProcessingFinished = (valveType.QueryList[Step].queryType == QueryType.singleExecution) ||
-                        (IsInflated && !IsDeflated && valveType.QueryList[Step].queryType == QueryType.inflate) ||
-                        (IsDeflated && !IsInflated && valveType.QueryList[Step].queryType == QueryType.deflate);
-                    Trace.WriteLine($"ChannelNumber {ValveNumber} QueryType {valveType.QueryList[Step].queryType },Repetition {actualRepetition},Step {Step}, IsInflated {IsInflated}, IsDeflated {IsDeflated}");
-                    if (IsMaxStepTimerDone | (IsMinStepTimerDone & (isStandardProcessingFinished)))
+                    UntimelyFinish();
+                }
+                if (CheckStandardProcessingDone())
+                {
+                    Step++;
+                    if (Step >= valveType.QueryList.Count)
                     {
-                        Step++;
-                        if (!isStandardProcessingFinished)
-                        {
-                            UntimelyFinish();
-                        }
-                        if (Step >= valveType.QueryList.Count)
-                        {
-                            RepetitionDone();
-                        }
-                        else
-                        {
-                            switch (valveType.QueryList[Step].queryType)
-                            {
-                                case QueryType.inflate:
-                                    minStepTimer.Change(valveManager.TestSettings.ValveMinInflateTime, Timeout.Infinite);
-                                    maxStepTimer.Change(valveManager.TestSettings.ValveMaxInflateTime, Timeout.Infinite);
-                                    break;
-                                case QueryType.deflate:
-                                    minStepTimer.Change(valveManager.TestSettings.ValveMinDeflateTime, Timeout.Infinite);
-                                    maxStepTimer.Change(valveManager.TestSettings.ValveMaxDeflateTime, Timeout.Infinite);
-                                    break;
-                                default:
-                                    minStepTimer.Change(0, Timeout.Infinite);
-                                    maxStepTimer.Change(0, Timeout.Infinite);
-                                    break;
-                            }
-                            IsMinStepTimerDone = false;
-                            IsMaxStepTimerDone = false;
-                        }
+                        RepetitionDone();
                     }
                     else
                     {
-                        valveType.QueryList[Step].Restart();
+                        SetupNewStepTimers();
                     }
-                    canSetNextProcessedChannel = true;
                 }
+                else
+                {
+                    valveType.QueryList[Step].Restart();
+                }
+                canSetNextProcessedChannel = true;
             }
-            QueryFinished = valveType.QueryList[Step].isDone;
-            return (message);
         }
-        public void WakeUp()
+        void SetupNewStepTimers() 
         {
-            driver.WakeUp();
+            switch (valveType.QueryList[Step].queryType)
+            {
+                case QueryType.inflate:
+                    minStepTimer.Change(valveManager.TestSettings.ValveMinInflateTime, Timeout.Infinite);
+                    maxStepTimer.Change(valveManager.TestSettings.ValveMaxInflateTime, Timeout.Infinite);
+                    break;
+                case QueryType.deflate:
+                    minStepTimer.Change(valveManager.TestSettings.ValveMinDeflateTime, Timeout.Infinite);
+                    maxStepTimer.Change(valveManager.TestSettings.ValveMaxDeflateTime, Timeout.Infinite);
+                    break;
+                default:
+                    minStepTimer.Change(0, Timeout.Infinite);
+                    maxStepTimer.Change(0, Timeout.Infinite);
+                    break;
+            }
+            IsMinStepTimerDone = false;
+            IsMaxStepTimerDone = false;
+        }
+        bool CheckStandardProcessingDone() 
+        {
+            return IsMinStepTimerDone & ((valveType.QueryList[Step].queryType == QueryType.singleExecution) ||
+                    (IsInflated && !IsDeflated && valveType.QueryList[Step].queryType == QueryType.inflate) ||
+                    (IsDeflated && !IsInflated && valveType.QueryList[Step].queryType == QueryType.deflate));
         }
         protected List<string> CheckErrorInData(ref bool isReadingActive, List<string> list, byte errorType)
         {
@@ -251,42 +223,48 @@ namespace Jogger.Valves
         protected void AddError(List<string> list, byte data0, byte data1)
         {
             HasAnyErrorCodeRead = true;
-            byte[] b = { data1, data0 };
-            string errorTxt = "???";
-            int code = BitConverter.ToInt16(b, 0);
-            if (!(valveType.ErrorCodes.TryGetValue(BitConverter.ToInt16(b, 0), out errorTxt)))
+            byte[] data = { data1, data0 };
+            if (!(valveType.ErrorCodes.TryGetValue(BitConverter.ToInt16(data, 0), out string errorTxt)))
             {
-                errorTxt = b[1].ToString("x2") + b[0].ToString("x2");
-            }       
-            if (valveType.CriticalErrorCodes.TryGetValue(BitConverter.ToInt16(b, 0), out _))
+                errorTxt = data[1].ToString("x2") + data[0].ToString("x2");
+            }
+            if (valveType.CriticalErrorCodes.TryGetValue(BitConverter.ToInt16(data, 0), out _))
             {
-                HasCriticalError = true;
+                Result = Result.DoneErrorCriticalCode;
             }
             list.Add(errorTxt);
         }
         protected void UntimelyFinish()
         {
-            isUntimelyDone = true;
-            RepetitionDone(false);
+            Result = HasReceivedAnyMessage ? Result.DoneErrorTimeout : Result.DoneErrorConnection;
+            SuccessfullyEndTesting();
         }
-        protected void RepetitionDone(bool canContinue = true)
+        protected void RepetitionDone()
         {
-            if ((actualRepetition + 1 < valveManager.TestSettings.Repetitions) & canContinue)
+            if (actualRepetition + 1 < valveManager.TestSettings.Repetitions)
             {
                 actualRepetition++;
+                Reset();
             }
             else
             {
-                IsDone = true;
-                IsStarted = false;
-                actualRepetition = 0;
-            }
+                SuccessfullyEndTesting();
+            }     
+        }
+
+        protected void SuccessfullyEndTesting()
+        {
+            Result = Result.DoneOk;
+            actualRepetition = 0;
+            Reset();
+        }
+        void Reset()
+        {
             Step = 0;
             foreach (Query query in valveType.QueryList)
             {
                 query.Restart();
             }
         }
-
     }
 }

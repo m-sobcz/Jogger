@@ -10,6 +10,7 @@ namespace Jogger.Valves
     {
         public bool executeStepDone;
         public bool receiveDone;
+        public bool Stopped { get; set; }
 
         public bool QueryFinished { get; set; }
         public List<string> ActiveErrorList { get; set; }
@@ -26,7 +27,6 @@ namespace Jogger.Valves
         public bool IsDone { get; set; }
         public bool IsInflated { get; set; }
         public bool IsStarted { get; set; }
-        public bool IsStopRequested { get; set; }
         public bool isUntimelyDone { get; set; }
         public List<string> OccuredErrorList { get; set; }
         public string OccuredErrors { get; set; }
@@ -56,6 +56,11 @@ namespace Jogger.Valves
         public void Start(IValveType valveType)
         {
             
+        }
+
+        public void Stop()
+        {
+            Stopped = true;
         }
 
         public void WakeUp()

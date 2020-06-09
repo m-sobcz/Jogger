@@ -109,14 +109,14 @@ namespace Jogger.Valves.Tests
             Assert.AreEqual(ActionStatus.OK, actionStatus);
         }
         [TestMethod()]
-        public void Stop_SetsIsStopRequestedOnAllValves()
+        public void Stop_SetsStoppedResult()
         {
             valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
             valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
             valveManager.Stop();
             foreach (IValve valve in valveManager.valves)
             {
-                Assert.AreEqual(true, valve.IsStopRequested);
+                Assert.IsTrue((valve as ValveStub).Stopped);
             }
         }
         [TestMethod]
@@ -175,8 +175,8 @@ namespace Jogger.Valves.Tests
         {
             valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
             valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
-            valveManager.valves[0].IsStarted = true;
-            valveManager.valves[1].IsStarted = true;
+            valveManager.valves[0].Result = Result.Testing;
+            valveManager.valves[1].Result = Result.Testing;
             for (int i = 0; i < numberOfExecutions; i++)
             {
                 valveManager.SetNextProcessedValve();
@@ -192,7 +192,7 @@ namespace Jogger.Valves.Tests
             valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
             valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
             valveManager.valves.Add(ServiceProvider.GetRequiredService<IValve>());
-            valveManager.valves[numberOfStartedValve].IsStarted = true;
+            valveManager.valves[numberOfStartedValve].Result = Result.Testing;
             valveManager.SetNextProcessedValve();
             Assert.AreEqual(numberOfStartedValve, valveManager.ActualProcessedValve);
         }
