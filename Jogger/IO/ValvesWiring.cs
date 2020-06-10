@@ -20,7 +20,7 @@ namespace Jogger.IO
             for (int i = 0; i < (valveManager.GetNumberOfValves()); i++)
             {
                 bool isInflated = (buffer[0] & (1 << i * 2)) != 0;
-                bool isDeflated = (buffer[0] & (1 << i * 2)) != 0;
+                bool isDeflated = (buffer[0] & (1 << i * 2+1)) != 0;
                 valveManager.SetValveSensorsState(i, isInflated, isDeflated);
             }
         }
