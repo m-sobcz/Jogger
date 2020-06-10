@@ -69,7 +69,7 @@ namespace Jogger.Valves
         {
             foreach (IValve valve in valves)
             {
-                valve.Stop();
+                valve.IsStopRequested = true;
             }
             return ActionStatus.OK;
         }
@@ -101,7 +101,7 @@ namespace Jogger.Valves
                 {
                     ActualProcessedValve = 0;
                 }
-                if (valves[ActualProcessedValve].Result==Result.Testing)
+                if (valves[ActualProcessedValve].IsStarted)
                 {
                     break;
                 }
@@ -111,6 +111,7 @@ namespace Jogger.Valves
                     break;
                 }
             }
+            valves[ActualProcessedValve].QueryFinished = false;
         }
         public bool SetValveSensorsState(int valveNumber, bool isInflated, bool isDeflated)
         {
