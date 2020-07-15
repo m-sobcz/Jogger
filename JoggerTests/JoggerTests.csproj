@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Jogger\Jogger.csproj" />
+    <ProjectReference Include="..\Jogger\JoggerWPF.csproj" />
   </ItemGroup>
 
 </Project>

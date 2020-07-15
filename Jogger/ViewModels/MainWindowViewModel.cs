@@ -1,5 +1,4 @@
-﻿using Jogger.Localization;
-using Jogger.Services;
+﻿using Jogger.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
