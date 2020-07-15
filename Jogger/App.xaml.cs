@@ -35,7 +35,7 @@ namespace Jogger
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
       .SetBasePath(Directory.GetCurrentDirectory());
-      //.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            //.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             Configuration = builder.Build();
             ServiceCollection serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
@@ -73,8 +73,8 @@ namespace Jogger
             services.AddSingleton<IDriver, LinDriver>();
             //Logic - Other 
             services.AddTransient<IValve, Valve>();
-            services.AddSingleton<Func<IValve>>(x=>()=>x.GetRequiredService<IValve>());
-            services.AddSingleton<IWiringIO,ValvesWiring>();
+            services.AddSingleton<Func<IValve>>(x => () => x.GetRequiredService<IValve>());
+            services.AddSingleton<IWiringIO, ValvesWiring>();
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

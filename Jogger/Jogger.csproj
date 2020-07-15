@@ -24,7 +24,6 @@
     <None Remove="Images\settings.png" />
     <None Remove="Images\slash.png" />
     <None Remove="Resources\kaico13.ico" />
-    <None Remove="Resources\staticDi4761.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,6 +32,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.3" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.3" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.19" />
+    <PackageReference Include="Moq" Version="4.14.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,12 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Automation.BDaq4">
-      <HintPath>..\..\..\DLL\Advantech\4.0.0.0\Automation.BDaq4.dll</HintPath>
-    </Reference>
-    <Reference Include="vxlapi_NET">
-      <HintPath>..\..\..\..\Users\MISO\source\repos\Vector XL Driver Library\exec\NET\vxlapi_NET.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\JoggerBLL\JoggerBLL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -69,24 +64,9 @@
     <Resource Include="Images\settings.png" />
     <Resource Include="Images\slash.png" />
     <Resource Include="Resources\kaico13.ico" />
-    <Resource Include="Resources\staticDi4761.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Localization\Strings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Localization\Strings.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>

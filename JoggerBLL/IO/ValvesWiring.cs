@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Jogger.IO
 {
-    class ValvesWiring : IWiringIO
+    public class ValvesWiring : IWiringIO
     {
         private IDigitalIO digitalIO;
         private IValveManager valveManager;

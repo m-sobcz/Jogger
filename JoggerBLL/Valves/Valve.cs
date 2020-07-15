@@ -98,12 +98,17 @@ namespace Jogger.Valves
         {
             this.valveManager = valveManager;
             this.driver = driver;
-            minStepTimer = new Timer(new TimerCallback((o) => IsMinStepTimerDone = true), null, 0, Timeout.Infinite);
-            maxStepTimer = new Timer(new TimerCallback((o) => IsMaxStepTimerDone = true), null, 0, Timeout.Infinite);
+            minStepTimer = new Timer(supremeFunction, null, 0, Timeout.Infinite);
+            minStepTimer = new Timer(new TimerCallback(o => IsMinStepTimerDone = true), null, 0, Timeout.Infinite);
+            maxStepTimer = new Timer(new TimerCallback(o => IsMaxStepTimerDone = true), null, 0, Timeout.Infinite);
             ActiveErrors = alarmInactiveTxt;
             OccuredErrors = alarmInactiveTxt;
             ValveNumber = valveCount;
             valveCount++;
+        }
+        void supremeFunction(object o) 
+        { 
+        
         }
         public void Start(IValveType valveType)
         {
