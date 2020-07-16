@@ -49,7 +49,7 @@ namespace Jogger.ViewModels
             get { return selectedBaudrate; }
             set { selectedBaudrate = value; OnPropertyChanged(nameof(SelectedBaudrate)); }
         }
-        private void TesterService_ProgramStateEventHandler_Change(object sender, ProgramState programState)
+        private void TesterService_ProgramStateEventHandler_Change(ProgramState programState)
         {
             OnPropertyChanged(nameof(IsPreInitialization));
             OnPropertyChanged("IsInitialized");

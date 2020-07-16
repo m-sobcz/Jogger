@@ -16,7 +16,7 @@ namespace Jogger.Valves
         TestSettings TestSettings{get;set;}
         bool SetValveSensorsState(int valveNumber, bool isInflated, bool isDeflated);
         int GetNumberOfValves();
-        event EventHandler TestingFinished;
+        event Action TestingFinished;
         event CommunicationLogEventHandler CommunicationLogChanged;
         public delegate void CommunicationLogEventHandler(object sender, string log);
         event ErrorsEventHandler ActiveErrorsChanged;

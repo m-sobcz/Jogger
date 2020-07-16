@@ -14,37 +14,35 @@ namespace Jogger.ViewModels.Tests
     public class RelayCommandTests
     {
         [TestMethod()]
-        public void Execute_Once_CounterEquals1()
-        {
-            var executionCounter = 0;
-            RelayCommand relayCommand = new RelayCommand((o) => executionCounter++, o => true);
-            relayCommand.Execute(new object());
-            Assert.AreEqual(1, executionCounter);
-        }
-        [TestMethod()]
         public void Execute_Double_CounterEquals2()
         {
+            //Arrange
             int executionCounter = 0;
-
             RelayCommand relayCommand = new RelayCommand((o) => executionCounter++, o => true);
+            //Act
             relayCommand.Execute(new object());
             relayCommand.Execute(new object());
+            //Assert
             Assert.AreEqual(2, executionCounter);
         }
         [TestMethod()]
         public void Execute_CanExecuteSetToFalse_AreEqual()
         {
+            //Arrange
             int executionCounter = 0;
-
+            //Act
             RelayCommand relayCommand = new RelayCommand((o) => executionCounter++, o => false);
+            //Assert
             Assert.AreEqual(false, relayCommand.CanExecute(new object()));
         }
         [TestMethod()]
         public void Execute_CanExecuteWithDefaultCanExecuteParameter_CanExecute()
         {
+            //Arrange
             int executionCounter = 0;
-
+            //Act
             RelayCommand relayCommand = new RelayCommand((o) => executionCounter++);
+            //Assert
             Assert.AreEqual(true, relayCommand.CanExecute(new object()));
         }
     }

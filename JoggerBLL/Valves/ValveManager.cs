@@ -28,7 +28,7 @@ namespace Jogger.Valves
         public event ErrorsEventHandler ActiveErrorsChanged;
         public event ErrorsEventHandler OccuredErrorsChanged;
         public event ResultEventHandler ResultChanged;
-        public event EventHandler TestingFinished;
+        public event Action TestingFinished;
         public ValveManager(TestSettings testSettings, Func<IValve> getValve)
         {
             this.getValve = getValve;
@@ -106,12 +106,14 @@ namespace Jogger.Valves
                 }
                 if (ActualProcessedValve == PreviousProcessedValve)
                 {
-                    TestingFinished?.Invoke(this, EventArgs.Empty);
+                    TestingFinished?.Invoke();
                     break;
                 }
             }
             valves[ActualProcessedValve].QueryFinished = false;
         }
+
+
         public bool SetValveSensorsState(int valveNumber, bool isInflated, bool isDeflated)
         {
             if (valveNumber < valves.Count)
@@ -136,7 +138,7 @@ namespace Jogger.Valves
             {
                 if (valve.Result == Result.Testing) isTestingDone = false;
             }
-            if (isTestingDone) TestingFinished?.Invoke(this, EventArgs.Empty);
+            if (isTestingDone) TestingFinished?.Invoke();
         }
         
         

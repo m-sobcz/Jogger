@@ -9,12 +9,12 @@ namespace Jogger.Services
         ProgramState State { get; set; }
         string ValveType { get; set; }
 
-        event TesterService.ProgramStateEventHandler ProgramStateChanged;
+        event Action<ProgramState> ProgramStateChanged;
 
         Task CommunicationLoop();
         void Dispose();
-        ActionStatus Initialize(ConfigurationSettings configurationSettings);
-        ActionStatus Start(TestSettings testSettings);
+        ActionStatus Initialize(int hardwareChannelCount=4);
+        ActionStatus Start(TestSettings testSettings, string valveType);
         ActionStatus Stop();
     }
 }
