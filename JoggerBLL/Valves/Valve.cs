@@ -213,7 +213,6 @@ namespace Jogger.Valves
                     canSetNextProcessedChannel = true;
                 }
             }
-            QueryFinished = valveType.QueryList[Step].isDone;
             return (message);
         }
         public void WakeUp()

@@ -8,7 +8,6 @@ namespace Jogger.Valves
     {
         public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
         public delegate void ErrorsEventHandler(object sender, string errors, int channelNumber);
-        bool QueryFinished { get; set; }
         List<string> ActiveErrorList { get; set; }
         string ActiveErrors { get; set; }
         int ValveNumber { get; set; }

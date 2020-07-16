@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Dynamic;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using static Jogger.Valves.IValveManager;
@@ -24,7 +25,7 @@ namespace Jogger.Valves
         public int ActualProcessedValve { get; set; }
 
         public int GetNumberOfValves() => valves.Count;
-        public event CommunicationLogEventHandler CommunicationLogChanged;
+        public event Action<string> CommunicationLogChanged;
         public event ErrorsEventHandler ActiveErrorsChanged;
         public event ErrorsEventHandler OccuredErrorsChanged;
         public event ResultEventHandler ResultChanged;
@@ -36,24 +37,23 @@ namespace Jogger.Valves
         }
         public ActionStatus Initialize(int channelsCount)
         {
+            if (channelsCount <= 0) return ActionStatus.Error;
             for (int i = 0; i < channelsCount; i++)
             {
                 valves.Add(getValve());
-                valves[i].ResultChanged += (object sender, Result result, int channelNumber) => CheckTestingDone();
                 //TODO - move out - direct wiring
                 valves[i].OccuredErrorsChanged +=
-    (object sender, string errors, int channelNumber) => OccuredErrorsChanged?.Invoke(sender, errors, channelNumber);
+    (object sender, string errors, int channelNumber) => OccuredErrorsChanged?.Invoke(channelNumber, errors);
                 valves[i].ActiveErrorsChanged +=
-                    (object sender, string errors, int channelNumber) => ActiveErrorsChanged?.Invoke(sender, errors, channelNumber);
+                    (object sender, string errors, int channelNumber) => ActiveErrorsChanged?.Invoke(channelNumber, errors);
                 valves[i].ResultChanged +=
-                   (object sender, Result result, int channelNumber) => ResultChanged?.Invoke(sender, result, channelNumber);
+                   (object sender, Result result, int channelNumber) => ResultChanged?.Invoke(channelNumber, result);
             }
             return ActionStatus.OK;
         }
 
         public ActionStatus Start(TestSettings testSettings, string valveTypeTxt)
         {
-            if (valveTypeTxt is null) return ActionStatus.Error;
             this.TestSettings = testSettings;
             foreach (IValve valve in valves)
             {
@@ -77,7 +77,7 @@ namespace Jogger.Valves
             string dataToDriver = await valves[ActualProcessedValve].ExecuteStep();
             if (TestSettings.IsLogOutDataSelected & dataToDriver != null)
             {
-                CommunicationLogChanged?.Invoke(this, dataToDriver + "\n");
+                CommunicationLogChanged?.Invoke(dataToDriver + "\n");
             }
             return true;
         }
@@ -86,7 +86,7 @@ namespace Jogger.Valves
             string dataFromDriver = await valves[ActualProcessedValve].Receive();
             if (TestSettings.IsLogInDataSelected & (TestSettings.IsLogTimeoutSelected | !dataFromDriver.Equals("Timeout")))
             {
-                CommunicationLogChanged?.Invoke(this, dataFromDriver + "\n");
+                CommunicationLogChanged?.Invoke(dataFromDriver + "\n");
             }
             return true;
         }
@@ -110,9 +110,7 @@ namespace Jogger.Valves
                     break;
                 }
             }
-            valves[ActualProcessedValve].QueryFinished = false;
         }
-
 
         public bool SetValveSensorsState(int valveNumber, bool isInflated, bool isDeflated)
         {
@@ -126,21 +124,9 @@ namespace Jogger.Valves
         }
         IValveType GetValveType(string valveTypeTxt)
         {
-            string namespacePrefix = System.Reflection.Assembly.GetExecutingAssembly().EntryPoint.DeclaringType.Namespace;
-            Type valveType = Type.GetType(namespacePrefix + ".ValveTypes.ValveType" + valveTypeTxt, false);
-            if (valveType is null) return null;
-            return Activator.CreateInstance(valveType) as IValveType;
+            string namespacePrefix = typeof(IValveType).Namespace;
+            Type valveType = Type.GetType(namespacePrefix+".ValveType" + valveTypeTxt, false);
+            return valveType is null ? null : Activator.CreateInstance(valveType) as IValveType;
         }
-        void CheckTestingDone()
-        {
-            bool isTestingDone = true;
-            foreach (Valve valve in valves)
-            {
-                if (valve.Result == Result.Testing) isTestingDone = false;
-            }
-            if (isTestingDone) TestingFinished?.Invoke();
-        }
-        
-        
     }
 }

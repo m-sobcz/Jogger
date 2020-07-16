@@ -17,12 +17,11 @@ namespace Jogger.Valves
         bool SetValveSensorsState(int valveNumber, bool isInflated, bool isDeflated);
         int GetNumberOfValves();
         event Action TestingFinished;
-        event CommunicationLogEventHandler CommunicationLogChanged;
-        public delegate void CommunicationLogEventHandler(object sender, string log);
+        event Action<string> CommunicationLogChanged;
         event ErrorsEventHandler ActiveErrorsChanged;
         event ErrorsEventHandler OccuredErrorsChanged;
-        public delegate void ErrorsEventHandler(object sender, string errors, int channelNumber);
+        public delegate void ErrorsEventHandler(int channelNumber, string errors);
         event ResultEventHandler ResultChanged;
-        public delegate void ResultEventHandler(object sender, Result result, int channelNumber);
+        public delegate void ResultEventHandler(int channelNumber, Result result);
     }
 }

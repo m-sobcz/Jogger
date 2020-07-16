@@ -20,7 +20,7 @@ namespace Jogger.Drivers
         public event EventHandler InitializationFailed;
         VectorHardware vectorHardware;
         string InitializeInfo { get; set; } = "";
-        public event CommunicationLogEventHandler CommunicationLogChanged;
+        public event Action<string> CommunicationLogChanged;
 
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern int WaitForSingleObject(int handle, int timeOut);
@@ -186,7 +186,7 @@ namespace Jogger.Drivers
             initializationWithoutErrors &= SetDataLengthControl();
             initializationWithoutErrors &= ActivateChannel();
             initializationWithoutErrors &= SetNotificationAndReadHandle();
-            CommunicationLogChanged?.Invoke(this, InitializeInfo);
+            CommunicationLogChanged?.Invoke(InitializeInfo);
             return initializationWithoutErrors ? ActionStatus.OK : ActionStatus.Error;
         }
         bool OpenDriver()

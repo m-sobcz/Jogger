@@ -11,8 +11,7 @@ namespace Jogger.IO
         ActionStatus Initialize();
         Task<(string, byte[])> ReadInputs();
         Task<string> WriteOutputs(byte[] outpudData);
-        event CommunicationLogEventHandler CommunicationLogChanged;
-        delegate void CommunicationLogEventHandler(object sender, string log);
+        event Action<string> CommunicationLogChanged;
         event InputsReadEventHandler InputsRead;  
         delegate void InputsReadEventHandler(object sender, string errorCode, byte[] buffer);
     }

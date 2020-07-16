@@ -67,7 +67,6 @@ namespace Jogger.ViewModels
         }
 
 
-
         public bool IsLogInDataSelected
         {
             get { return testSettings.IsLogInDataSelected; }
@@ -247,7 +246,7 @@ namespace Jogger.ViewModels
             }
         }
 
-        private void ValveManager_ResultChanged(object sender, Result result, int channelNumber)
+        private void ValveManager_ResultChanged(int channelNumber, Result result)
         {
             switch (channelNumber)
             {
@@ -268,7 +267,7 @@ namespace Jogger.ViewModels
             }
         }
 
-        private void ValveManager_OccuredErrorsChanged(object sender, string errors, int channelNumber)
+        private void ValveManager_OccuredErrorsChanged(int channelNumber, string errors)
         {
             switch (channelNumber)
             {
@@ -289,7 +288,7 @@ namespace Jogger.ViewModels
             }
         }
 
-        private void ValveManager_ActiveErrorsChanged(object sender, string errors, int channelNumber)
+        private void ValveManager_ActiveErrorsChanged(int channelNumber, string errors)
         {
             switch (channelNumber)
             {
@@ -310,7 +309,7 @@ namespace Jogger.ViewModels
             }
         }
 
-        private void CommunicationLogChanged(object sender, string log)
+        private void CommunicationLogChanged(string log)
         {
             CommunicationLog = log;
         }

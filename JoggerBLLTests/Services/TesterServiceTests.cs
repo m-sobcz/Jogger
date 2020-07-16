@@ -20,15 +20,15 @@ namespace Jogger.Services.Tests
         Mock<IDigitalIO> digitalIOMock;
         Mock<IDriver> driverMock;
         Mock<IValveManager> valveManagerMock;
-        Mock<TestSettings> testSettings;
         ConfigurationSettings configurationSettings;
+        TestSettings testSettings = new TestSettings();
+        string valveType = "";
         [TestInitialize]
         public void TestInitializeAttribute()
         {
             digitalIOMock = new Mock<IDigitalIO>();
             driverMock = new Mock<IDriver>();
             valveManagerMock = new Mock<IValveManager>();
-            testSettings = new Mock<TestSettings>();
             configurationSettings = new ConfigurationSettings();
             testerService = new TesterService(digitalIOMock.Object, driverMock.Object, valveManagerMock.Object);
         }
@@ -37,10 +37,13 @@ namespace Jogger.Services.Tests
         public void Initialize_ProgramStateInitializedOrErrorBasedOnActionStatuses
             (ActionStatus digitalIOActionStatus, ActionStatus driverActionStatus, ActionStatus valveManagerActionStatus, ProgramState expectedState)
         {
+            //Arrange
             digitalIOMock.Setup(x => x.Initialize()).Returns(digitalIOActionStatus);
             driverMock.Setup(x => x.Initialize(4)).Returns(driverActionStatus);
             valveManagerMock.Setup(x => x.Initialize(4)).Returns(valveManagerActionStatus);
+            //Act
             testerService.Initialize(4);
+            //Assert
             Assert.AreEqual(expectedState, testerService.State);
         }
         public static IEnumerable<object[]> InitializeActionStatusProgramState()
@@ -54,10 +57,13 @@ namespace Jogger.Services.Tests
         public void Initialize_ReturnsCorrectActionStatus
             (ActionStatus digitalIOActionStatus, ActionStatus driverActionStatus, ActionStatus valveManagerActionStatus, ActionStatus exepctedStatus)
         {
+            //Arrange
             digitalIOMock.Setup(x => x.Initialize()).Returns(digitalIOActionStatus);
             driverMock.Setup(x => x.Initialize(4)).Returns(driverActionStatus);
             valveManagerMock.Setup(x => x.Initialize(4)).Returns(valveManagerActionStatus);
+            //Act
             ActionStatus returnStatus = testerService.Initialize(4);
+            //Assert
             Assert.AreEqual(exepctedStatus, returnStatus);
         }
         public static IEnumerable<object[]> InitializeActionStatusReturnActionStatus()
@@ -70,10 +76,11 @@ namespace Jogger.Services.Tests
         [DynamicData(nameof(StartActionStatusProgramState), DynamicDataSourceType.Method)]
         public void Start_ProgramStateStartedOrIdleBasedOnValveManagerStart(ActionStatus actionStatus, ProgramState expectedState)
         {
-            TestSettings testSettings = new TestSettings();
-            string valveType = "";
+            //Arrange
             valveManagerMock.Setup(x => x.Start(testSettings, valveType)).Returns(actionStatus);
+            //Act
             testerService.Start(testSettings, valveType);
+            //Assert
             Assert.AreEqual(expectedState, testerService.State);
         }
         public static IEnumerable<object[]> StartActionStatusProgramState()
@@ -85,10 +92,11 @@ namespace Jogger.Services.Tests
         [DynamicData(nameof(StartActionStatusReturnsActionStatus), DynamicDataSourceType.Method)]
         public void Start_RetursActionStateEqualToValveMangerState(ActionStatus actionStatus)
         {
-            TestSettings testSettings = new TestSettings();
-            string valveType = "";
+            //Arrange
             valveManagerMock.Setup(x => x.Start(testSettings, valveType)).Returns(actionStatus);
+            //Act
             ActionStatus returnStatus = testerService.Start(testSettings, valveType);
+            //Assert
             Assert.AreEqual(actionStatus, returnStatus);
         }
         public static IEnumerable<object[]> StartActionStatusReturnsActionStatus()
@@ -99,21 +107,28 @@ namespace Jogger.Services.Tests
         [TestMethod()]
         public void Stop_SetsStateStopped()
         {
+            //Act
             testerService.Stop();
+            //Assert
             Assert.AreEqual(ProgramState.Stopping, testerService.State);
         }
         [TestMethod()]
         public void Stop_ReturnsActionStatusOk()
         {
+            //Act
             ActionStatus returnStatus = testerService.Stop();
+            //Assert
             Assert.AreEqual(ActionStatus.OK, returnStatus);
         }
         [TestMethod()]
         [DynamicData(nameof(TestingFinishedProgramStates), DynamicDataSourceType.Method)]
         public void ValveManagerTestingFinishedFiredChangesProgramState(ProgramState programStateInitial, ProgramState programStateAfterEvent)
         {
+            //Arrange
             testerService.State = programStateInitial;
-            valveManagerMock.Raise(m => m.TestingFinished += null);         
+            //Act
+            valveManagerMock.Raise(m => m.TestingFinished += null); 
+            //Assert
             Assert.AreEqual(programStateAfterEvent, testerService.State);
         }
         public static IEnumerable<object[]> TestingFinishedProgramStates()
@@ -125,11 +140,14 @@ namespace Jogger.Services.Tests
         [TestMethod()]
         public void State_SetterFiresEvent()
         {
+            //Arrange
             int eventFiredCounter = 0;
             testerService.ProgramStateChanged += (ProgramState programState) => eventFiredCounter++;
+            //Act
             testerService.State = ProgramState.Done;
             testerService.State = ProgramState.Error;
-            testerService.State = ProgramState.Idle;    
+            testerService.State = ProgramState.Idle;
+            //Assert
             Assert.AreEqual(3, eventFiredCounter);
         }
 

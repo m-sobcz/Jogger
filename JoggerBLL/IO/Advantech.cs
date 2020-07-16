@@ -21,7 +21,7 @@ namespace Jogger.IO
         ErrorCode errorCode = ErrorCode.ErrorUndefined;
         private DioPort[] dioPort;
         public event InputsReadEventHandler InputsRead;
-        public event CommunicationLogEventHandler CommunicationLogChanged;
+        public event Action<string> CommunicationLogChanged;
         public ActionStatus Initialize()
         {
             try
@@ -32,9 +32,9 @@ namespace Jogger.IO
             }
             catch (Exception e)
             {
-                CommunicationLogChanged?.Invoke(this, $"Advantech init exception {e.Message}!\n");
+                CommunicationLogChanged?.Invoke($"Advantech init exception {e.Message}!\n");
             }
-            CommunicationLogChanged?.Invoke(this, $"Advantech Init status: {errorCode}\n");
+            CommunicationLogChanged?.Invoke($"Advantech Init status: {errorCode}\n");
             return ErrorCodeToActionStatus(errorCode);
         }
         public async Task<(string, byte[])> ReadInputs()
@@ -46,7 +46,7 @@ namespace Jogger.IO
             }
             catch (Exception e)
             {
-                CommunicationLogChanged?.Invoke(this, $"Advantech read exception {e.Message} !\n");
+                CommunicationLogChanged?.Invoke($"Advantech read exception {e.Message} !\n");
             }
             return (errorCode.ToString(), buffer);
         }
