@@ -56,7 +56,7 @@ namespace Jogger.ViewModels
             }
             OnPropertyChanged(nameof(DigitalIO));
         }
-        private void TesterService_ProgramStateEventHandler_Change(object sender, ProgramState programState)
+        private void TesterService_ProgramStateEventHandler_Change(ProgramState programState)
         {
             OnPropertyChanged(nameof(IsPreInitialization));
         }

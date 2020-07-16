@@ -92,10 +92,11 @@ namespace Jogger.ViewModels
                     initializeCommand = new RelayCommand(
                         o =>
                         {
-                            ActionStatus actionStatus = testerService.Initialize(configurationSettings);
+                            ActionStatus actionStatus = testerService.Initialize(configurationSettings.HardwareChannelCount);
                             switch (actionStatus)
                             {
                                 case ActionStatus.OK:
+                                    _=testerService.CommunicationLoop();
                                     break;
                                 case ActionStatus.WarningWrongParameter:
                                     showInfo.Show("Zły parametr inicjalizacji", "Ostrzeżenie");
@@ -122,7 +123,7 @@ namespace Jogger.ViewModels
                     startCommand = new RelayCommand(
                     o =>
                     {
-                        ActionStatus actionStatus = testerService.Start(testSettings);
+                        ActionStatus actionStatus = testerService.Start(testSettings, testerService.ValveType);
                         switch (actionStatus)
                         {
                             case ActionStatus.Error:
@@ -167,7 +168,7 @@ namespace Jogger.ViewModels
                     selectValveType = new RelayCommand(
                     o =>
                     {
-                        testerService.ValveType = ((string)SelectedType.Code);
+                        testerService.ValveType = (string)SelectedType.Code;
                     },
                     o => true//testerService.State != ProgramState.NotInitialized
                     );
@@ -314,7 +315,7 @@ namespace Jogger.ViewModels
             CommunicationLog = log;
         }
 
-        private void TesterService_ProgramStateEventHandler_Change(object sender, ProgramState programState)
+        private void TesterService_ProgramStateEventHandler_Change(ProgramState programState)
         {
             ProgramState = programState;
             CommandManager.InvalidateRequerySuggested();

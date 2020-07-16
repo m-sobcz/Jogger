@@ -20,8 +20,7 @@ namespace Jogger.Services
         ActionStatus actionStatus;
         ProgramState state = ProgramState.NotInitialized;
         public Result[] results = new Result[4];
-        public event ProgramStateEventHandler ProgramStateChanged;
-        public delegate void ProgramStateEventHandler(object sender, ProgramState programState);
+        public event Action<ProgramState> ProgramStateChanged;
         public string ValveType { get; set; } = "";
         public ProgramState State
         {
@@ -30,7 +29,7 @@ namespace Jogger.Services
             {
                 state = value;
                 Trace.WriteLine($"New program state: {state}");
-                ProgramStateChanged?.Invoke(this, state);
+                ProgramStateChanged?.Invoke(state);
             }
         }
         public TesterService(IDigitalIO digitalIO, IDriver driver, IValveManager valveManager)
@@ -40,22 +39,16 @@ namespace Jogger.Services
             this.driver = driver;
             valveManager.TestingFinished += ValveManager_TestingFinished;
         }
-        public ActionStatus Initialize(ConfigurationSettings configurationSettings)
+        public ActionStatus Initialize(int hardwareChannelCount = 4)
         {
             State = ProgramState.Initializing;
-            List<ActionStatus> actionList = new List<ActionStatus>();
-            actionList.Add(digitalIO.Initialize());
-            actionList.Add(driver.Initialize(configurationSettings.HardwareChannelCount));
-            actionList.Add(valveManager.Initialize(configurationSettings.HardwareChannelCount));
-            actionStatus = ActionListStatusToActionStatus(actionList);
+            actionStatus = ActionListStatusToActionStatus(GetInitializeActionList(hardwareChannelCount));
             State = (actionStatus == ActionStatus.Error) ? ProgramState.Error : ProgramState.Initialized;
-            if (State == ProgramState.Initialized) _ = CommunicationLoop();
             return actionStatus;
         }
-        public ActionStatus Start(TestSettings testSettings)
+        public ActionStatus Start(TestSettings testSettings, string valveType)
         {
-            State = (ProgramState.Starting);
-            actionStatus = valveManager.Start(testSettings, ValveType);
+            actionStatus = valveManager.Start(testSettings, valveType);
             State = (actionStatus == ActionStatus.OK) ? ProgramState.Started : ProgramState.Idle;
             return actionStatus;
         }
@@ -80,6 +73,16 @@ namespace Jogger.Services
             digitalIO?.Dispose();
             driver?.Dispose();
         }
+        List<ActionStatus> GetInitializeActionList(int hardwareChannelCount)
+        {
+            List<ActionStatus> actionList = new List<ActionStatus>
+            {
+                digitalIO.Initialize(),
+                driver.Initialize(hardwareChannelCount),
+                valveManager.Initialize(hardwareChannelCount)
+            };
+            return actionList;
+        }
         ActionStatus ActionListStatusToActionStatus(List<ActionStatus> actionList)
         {
             ActionStatus actionStatus;
@@ -101,7 +104,7 @@ namespace Jogger.Services
             }
             return actionStatus;
         }
-        private void ValveManager_TestingFinished(object sender, EventArgs e)
+        private void ValveManager_TestingFinished()
         {
             if (State == ProgramState.Started) State = ProgramState.Done;
             else if (State == ProgramState.Stopping) State = ProgramState.Idle;
